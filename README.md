@@ -21,19 +21,19 @@ issue shaping, TDD execution, and closeout.
 Install the bundled skills into the default Codex skills directory:
 
 ```bash
-npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git install-skills
+npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add
 ```
 
 Install to a project-local skills directory:
 
 ```bash
-npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git install-skills --target ./.codex/skills
+npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target ./.codex/skills
 ```
 
 Install to a custom directory:
 
 ```bash
-npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git install-skills --target /path/to/skills
+npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target /path/to/skills
 ```
 
 ## Typical Workflow
@@ -86,4 +86,3 @@ Run the CLI locally:
 ```bash
 node bin/rope.js --help
 ```
-

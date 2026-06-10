@@ -7,7 +7,7 @@ function usage() {
   console.log(`rope
 
 Usage:
-  rope install-skills [--target <dir>]
+  rope add [--target <dir>]
 
 Installs bundled rope skills into a Codex skills directory.
 Default target: ~/.codex/skills
@@ -51,7 +51,7 @@ const [, , command, ...args] = process.argv;
 
 if (!command || command === "--help" || command === "-h") {
   usage();
-} else if (command === "install-skills") {
+} else if (command === "add" || command === "install-skills") {
   installSkills(args);
 } else {
   console.error(`Unknown command: ${command}`);
