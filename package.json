@@ -1,0 +1,17 @@
+{
+  "name": "@wufei/rope",
+  "version": "0.1.0",
+  "description": "Lightweight repo-local coding harness skills for Codex-style agents.",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@git.haizhi.com:10022/wufei/rope-skill.git"
+  },
+  "bin": {
+    "rope": "./bin/rope.js"
+  },
+  "files": [
+    "bin/",
+    "skills/"
+  ],
+  "license": "UNLICENSED"
+}

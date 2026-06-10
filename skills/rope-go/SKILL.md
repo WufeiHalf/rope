@@ -1,0 +1,83 @@
+---
+name: rope-go
+description: Executes a .rope issue package slice by slice with TDD, verification, review gates, commit discipline, and classified E2E execution. Use after rope-shape has created a .rope issue directory with prd.md, tasks.md, and e2e.md.
+---
+
+# Rope Go
+
+Execute one `.rope/issues/<issue-slug>/` package.
+
+For review gates, E2E statuses, commit rules, and overall review checklist, read [references/execution-rules.md](references/execution-rules.md).
+
+## Startup Checks
+
+1. Confirm the target issue directory.
+2. Read:
+   - `.rope/CONTEXT.md`
+   - `.rope/routes.md`
+   - referenced `.rope/adr/`, `.rope/research/`, `.rope/specs/`
+   - `.rope/issues/<issue>/prd.md`
+   - `.rope/issues/<issue>/tasks.md`
+   - `.rope/issues/<issue>/e2e.md`
+3. Inspect git status and avoid unrelated dirty files.
+4. Confirm every slice has status, behavior matrix coverage, verification, and review mode.
+
+## Slice Loop
+
+For each pending slice:
+
+1. Set slice status to `in_progress`.
+2. Use TDD:
+   - write one public-interface behavior test
+   - implement minimal code
+   - repeat for assigned Behavior Matrix rows
+3. Run slice verification.
+4. Update `tasks.md` with status, verification result, and review verdict.
+5. Commit the completed slice independently.
+6. Review:
+   - `Review: required` -> use a read-only review pass or subagent when available
+   - `Review: self-check` -> self-review unless actual diff touches a high-risk boundary
+   - upgrade to required when public interface, external system, auth, persistence, routing, runtime wiring, or E2E-critical behavior is touched
+7. If review fails, fix, verify, commit the review fix, and rerun review.
+
+## Plan Adjustment
+
+If the plan is incomplete or wrong:
+
+1. Pause the current slice.
+2. Resolve facts from code, tests, docs, or primary sources.
+3. Update `.rope/issues/<issue>/prd.md`, `tasks.md`, `e2e.md`, or relevant `.rope/research/` / `.rope/specs/`.
+4. Commit the plan/doc adjustment separately when it changes tracked docs.
+5. Continue unless it triggers a human gate.
+
+## Overall Verification
+
+After all slices pass review:
+
+1. Run full verification defined by the issue.
+2. Check Behavior Matrix coverage: every applicable row has test, smoke, or explicit waiver.
+3. Execute classified E2E items from `e2e.md`:
+   - `agent`: execute now and record result
+   - `agent-with-gate`: ask before executing; after approval, execute and record result
+   - `user`: leave clear user validation steps
+   - `not-run`: record reason
+4. Run overall review against PRD, tasks, matrix coverage, E2E results, and refs.
+5. Fix any findings with separate commits.
+6. Stop with final status; do not run `rope-finish` automatically.
+
+## Stop Conditions
+
+- Issue directory missing or inconsistent.
+- Required Behavior Matrix rows have no assigned verification.
+- Human gate: schema/migration, dependency/root config, auth/security, deployment/production/shared write, destructive filesystem/git, cross-repo operation.
+- Unrelated dirty files conflict with the task.
+- Required environment or credential is unavailable.
+
+## Final Response
+
+Report:
+- completed slices
+- commits
+- verification commands/results
+- review verdicts
+- E2E item statuses: `agent_passed`, `blocked_on_gate`, `blocked_on_user`, `not_run_with_reason`
