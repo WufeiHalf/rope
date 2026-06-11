@@ -21,6 +21,7 @@ For review gates, E2E statuses, commit rules, and overall review checklist, read
    - `.rope/issues/<issue>/e2e.md`
 3. Inspect git status and avoid unrelated dirty files.
 4. Confirm every slice has status, behavior matrix coverage, verification, and review mode.
+5. Confirm every `agent-with-gate`, `user`, and `not-run` validation has a shape-time gate decision.
 
 ## Slice Loop
 
@@ -58,18 +59,25 @@ After all slices pass review:
 2. Check Behavior Matrix coverage: every applicable row has test, smoke, or explicit waiver.
 3. Execute classified E2E items from `e2e.md`:
    - `agent`: execute now and record result
-   - `agent-with-gate`: ask before executing; after approval, execute and record result
-   - `user`: leave clear user validation steps
-   - `not-run`: record reason
+   - `agent-with-gate` with `Gate Decision: approved`: execute the approved action without asking again, choosing concrete commands as needed
+   - `agent-with-gate` with `Gate Decision: skipped`: do not execute; record `skipped_by_user_at_shape`
+   - `agent-with-gate` with missing or stale approval: stop and ask only if the action, scope, risk, environment, or target resource changed
+   - `user`: leave clear user validation steps and wait for user-reported result
+   - `not-run`: record accepted waiver reason
 4. Run overall review against PRD, tasks, matrix coverage, E2E results, and refs.
 5. Fix any findings with separate commits.
-6. Stop with final status; do not run `rope-finish` automatically.
+6. Stop with final status and pending user validations. Do not recommend `rope-finish` until the user explicitly reports acceptance or validation passed.
+7. After the user explicitly reports acceptance or validation passed, provide `Next recommended step`:
+   - recommended skill: `$rope-finish`
+   - why the issue is ready to close
+   - a copy-paste prompt that names the issue directory and asks `rope-finish` to close it
 
 ## Stop Conditions
 
 - Issue directory missing or inconsistent.
 - Required Behavior Matrix rows have no assigned verification.
-- Human gate: schema/migration, dependency/root config, auth/security, deployment/production/shared write, destructive filesystem/git, cross-repo operation.
+- Missing shape-time gate decision for any non-agent validation.
+- Human gate: schema/migration, dependency/root config, auth/security, deployment/production/shared write, destructive filesystem/git, cross-repo operation outside the approved action scope.
 - Unrelated dirty files conflict with the task.
 - Required environment or credential is unavailable.
 
@@ -80,4 +88,4 @@ Report:
 - commits
 - verification commands/results
 - review verdicts
-- E2E item statuses: `agent_passed`, `blocked_on_gate`, `blocked_on_user`, `not_run_with_reason`
+- E2E item statuses: `agent_passed`, `agent_failed`, `blocked_on_gate`, `blocked_on_user`, `skipped_by_user_at_shape`, `not_run_with_reason`

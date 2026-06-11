@@ -30,8 +30,9 @@ Do not silently treat `Review: required` as ordinary self-check.
 
 - `agent_passed`: agent ran the classified validation and it passed.
 - `agent_failed`: agent ran it and it failed; fix or record blocker.
-- `blocked_on_gate`: requires user approval before execution.
+- `blocked_on_gate`: missing, stale, or changed shape-time approval prevents execution.
 - `blocked_on_user`: requires human judgment or unavailable user-only access.
+- `skipped_by_user_at_shape`: user skipped an agent-with-gate action during shaping.
 - `not_run_with_reason`: intentionally not run; reason recorded.
 
 ## Commit Rules
@@ -47,6 +48,6 @@ Do not silently treat `Review: required` as ordinary self-check.
 - PRD goals and non-goals still match the final diff.
 - Each applicable Behavior Matrix row has test, smoke, or explicit waiver.
 - E2E `agent` items were actually executed.
-- E2E `agent-with-gate` items are either approved and executed or blocked on gate.
+- E2E `agent-with-gate` items have shape-time decisions and are executed, skipped, or blocked according to that decision.
 - Existing behavior compatibility was tested or explicitly waived.
 - No unrelated dirty files were included.

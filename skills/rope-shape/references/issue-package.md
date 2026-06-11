@@ -52,6 +52,17 @@
 ## Open Questions / Human Gates
 
 - <question or gate>
+
+## Gate Decisions
+
+- Gate: <validation name>
+- Decision: approved | skipped | user-run | blocked | not-run-waived
+- Approved action: <action, not exact command; required for approved agent-with-gate>
+- Scope: <repo/env/resource boundary>
+- Risk: <why this needs a gate>
+- Pass criteria: <observable success condition>
+- Failure report: <what the user or agent should report on failure>
+- Forbidden out-of-scope actions: <actions that require renewed approval>
 ```
 
 ## `tasks.md`
@@ -97,10 +108,17 @@
 
 Executor: agent | agent-with-gate | user | not-run
 Risk: local-readonly | local-write | remote-readonly | remote-write | production | human-judgment
+Gate Decision: not-required | approved | skipped | user-run | blocked | not-run-waived
+Approved Action: <action, not exact command; required for approved agent-with-gate>
+Scope: <repo/env/resource boundary>
 Command or Steps:
 - <command or step>
 Pass Criteria:
 - <observable pass condition>
+Failure Report:
+- <what to capture or report if it fails>
+Forbidden Out-of-Scope Actions:
+- <actions requiring renewed approval>
 Result:
 - pending
 ```

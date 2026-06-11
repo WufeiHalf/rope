@@ -1,6 +1,6 @@
 # Rope Skill
 
-Rope is a lightweight repo-local coding harness for Codex-style agents. It keeps
+Rope is a lightweight repo-local coding harness for agentic coding tools. It keeps
 project knowledge under `.rope/` and uses small skills for requirement grilling,
 issue shaping, TDD execution, and closeout.
 
@@ -18,7 +18,7 @@ issue shaping, TDD execution, and closeout.
 
 ## Install Skills
 
-Install the bundled skills into the default Codex skills directory:
+Install the bundled skills into the default agent skills directory:
 
 ```bash
 npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add
@@ -27,7 +27,7 @@ npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add
 Install to a project-local skills directory:
 
 ```bash
-npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target ./.codex/skills
+npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target ./.agents/skills
 ```
 
 Install to a custom directory:
@@ -69,16 +69,16 @@ Rope does not default all E2E validation to manual user work. `rope-shape`
 classifies each E2E item:
 
 - `agent`: the agent must execute it.
-- `agent-with-gate`: the agent asks before execution.
-- `user`: human-only validation.
-- `not-run`: intentionally skipped with a reason.
+- `agent-with-gate`: the agent executes a shape-approved action without asking again unless action scope or risk changes.
+- `user`: human-only validation, used only when real human judgment or access is required.
+- `not-run`: intentionally skipped with a user-accepted reason.
 
 ## Development
 
 Validate a skill:
 
 ```bash
-python3 /home/wufei/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/rope-init
+python3 /path/to/skill-creator/scripts/quick_validate.py skills/rope-init
 ```
 
 Run the CLI locally:

@@ -34,13 +34,23 @@ Read these when present:
    - Failure visibility: where and how are errors observable?
    - Forbidden shortcuts: what implementation paths would satisfy tests but violate intent?
 5. Ask one decision question at a time with a recommended answer.
-6. Stress-test concrete scenarios and edge cases against the Behavior Contract.
-7. Update docs inline as decisions crystallize:
+6. Keep the clarification loop moving:
+   - if the user asks for rationale, examples, or discussion of a point, answer it first
+   - if the current decision is still unresolved, restate the recommended answer and ask for confirmation
+   - if the current decision is confirmed, immediately ask the next highest-priority decision question
+   - do not stop after explanation and wait for the user to say `continue`, unless the user explicitly pauses or asks to stay on the topic
+7. Stress-test concrete scenarios and edge cases against the Behavior Contract.
+8. Update docs inline as decisions crystallize:
    - resolved project term -> `.rope/CONTEXT.md`
    - hard-to-reverse surprising tradeoff -> `.rope/adr/NNNN-slug.md`
    - external or platform fact -> `.rope/research/<topic>.md`
    - reusable implementation contract or gotcha -> `.rope/specs/<area>/<topic>.md`
-8. Stop when `rope-shape` can write a PRD, Behavior Contract, vertical slices, and E2E plan without hidden ambiguity.
+9. Stop when `rope-shape` can write a PRD, Behavior Contract, vertical slices, and E2E plan without hidden ambiguity.
+10. When stopping, provide `Next recommended step`:
+   - recommended skill: `$rope-shape`
+   - why the requirement is ready to shape
+   - a copy-paste prompt that names the requirement and asks `rope-shape` to create the issue package
+   - if not ready, list blockers instead of recommending the next skill
 
 ## Document Boundaries
 

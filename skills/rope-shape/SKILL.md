@@ -53,13 +53,32 @@ Create or update:
    - `Executor: agent-with-gate`
    - `Executor: user`
    - `Executor: not-run`
+7. Resolve every non-agent validation before marking the package ready:
+   - `agent-with-gate`: define the approved action, scope, risk, pass criteria, and forbidden out-of-scope actions; ask the user to approve or skip the action during shaping
+   - `user`: define the human-only steps, pass criteria, and failure report format; confirm the user accepts this validation duty during shaping
+   - `not-run`: record the reason and confirm the user accepts the waiver during shaping
+8. After the user confirms the PRD and gate decisions, commit the issue package docs before recommending implementation. Commit message is not prescribed.
+9. Provide `Next recommended step` only after the docs commit succeeds:
+   - recommended skill: `$rope-go`
+   - why the issue package is ready to execute
+   - the docs commit hash
+   - a copy-paste prompt that names the issue directory and asks `rope-go` to execute it
+   - if not ready, list blockers instead of recommending the next skill
 
 ## E2E Executor Rules
 
 - `agent`: local tests, deterministic fixture smoke, read-only HTTP checks, dry-run commands, safe CLI validation. Rope-go must execute these.
-- `agent-with-gate`: service restart, deploy, production/shared write, external write API, destructive or expensive command. Rope-go must ask before executing.
-- `user`: visual judgment, business acceptance, unavailable credentials, 2FA, private UI session, or environment unreachable to the agent.
-- `not-run`: explicitly out of scope or blocked; include reason.
+- `agent-with-gate`: service restart, deploy, production/shared write, external write API, destructive or expensive command. Shape must get user approval for the action before handoff to rope-go.
+- `user`: visual judgment, business acceptance, unavailable credentials, 2FA, private UI session, or environment unreachable to the agent. Use only when real human validation is required.
+- `not-run`: explicitly out of scope or blocked; include reason and user-accepted waiver.
+
+## Gate Approval Rules
+
+- Shape approves actions, not exact commands. Example: `restart local dev server`, not `npm run dev`.
+- Each approved action must include scope, risk, pass criteria, and forbidden out-of-scope actions.
+- Rope-go may choose concrete commands to perform the approved action without asking again.
+- Rope-go must ask again only if the action, scope, risk, environment, or target resource changes.
+- If the user skips an `agent-with-gate` action during shaping, rope-go must not execute it and must record `skipped_by_user_at_shape`.
 
 ## Guardrails
 

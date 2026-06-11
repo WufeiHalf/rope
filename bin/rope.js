@@ -9,8 +9,8 @@ function usage() {
 Usage:
   rope add [--target <dir>]
 
-Installs bundled rope skills into a Codex skills directory.
-Default target: ~/.codex/skills
+Installs bundled rope skills into an agent skills directory.
+Default target: ~/.agents/skills
 `);
 }
 
@@ -36,7 +36,7 @@ function installSkills(args) {
   const target =
     targetIndex >= 0 && args[targetIndex + 1]
       ? args[targetIndex + 1]
-      : path.join(homeDir(), ".codex", "skills");
+      : path.join(homeDir(), ".agents", "skills");
   const skillsDir = path.resolve(__dirname, "..", "skills");
 
   for (const entry of fs.readdirSync(skillsDir, { withFileTypes: true })) {
