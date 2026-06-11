@@ -28,6 +28,7 @@ Create or update:
    - problem statement
    - solution
    - goals / non-goals
+   - Behavior Contract
    - public interface or user-visible behavior
    - research/spec/ADR refs
    - open questions and human gates
@@ -64,5 +65,6 @@ Create or update:
 
 - Do not implement code.
 - Do not create unrelated workflow task files or hooks.
+- Do not mark work ready if the Behavior Contract is missing or ambiguous.
 - Do not mark work ready if answerable facts remain unknown.
 - Do not put stale file-by-file implementation plans into PRD; use stable public interfaces and verification seams.

@@ -26,14 +26,21 @@ Read these when present:
    - repo code/tests/docs for codebase facts
    - official docs or primary sources for external API/platform facts
 3. Challenge vocabulary against `.rope/CONTEXT.md`.
-4. Ask one decision question at a time with a recommended answer.
-5. Stress-test concrete scenarios and edge cases.
-6. Update docs inline as decisions crystallize:
+4. Resolve the Behavior Contract before shaping:
+   - System under test: what behavior is being specified and tested?
+   - Trigger/input: what user action, API call, event, command, or state change starts it?
+   - Collaborators: what dependencies participate without owning the behavior?
+   - Observable result: what output, state, artifact, UI, log, or side effect proves success?
+   - Failure visibility: where and how are errors observable?
+   - Forbidden shortcuts: what implementation paths would satisfy tests but violate intent?
+5. Ask one decision question at a time with a recommended answer.
+6. Stress-test concrete scenarios and edge cases against the Behavior Contract.
+7. Update docs inline as decisions crystallize:
    - resolved project term -> `.rope/CONTEXT.md`
    - hard-to-reverse surprising tradeoff -> `.rope/adr/NNNN-slug.md`
    - external or platform fact -> `.rope/research/<topic>.md`
    - reusable implementation contract or gotcha -> `.rope/specs/<area>/<topic>.md`
-7. Stop when `rope-shape` can write a PRD, vertical slices, and E2E plan without hidden ambiguity.
+8. Stop when `rope-shape` can write a PRD, Behavior Contract, vertical slices, and E2E plan without hidden ambiguity.
 
 ## Document Boundaries
 

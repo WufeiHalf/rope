@@ -34,6 +34,15 @@
 
 - <callable API, UI behavior, CLI, config, schema, side effect, or observable result>
 
+## Behavior Contract
+
+- System under test: <behavior being specified and tested>
+- Trigger/input: <user action, API call, event, command, or state change>
+- Collaborators: <dependencies that participate but do not own the behavior>
+- Observable result: <output, state, artifact, UI, log, or side effect proving success>
+- Failure visibility: <where and how errors are visible>
+- Forbidden shortcuts: <implementation paths that would violate intent>
+
 ## References
 
 - Research: `.rope/research/<topic>.md#<anchor>`
@@ -95,4 +104,3 @@ Pass Criteria:
 Result:
 - pending
 ```
-

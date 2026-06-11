@@ -13,6 +13,19 @@ Use `Review: required` when the slice touches:
 
 Use `Review: self-check` only for low-risk docs, fixture, or isolated behavior.
 
+## Required Review Execution
+
+For every `Review: required` slice:
+
+1. Try to discover an available read-only review subagent before self-review.
+2. If a review subagent is available, use it and record the review verdict in `tasks.md`.
+3. If no subagent tool is available, run a read-only self-review and record:
+   - `review_degraded: no_subagent_tool_available`
+   - what discovery was attempted
+   - why self-review was used
+
+Do not silently treat `Review: required` as ordinary self-check.
+
 ## E2E Execution Statuses
 
 - `agent_passed`: agent ran the classified validation and it passed.
@@ -37,4 +50,3 @@ Use `Review: self-check` only for low-risk docs, fixture, or isolated behavior.
 - E2E `agent-with-gate` items are either approved and executed or blocked on gate.
 - Existing behavior compatibility was tested or explicitly waived.
 - No unrelated dirty files were included.
-
