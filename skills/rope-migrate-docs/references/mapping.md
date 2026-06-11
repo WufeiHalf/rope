@@ -73,4 +73,3 @@ If target exists:
 
 - <cleanup or review item>
 ```
-

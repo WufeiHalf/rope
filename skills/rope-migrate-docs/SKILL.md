@@ -46,4 +46,3 @@ For source-to-target mappings and templates, read [references/mapping.md](refere
 - Do not migrate runtime caches, task archives, journals, generated reports, or local credentials.
 - Do not flatten all historical tasks into `.rope/issues/`; migrate only active or explicitly selected work.
 - Keep project language in `.rope/CONTEXT.md`, stable implementation contracts in `.rope/specs/`, external/platform facts in `.rope/research/`, and durable decisions in `.rope/adr/`.
-

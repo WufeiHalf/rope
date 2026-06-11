@@ -96,4 +96,3 @@ Use for stable implementation contracts and gotchas.
 
 <safe pattern>
 ```
-

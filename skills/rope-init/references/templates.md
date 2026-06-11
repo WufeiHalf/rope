@@ -78,4 +78,3 @@ Before shaping or implementing work:
 - Read referenced `.rope/research/` for external or platform facts.
 - Track local work under `.rope/issues/` unless the user says otherwise.
 ```
-
