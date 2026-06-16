@@ -13,6 +13,8 @@ issue shaping, TDD execution, and closeout.
   PRD, vertical slices, behavior matrix, and E2E classification.
 - `rope-go` executes slices with TDD, review gates, commits, and classified E2E.
 - `rope-finish` closes a Rope issue after implementation and validation.
+- `rope-summary` updates `.rope/` architecture/context docs after implementation
+  when reusable contracts or bug-fix learnings should be preserved.
 - `rope-migrate-docs` migrates existing Matt Pocock-style docs and Trellis docs
   into `.rope/` without deleting originals.
 
@@ -43,7 +45,9 @@ npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target /path/t
 3. Use `rope-shape` to create `.rope/issues/<issue>/prd.md`, `tasks.md`, and
    `e2e.md`.
 4. Use `rope-go` to implement the issue slice by slice.
-5. Use `rope-finish` to close the issue.
+5. Use `rope-summary` when the implementation revealed reusable contracts or
+   architecture facts that should be preserved.
+6. Use `rope-finish` to close the issue.
 
 ## `.rope/` Layout
 
