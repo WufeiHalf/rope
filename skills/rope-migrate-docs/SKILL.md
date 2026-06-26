@@ -1,6 +1,7 @@
 ---
 name: rope-migrate-docs
-description: Migrates existing Matt Pocock-style docs and Trellis docs into the .rope document layout without deleting originals. Use when a repo already has CONTEXT.md, docs/adr, docs/agents, .scratch, or .trellis/spec and the user wants to adopt Rope.
+description: Migrates existing Matt Pocock-style or Trellis docs into the .rope layout without deleting originals. One-time adoption step; invoke by name.
+disable-model-invocation: true
 ---
 
 # Rope Migrate Docs

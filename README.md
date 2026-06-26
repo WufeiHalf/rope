@@ -12,7 +12,11 @@ issue shaping, TDD execution, and closeout.
 - `rope-shape` turns clarified requirements into `.rope/issues/<issue>/` with
   PRD, vertical slices, behavior matrix, and E2E classification.
 - `rope-go` executes slices with TDD, review gates, commits, and classified E2E.
-- `rope-finish` closes a Rope issue after implementation and validation.
+- `rope-verify` verifies an issue's completion state against its PRD, Behavior Matrix,
+  and E2E plan after `rope-go` finishes. Runs in the planner window with a strong
+  model; does not edit code, produces findings and a fix prompt routed back to the
+  implementer window when needed.
+- `rope-finish` closes a Rope issue after implementation, validation, and verify.
 - `rope-summary` updates `.rope/` architecture/context docs after implementation
   when reusable contracts or bug-fix learnings should be preserved.
 - `rope-migrate-docs` migrates existing Matt Pocock-style docs and Trellis docs
@@ -45,9 +49,12 @@ npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target /path/t
 3. Use `rope-shape` to create `.rope/issues/<issue>/prd.md`, `tasks.md`, and
    `e2e.md`.
 4. Use `rope-go` to implement the issue slice by slice.
-5. Use `rope-summary` when the implementation revealed reusable contracts or
+5. Use `rope-verify` in the planner window to verify the issue's completion
+   state against its PRD and E2E plan. If it returns `CHANGES_REQUESTED`, route
+   the fix prompt back to the `rope-go` window and re-verify.
+6. Use `rope-summary` when the implementation revealed reusable contracts or
    architecture facts that should be preserved.
-6. Use `rope-finish` to close the issue.
+7. Use `rope-finish` to close the issue.
 
 ## `.rope/` Layout
 
@@ -65,6 +72,7 @@ npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target /path/t
       prd.md
       tasks.md
       e2e.md
+      verify.md   # written by rope-verify after go completes
 ```
 
 ## E2E Classification

@@ -1,6 +1,7 @@
 ---
 name: rope-summary
-description: Updates Rope architecture/context docs after implementation when reusable contracts, adapter boundaries, config rules, deployment constraints, or bug-fix learnings should be preserved. Use when user invokes rope-summary or asks to summarize/沉淀 current work into .rope architecture docs.
+description: Distills reusable contracts, adapter boundaries, config rules, or bug-fix learnings from just-finished work into .rope docs. Invoke by name when the user asks to summarize/沉淀 current work.
+disable-model-invocation: true
 ---
 
 # Rope Summary
@@ -21,6 +22,7 @@ description: Updates Rope architecture/context docs after implementation when re
 3. Decide whether docs need updates:
    - update when work created or clarified reusable architecture rule, adapter contract, config contract, deployment constraint, validation pattern, or recurring failure mode
    - skip when change is one-off, private implementation detail, or already covered by existing docs
+   - **completion criterion:** every changed file since the issue's shape commit has been considered against the four doc homes (specs / adr / research / CONTEXT); each is either updated or explicitly skipped with reason. Do not declare done while any changed file is unconsidered.
 4. Update the smallest durable doc:
    - `.rope/specs/` for stable implementation contracts and tests required
    - `.rope/adr/` for architecture decisions with trade-offs

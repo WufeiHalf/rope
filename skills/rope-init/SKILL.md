@@ -1,6 +1,7 @@
 ---
 name: rope-init
-description: Initializes a lightweight repo-local .rope coding harness with context, routes, specs, research, ADR, and issue directories. Use when setting up Rope in an existing or new repository or preparing local markdown workflow conventions.
+description: Initializes the .rope coding harness (context, routes, specs, research, ADR, issue dirs) in a repo. One-time setup; invoke by name.
+disable-model-invocation: true
 ---
 
 # Rope Init

@@ -4,6 +4,7 @@
 
 - Issue directory exists.
 - `prd.md`, `tasks.md`, and `e2e.md` are present.
+- `verify.md` is present with `Verdict: PASS`, or the user explicitly waived issue-level verify.
 - All slices are completed or explicitly waived.
 - Review findings are resolved or explicitly waived.
 - E2E entries have terminal statuses:
@@ -27,6 +28,7 @@
 ## Final Status
 
 - Issue:
+- Verify verdict:
 - Slice status:
 - E2E status:
 - Commits:

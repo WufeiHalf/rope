@@ -1,6 +1,7 @@
 ---
 name: rope-finish
-description: Finalizes a .rope issue after rope-go has completed slices, reviews, and classified E2E outcomes. Use when development is done and the user wants to close the local rope issue.
+description: Closes a .rope issue after go, verify, and E2E outcomes are terminal. Invoke by name when the user wants to close the issue.
+disable-model-invocation: true
 ---
 
 # Rope Finish
@@ -12,6 +13,7 @@ For final status checks and reusable lesson routing, read [references/finish-che
 ## Preconditions
 
 - `.rope/issues/<issue>/prd.md`, `tasks.md`, and `e2e.md` exist.
+- `.rope/issues/<issue>/verify.md` exists with `Verdict: PASS`, **or** the user explicitly waives issue-level verify.
 - All slices are completed or explicitly waived by the user.
 - Reviews are passed or explicitly waived.
 - Every E2E item has a terminal status:

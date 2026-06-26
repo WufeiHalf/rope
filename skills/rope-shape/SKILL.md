@@ -53,17 +53,12 @@ Create or update:
    - `Executor: agent-with-gate`
    - `Executor: user`
    - `Executor: not-run`
-7. Resolve every non-agent validation before marking the package ready:
-   - `agent-with-gate`: define the approved action, scope, risk, pass criteria, and forbidden out-of-scope actions; ask the user to approve or skip the action during shaping
-   - `user`: define the human-only steps, pass criteria, and failure report format; confirm the user accepts this validation duty during shaping
-   - `not-run`: record the reason and confirm the user accepts the waiver during shaping
-8. After the user confirms the PRD and gate decisions, commit the issue package docs before recommending implementation. Commit message is not prescribed.
-9. Provide `Next recommended step` only after the docs commit succeeds:
-   - recommended skill: `$rope-go`
-   - why the issue package is ready to execute
-   - the docs commit hash
-   - a copy-paste prompt that names the issue directory and asks `rope-go` to execute it
-   - if not ready, list blockers instead of recommending the next skill
+7. Resolve every non-agent validation before marking the package ready, per the E2E Executor Rules and Gate Approval Rules below: get the user's gate decision (approve / skip / user-run / not-run-waived) for each `agent-with-gate`, `user`, and `not-run` item during shaping.
+8. After the user confirms the PRD and gate decisions, commit the issue package docs. Commit message is not prescribed.
+9. Hand off to go:
+   - **Default (inline):** grill, shape, and go run in the same session. After the docs commit, say the issue package is ready and name the issue directory + commit hash. Do not emit a cross-window copy-paste prompt.
+   - **Cross-window only when the user says so:** only when the user signals switching windows for go do you emit a `Next recommended step` block with a copy-paste prompt naming the issue directory and asking `rope-go` to execute it.
+   - If not ready, list blockers instead of moving to go.
 
 ## E2E Executor Rules
 

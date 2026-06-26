@@ -66,11 +66,11 @@ After all slices pass review:
    - `not-run`: record accepted waiver reason
 4. Run overall review against PRD, tasks, matrix coverage, E2E results, and refs.
 5. Fix any findings with separate commits.
-6. Stop with final status and pending user validations. Do not recommend `rope-finish` until the user explicitly reports acceptance or validation passed.
-7. After the user explicitly reports acceptance or validation passed, provide `Next recommended step`:
-   - recommended skill: `$rope-finish`
-   - why the issue is ready to close
-   - a copy-paste prompt that names the issue directory and asks `rope-finish` to close it
+6. Stop with final status and pending user validations. Do not recommend `rope-finish`. Instead, prompt the user to run issue-level verification in the planner window:
+   - recommended skill: `$rope-verify`
+   - why: go is done but issue completion state has not been verified against the PRD/E2E by the planner window yet
+   - a one-line handoff naming the issue directory, e.g. `Run rope-verify on .rope/issues/<issue> in the planner window.`
+7. Do not recommend `rope-finish` directly. `rope-finish` is reached only after `rope-verify` returns `Verdict: PASS` (or the user explicitly waives verify).
 
 ## Stop Conditions
 
