@@ -48,6 +48,32 @@ Read these when present. Decide for yourself how much to read — you are the ju
    - `CHANGES_REQUESTED`: give the user the fix prompt to paste into the implementer window. After the implementer window fixes, the user re-runs `rope-verify` in this window; append a new round to `verify.md` (do not overwrite history).
    - `BLOCKED`: surface the blockers and wait for the user.
 
+## Subagent Model Policy (long-term constraint)
+
+When verify dispatches read-only subagents for mechanical checks, **the
+subagent model must be a pi strong-model (gpt-5.5 medium or high), never the
+host/runtime model of the project under verification.** This holds regardless
+of what the project's own runtime model is.
+
+- Use `gpt-5.5` with `reasoning_effort=medium` for routine mechanical checks
+  (grep for residual imports, map a matrix row to a test, list commits, check
+  a schema column).
+- Use `gpt-5.5` with `reasoning_effort=high` for deeper mechanical inspection
+  (cross-file dependency tracing, multi-test root-cause grouping, detecting
+  drift across many E2E items).
+- Choose medium vs high by **the complexity of the check itself**, not by the
+  importance of the issue or the host model.
+- Rationale: verify runs in the planner window and is the gate before
+  `rope-finish`. A subagent that runs on the project's own runtime model (e.g.
+  a text-only or capability-limited model) can miss subtle findings or produce
+  shallow mechanical reports, undermining the gate. The constraint is model-
+  agnostic: whatever the host runtime model is now or later, the verify
+  subagent is a separate strong-model budget.
+- When invoking the subagent, set the model explicitly (e.g.
+  `subagent_type: general-purpose`, `model: gpt-5.5`, `thinking: medium|high`)
+  so the policy is honored even if a default would otherwise pick the host
+  model.
+
 ## Guardrails
 
 - Do not skip verify by trusting `tasks.md`/`e2e.md` claims. Verify against the actual diff, tests, and commits.
