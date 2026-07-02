@@ -48,31 +48,38 @@ Read these when present. Decide for yourself how much to read — you are the ju
    - `CHANGES_REQUESTED`: give the user the fix prompt to paste into the implementer window. After the implementer window fixes, the user re-runs `rope-verify` in this window; append a new round to `verify.md` (do not overwrite history).
    - `BLOCKED`: surface the blockers and wait for the user.
 
-## Subagent Model Policy (long-term constraint)
+## Subagent Model Policy
 
-When verify dispatches read-only subagents for mechanical checks, **the
-subagent model must be a pi strong-model (gpt-5.5 medium or high), never the
-host/runtime model of the project under verification.** This holds regardless
-of what the project's own runtime model is.
+When verify dispatches read-only subagents for mechanical checks, resolve model
+settings in this order:
 
-- Use `gpt-5.5` with `reasoning_effort=medium` for routine mechanical checks
-  (grep for residual imports, map a matrix row to a test, list commits, check
-  a schema column).
-- Use `gpt-5.5` with `reasoning_effort=high` for deeper mechanical inspection
-  (cross-file dependency tracing, multi-test root-cause grouping, detecting
-  drift across many E2E items).
-- Choose medium vs high by **the complexity of the check itself**, not by the
-  importance of the issue or the host model.
-- Rationale: verify runs in the planner window and is the gate before
-  `rope-finish`. A subagent that runs on the project's own runtime model (e.g.
-  a text-only or capability-limited model) can miss subtle findings or produce
-  shallow mechanical reports, undermining the gate. The constraint is model-
-  agnostic: whatever the host runtime model is now or later, the verify
-  subagent is a separate strong-model budget.
-- When invoking the subagent, set the model explicitly (e.g.
-  `subagent_type: general-purpose`, `model: gpt-5.5`, `thinking: medium|high`)
-  so the policy is honored even if a default would otherwise pick the host
-  model.
+1. Skill-local override file: `settings.json` next to this `SKILL.md`.
+2. If no override is present, let the agent runtime choose the subagent model.
+
+`settings.example.json` documents the supported shape:
+
+```json
+{
+  "review": {
+    "subagent": {
+      "model": null,
+      "thinking": null
+    }
+  }
+}
+```
+
+- `model`: optional model id passed to the subagent call.
+- `thinking`: optional effort value passed to the subagent call, such as
+  `medium` or `high` when the host supports it.
+- `null`, missing keys, or missing `settings.json` mean "do not set this field;
+  use runtime default".
+- Choose `thinking` by **the complexity of the check itself**, not by the
+  importance of the issue.
+- Do not infer a model from the project under verification. The project runtime
+  model is unrelated to verify review budget.
+- If `settings.json` is malformed or contains unsupported values, ignore the
+  broken field and record that fallback in `verify.md` under Scope Reviewed.
 
 ## Guardrails
 

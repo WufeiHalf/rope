@@ -26,6 +26,8 @@ function copyDir(src, dest) {
     if (entry.isDirectory()) {
       copyDir(srcPath, destPath);
     } else if (entry.isFile()) {
+      // ponytail: user-local skill config must survive reinstall; ship *.example.json for defaults.
+      if (entry.name === "settings.json" && fs.existsSync(destPath)) continue;
       fs.copyFileSync(srcPath, destPath);
     }
   }
