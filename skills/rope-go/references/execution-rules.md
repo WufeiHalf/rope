@@ -17,9 +17,11 @@ Use `Review: self-check` only for low-risk docs, fixture, or isolated behavior.
 
 For every `Review: required` slice:
 
-1. Try to discover an available read-only review subagent before self-review.
-2. If a review subagent is available, use it and record the review verdict in `tasks.md`.
-3. If no subagent tool is available, run a read-only self-review and record:
+1. Discover available subagent types from the current harness/tool error surface before self-review. Do not assume `code-reviewer` exists.
+2. If a specialized review type is available, use it in read-only mode and record the review verdict in `tasks.md`.
+3. If only generic subagent types are available, use `general-purpose` (or the closest available generic type) with explicit read-only review instructions and record the type used.
+4. If a named review type such as `code-reviewer` is rejected but generic subagents exist, record this as `review_degraded: no_specialized_review_subagent_available`, not as total subagent unavailability.
+5. If no subagent tool or suitable type is available, run a read-only self-review and record:
    - `review_degraded: no_subagent_tool_available`
    - what discovery was attempted
    - why self-review was used

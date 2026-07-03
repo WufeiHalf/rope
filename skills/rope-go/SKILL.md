@@ -36,7 +36,7 @@ For each pending slice:
 4. Update `tasks.md` with status, verification result, and review verdict.
 5. Commit the completed slice independently.
 6. Review:
-   - `Review: required` -> first discover and use an available read-only review subagent; if no subagent tool is available, record the degraded self-review reason in `tasks.md`
+   - `Review: required` -> first discover and use an available read-only review subagent type from the current harness; if only non-specialized types are available, prefer `general-purpose` with explicit read-only instructions; if no subagent tool or suitable type is available, record the degraded self-review reason in `tasks.md`
    - `Review: self-check` -> self-review unless actual diff touches a high-risk boundary
    - upgrade to required when public interface, external system, auth, persistence, routing, runtime wiring, or E2E-critical behavior is touched
 7. If review fails, fix, verify, commit the review fix, and rerun review.
