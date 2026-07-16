@@ -11,11 +11,11 @@ issue shaping, TDD execution, and closeout.
   `.rope/adr/`, `.rope/research/`, and `.rope/specs/`.
 - `rope-shape` turns clarified requirements into `.rope/issues/<issue>/` with
   PRD, vertical slices, behavior matrix, and E2E classification.
-- `rope-go` executes slices with TDD, review gates, commits, and classified E2E.
-- `rope-verify` verifies an issue's completion state against its PRD, Behavior Matrix,
-  and E2E plan after `rope-go` finishes. Runs in the planner window with a strong
-  model; does not edit code, produces findings and a fix prompt routed back to the
-  implementer window when needed.
+- `rope-go` executes slices as **Parent Orchestrator**: spawns implementer and
+  reviewer leaf workers, TDD, commits, and classified E2E.
+- `rope-verify` verifies an issue's completion state against its PRD, Behavior
+  Matrix, and E2E plan after `rope-go` finishes. Parent-owned, read-only on
+  code; produces findings and a fix brief for an implementer leaf when needed.
 - `rope-finish` closes a Rope issue after implementation, validation, and verify.
 - `rope-summary` updates `.rope/` architecture/context docs after implementation
   when reusable contracts or bug-fix learnings should be preserved.
@@ -57,17 +57,30 @@ model catalog changes. If presets are missing, go/verify soft-degrade with
 
 ## Typical Workflow
 
+One issue → one parent session (Parent Orchestrator). The parent spawns leaf
+workers for noisy implement/review/inspect work; it does not require dual human
+windows as the architecture.
+
 1. Run `rope-init` in a target repo.
-2. Use `rope-grill` to clarify the requirement and update durable Rope docs.
+2. Use `rope-grill` to clarify the requirement and update durable Rope docs
+   (spawn explore leaves for polluting investigation; write decisions to `.rope/`
+   early).
 3. Use `rope-shape` to create `.rope/issues/<issue>/prd.md`, `tasks.md`, and
-   `e2e.md`.
-4. Use `rope-go` to implement the issue slice by slice.
-5. Use `rope-verify` in the planner window to verify the issue's completion
-   state against its PRD and E2E plan. If it returns `CHANGES_REQUESTED`, route
-   the fix prompt back to the `rope-go` window and re-verify.
+   `e2e.md`. Default: continue in the same session.
+4. Use `rope-go` as parent orchestrator: for each slice, spawn implementer leaf,
+   then reviewer leaf when `Review: required` (self-check when allowed). Max two
+   automated fix rounds per problem, then Human Escalation Stop.
+5. Use `rope-verify` in the same parent session to verify issue completion against
+   PRD/E2E. If `CHANGES_REQUESTED`, parent spawns an implementer leaf with the
+   fix brief and re-verifies. (Hosts that cannot spawn workers may use a
+   top-level implement session as a degraded handoff.)
 6. Use `rope-summary` when the implementation revealed reusable contracts or
    architecture facts that should be preserved.
 7. Use `rope-finish` to close the issue.
+
+Optional: run `rope-harness-presets` once per machine/model-catalog change so
+go/verify can prefer `rope-implementer` / `rope-reviewer` / `rope-explore` /
+`rope-verify-inspector`. Missing presets soft-degrade; they are not a hard block.
 
 ## `.rope/` Layout
 

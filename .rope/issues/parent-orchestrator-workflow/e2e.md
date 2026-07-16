@@ -14,7 +14,7 @@ Command or Steps:
 Pass Criteria:
 - Contracts present; no primary “implementer must spawn review subagent” path
 Result:
-- pending
+- agent_passed — parent owns loop; spawn implementer/reviewer; nested spawn forbidden; max 2 fix rounds + Human Escalation Stop; Review:required is parent-spawned reviewer; review_degraded only when parent cannot spawn any worker
 
 ## E2 Grill + shape handoff wording
 
@@ -28,7 +28,7 @@ Command or Steps:
 Pass Criteria:
 - Both present
 Result:
-- pending
+- agent_passed — grill: context-protective, explore leaf, crystallize to .rope; shape: default same-session parent go; cross-window only when user says so
 
 ## E3 Verify fix-loop wording
 
@@ -42,7 +42,7 @@ Command or Steps:
 Pass Criteria:
 - Role-based fix loop; verify separation intact
 Result:
-- pending
+- agent_passed — fix brief → parent spawns implementer leaf; read-only on code; verify-inspector preferred; Window B paste only degraded path
 
 ## E4 CONTEXT + ADR consistency
 
@@ -56,7 +56,7 @@ Command or Steps:
 Pass Criteria:
 - Language consistent; verify still separated from go
 Result:
-- pending
+- agent_passed — Parent/Leaf/Human Escalation Stop primary; Window A/B historical aliases only; ADR 0001 amended to cross-role implement vs accept; verify still read-only and between go and finish
 
 ## E5 README typical workflow
 
@@ -69,7 +69,7 @@ Command or Steps:
 Pass Criteria:
 - No dual-window-only story as the only path
 Result:
-- pending
+- agent_passed — one issue → one parent session; leaf spawn narrative; rope-harness-presets referenced; no dual-window-only primary path
 
 ## E6 User smoke (optional narrative)
 

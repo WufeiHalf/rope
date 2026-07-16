@@ -84,7 +84,7 @@
 
 ## Slice 6: README + finish consistency
 
-- Status: pending
+- Status: completed
 - Goal: Typical workflow and any finish references match parent orchestrator
 - Scope: `README.md`; `skills/rope-finish` only if it still says dual-window
 - Matrix rows: Real entrypoint end-to-end wording
