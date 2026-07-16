@@ -25,3 +25,19 @@ _Avoid_: auto-fix, retry (too generic)
 **Escalation**:
 The act of the verify model deciding on its own that a finding needs deeper inspection — either by reading more itself or by dispatching a read-only subagent. Driven by the model's judgment, not by mechanical trigger rules.
 _Avoid_: upgrade, promote (mechanical connotation)
+
+**Parent Orchestrator**:
+The main issue session that owns grill, shape, the slice loop, leaf-worker dispatch, issue-level verify, and finish handoff. It is the only agent allowed to spawn workers for an issue. Judgment-primary and context-protective: it decides, talks to the human, writes durable artifacts, and re-briefs/steers leaves — it does not bulk-load exploratory noise or run long implement/fix loops in its own context, because compaction discards earlier discussion. Course correction is done by rewriting the brief and re-spawning a leaf, not by the parent absorbing the full failure trace and fixing in-place.
+_Avoid_: main session (ambiguous), god agent, multi-agent swarm, pure router, parent self-implements everything
+
+**Human Escalation Stop**:
+When leaf fix loops fail twice on the same problem, or the parent judges the failure is a design/requirements/contract issue rather than an implementation miss, the parent stops automated repair and presents a short precise problem statement to the user for a decision. It does not keep re-spawning leaves hoping the third try works.
+_Avoid_: infinite fix loop, silent retry, bury the design conflict in more patches
+
+**Leaf Worker**:
+A subagent (or equivalent host worker) that receives a self-contained brief, does one job, and returns a summary plus artifact paths. Implementer, reviewer, explorer, and verify-inspector are leaf roles. Leaves also execute course-correction work after the parent rewrites the brief. A leaf worker must not spawn other workers.
+_Avoid_: nested subagent, child orchestrator
+
+**Harness Profile / Role Preset**:
+A binding of Rope leaf roles (implementer, reviewer, explore, verify-inspector) onto **harness-native** subagent/agent preset templates. Default write target is the host's **user-level** agents directory (machine-local model churn). Plus a thin **user-global** Rope manifest (not project `.rope/`) that maps role → preset name/model and generation metadata. Refresh is **manual only** (no TTL/stale timer). The host preset is the source of spawn configuration; Rope does not keep a second full prompt/tool database as primary.
+_Avoid_: hard-coded model list in skills, provider lock-in, Rope-only shadow agent runtime, default project-committed model ids, project-committed private model catalogs, automatic preset refresh
