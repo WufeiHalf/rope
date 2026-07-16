@@ -17,6 +17,7 @@ current harness model inventory. Manual invoke only.
 | [pi-adapter.md](references/pi-adapter.md) | Pi discovery paths, write targets, unsupported-host |
 | [discovery-fixtures.md](references/discovery-fixtures.md) | Empty-models / unsupported-host dry checks |
 | [ranking.md](references/ranking.md) | Ranking procedure, offline heuristics, confidence |
+| [offline-ranking-fixture.md](references/offline-ranking-fixture.md) | Research-fail → confidence low still ranks |
 
 ## Host support
 

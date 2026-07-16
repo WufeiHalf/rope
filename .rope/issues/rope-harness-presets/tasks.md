@@ -62,7 +62,7 @@
 
 ## Slice 3: Ranking, offline degrade, write agents + manifest
 
-- Status: pending
+- Status: completed
 - Goal: Rank models into four roles with research-when-available; always capable of local-heuristic ranking; write medium `rope-*.md` and `~/.config/rope/harness/pi.json`
 - Scope:
   - ranking procedure + sources recording
@@ -82,8 +82,8 @@
 - Implementation notes:
   - only touch `rope-*` agent files
   - create parent dirs for `~/.config/rope/harness/` as needed
-- Verification: schema checks + gated live write E2
-- Review: required
+- Verification: live agents+manifest schema-checked; offline-ranking-fixture.md for research-fail; only rope-* agents written
+- Review: review_degraded — self-review of ranking (sol/terra/flash/pro) against research sources; parent may re-rank at E6
 - Review reason: user-home writes and ranking quality contract
 - Stop conditions: human gate denied for live write (then E2 skipped_by_user)
 
