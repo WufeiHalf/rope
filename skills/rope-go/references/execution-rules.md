@@ -1,12 +1,29 @@
 # Rope Go Execution Rules
 
-## Harness Leaf Presets (bridge)
+## Parent / Leaf Contract
+
+The go session is the **Parent Orchestrator**. Leaf workers:
+
+| Role | Typical preset | Job |
+| --- | --- | --- |
+| implementer | `rope-implementer` | TDD, implement one slice unit, commit, return summary + paths |
+| reviewer | `rope-reviewer` | Read-only critique of a finished unit; return verdict |
+| explore | `rope-explore` | Read-only facts when re-brief needs more context |
+| verify-inspector | `rope-verify-inspector` | Not used mid-go; reserved for issue-level verify |
+
+Rules:
+
+- Parent spawns leaves with **self-contained briefs** (goal, paths, acceptance, constraints).
+- Leaves return **summary + artifact paths/status** only. Parent reads those + diffs, not full traces by default.
+- **No nested spawn.** Leaves must not be asked to spawn workers. Parent owns all dispatch.
+- Correction = rewrite brief + re-spawn implementer (or explore then re-brief). Max **2** automated fix rounds per problem → **Human Escalation Stop**.
+- Design / requirements / contract defect → immediate Human Escalation Stop (no thrash).
+
+## Harness Leaf Presets
 
 If `~/.config/rope/harness/<host>.json` exists (pi: `~/.config/rope/harness/pi.json`):
 
-- Prefer named `rope-*` agents for leaf work (`rope-implementer`, `rope-reviewer`,
-  `rope-explore`, `rope-verify-inspector`) so model/thinking defaults come from
-  harness-native presets written by `rope-harness-presets`.
+- Prefer named `rope-*` agents so model/thinking defaults come from harness-native presets written by `rope-harness-presets`.
 - Parent may still override model/thinking at spawn when the host allows.
 
 If the manifest or a needed `rope-*` agent is missing:
@@ -15,7 +32,16 @@ If the manifest or a needed `rope-*` agent is missing:
 - Record `preset_missing` in `tasks.md` (review notes or final status).
 - Continue. Do **not** hard-block go. Do **not** auto-run `rope-harness-presets`.
 
-This is a forward-compat bridge only — not the full parent-orchestrator rewrite.
+## Leaf Brief Contract (minimum)
+
+Every implementer/reviewer spawn brief should include:
+
+1. Issue path and slice id/title
+2. Goal and out-of-scope
+3. Acceptance criteria / Behavior Matrix rows
+4. Relevant artifact paths (prd/tasks/e2e, specs, files)
+5. Constraints (no nested spawn; commit rules; test commands if known)
+6. Expected return shape: summary, paths changed, verification run, blockers
 
 ## Review Risk Gate
 
@@ -30,20 +56,35 @@ Use `Review: required` when the slice touches:
 
 Use `Review: self-check` only for low-risk docs, fixture, or isolated behavior.
 
-## Required Review Execution
+## Required Review Execution (parent-owned)
 
-For every `Review: required` slice:
+For every `Review: required` slice, **after** the implementer leaf finishes:
 
-1. Discover available subagent types from the current harness/tool error surface before self-review. Do not assume `code-reviewer` exists.
-2. If a specialized review type is available, use it in read-only mode and record the review verdict in `tasks.md`.
-3. If only generic subagent types are available, use `general-purpose` (or the closest available generic type) with explicit read-only review instructions and record the type used.
-4. If a named review type such as `code-reviewer` is rejected but generic subagents exist, record this as `review_degraded: no_specialized_review_subagent_available`, not as total subagent unavailability.
-5. If no subagent tool or suitable type is available, run a read-only self-review and record:
+1. Parent spawns a reviewer leaf. Prefer `rope-reviewer` from the harness manifest.
+2. If no specialized review type exists but a generic worker does, use the generic type with explicit read-only review instructions; record the type used.
+3. If a named review type is rejected but generic subagents exist, note `no_specialized_review_subagent_available` and still use the generic worker — this is **not** total degradation.
+4. Record the review verdict in `tasks.md`.
+5. **`review_degraded` only when the parent cannot spawn any worker at all** (no Agent/subagent tool). Then self-review and record:
    - `review_degraded: no_subagent_tool_available`
    - what discovery was attempted
    - why self-review was used
 
-Do not silently treat `Review: required` as ordinary self-check.
+Do **not**:
+
+- instruct the implementer leaf to spawn a review subagent
+- treat nested Agent inside a leaf as the required review path
+- silently treat `Review: required` as ordinary self-check when a worker can be spawned
+
+## Fix Rounds and Human Escalation Stop
+
+| Situation | Action |
+| --- | --- |
+| Implement miss, round 1–2 | Re-brief + re-spawn implementer leaf |
+| Same problem needs round 3 | Human Escalation Stop — explain and wait |
+| Design / requirements / contract defect | Human Escalation Stop immediately |
+| Need more facts to re-brief | Spawn explore leaf, then re-brief |
+
+Record stop reason in `tasks.md` when escalating.
 
 ## E2E Execution Statuses
 
@@ -70,3 +111,4 @@ Do not silently treat `Review: required` as ordinary self-check.
 - E2E `agent-with-gate` items have shape-time decisions and are executed, skipped, or blocked according to that decision.
 - Existing behavior compatibility was tested or explicitly waived.
 - No unrelated dirty files were included.
+- Per-slice `Review: required` used parent-spawned reviewer (or recorded true `review_degraded`).

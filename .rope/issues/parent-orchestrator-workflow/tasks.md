@@ -27,7 +27,7 @@
 
 ## Slice 2: rope-go parent slice loop
 
-- Status: pending
+- Status: completed
 - Goal: Rewrite rope-go so the session running go is the parent orchestrator of leaves, not a nested-review owner
 - Scope: `skills/rope-go/SKILL.md`, `references/execution-rules.md`
 - Matrix rows: Primary; Unavailable nested agent; Duplicate fix rounds; Boundary 2-fail stop; Missing presets
