@@ -16,7 +16,7 @@
 
 ## Slice 1: CONTEXT + ADR role language
 
-- Status: pending
+- Status: completed
 - Goal: Make Parent/Leaf/Human Escalation the canonical language; amend ADR 0001 from windows to roles
 - Scope: `.rope/CONTEXT.md`, `.rope/adr/0001-...` or new ADR superseding window-only wording; research cross-links if needed
 - Matrix rows: Existing compatibility (verify separation preserved)
