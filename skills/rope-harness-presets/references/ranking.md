@@ -9,6 +9,13 @@ Do **not** treat any hardcoded model id list in skill body as permanent truth.
 - optional capability hints from `models.json`
 - optional user constraints (prefer local, exclude provider) if the user stated any
 
+**Catalog completeness:** rank against the **full** `enabledModels` list, not a
+subset filtered to familiar GPT/DeepSeek/flash names. User default session model
+and non-English-vendor ids (`glm`, `grok`, etc.) must remain in the pool until
+role assignment consumes or deliberately skips them with a recorded reason.
+Deduplicate same-family aliases across providers (e.g. multiple `grok-4.5`
+providers) by preferring the user's default provider entry.
+
 ## Steps
 
 ### 1. Research when available
