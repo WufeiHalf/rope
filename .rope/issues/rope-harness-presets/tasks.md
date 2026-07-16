@@ -89,7 +89,7 @@
 
 ## Slice 4: Retire rope-verify settings pin + README
 
-- Status: pending
+- Status: completed
 - Goal: Single pin path — delete skill-local settings API for verify subagent model
 - Scope:
   - remove `skills/rope-verify/settings.example.json`
@@ -107,8 +107,8 @@
   - verify skill still describes issue-level verify workflow intact
 - Implementation notes:
   - do not gut verify itself; only pin channel
-- Verification: grep clean + read-through verify skill
-- Review: required
+- Verification: settings.example deleted; README pin section replaced; verify workflow sections intact; residual mentions are retire/migrate only
+- Review: review_degraded — self-review of docs contract
 - Review reason: public docs/skill contract removal
 - Stop conditions: none
 

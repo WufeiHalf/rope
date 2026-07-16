@@ -42,27 +42,16 @@ Install to a custom directory:
 npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target /path/to/skills
 ```
 
-`rope add` copies bundled skills and overwrites bundled files. User-local
-`settings.json` files are preserved; defaults live in `settings.example.json`.
+`rope add` copies bundled skills and overwrites bundled files.
 
-## Optional Skill Settings
+## Harness leaf presets
 
-Rope skills work without settings. To pin a verifier review subagent model, copy
-`rope-verify/settings.example.json` to `rope-verify/settings.json` in the installed
-skills directory and fill only the fields you need:
-
-```json
-{
-  "review": {
-    "subagent": {
-      "model": "gpt-5.5",
-      "thinking": "high"
-    }
-  }
-}
-```
-
-Leave fields `null` or omit `settings.json` to let the agent runtime decide.
+Leaf worker model/thinking pins live in harness-native agent presets produced by
+`rope-harness-presets` (user-level agents + `~/.config/rope/harness/<host>.json`).
+Skill-local `settings.json` pins (including the former `rope-verify` review
+subagent pin) are not a supported API. Run `rope-harness-presets` after local
+model catalog changes. If presets are missing, go/verify soft-degrade with
+`preset_missing` and continue.
 
 ## Typical Workflow
 

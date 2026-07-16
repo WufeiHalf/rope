@@ -48,38 +48,25 @@ Read these when present. Decide for yourself how much to read — you are the ju
    - `CHANGES_REQUESTED`: give the user the fix prompt to paste into the implementer window. After the implementer window fixes, the user re-runs `rope-verify` in this window; append a new round to `verify.md` (do not overwrite history).
    - `BLOCKED`: surface the blockers and wait for the user.
 
-## Subagent Model Policy
+## Subagent / Leaf Preset Policy
 
-When verify dispatches read-only subagents for mechanical checks, resolve model
-settings in this order:
+When verify dispatches read-only workers for mechanical checks, prefer harness
+presets from `rope-harness-presets`:
 
-1. Skill-local override file: `settings.json` next to this `SKILL.md`.
-2. If no override is present, let the agent runtime choose the subagent model.
+1. If `~/.config/rope/harness/<host>.json` exists and maps `verify-inspector`
+   (and optionally `explore`), spawn the named `rope-*` agent so model/thinking
+   defaults come from the harness-native preset.
+2. If the manifest or agent is missing, soft-degrade: use a generic read-only
+   worker without a forced model pin, record `preset_missing` in `verify.md`
+   under Scope Reviewed, and continue. Do not hard-block verify.
+3. Skill-local `settings.json` model pins are **retired** — not a supported
+   pin path. If an old `settings.json` is found next to this skill, treat it as
+   a one-shot migrate hint only (tell the user to run `rope-harness-presets`
+   and delete the old file); do not read it as the API.
 
-`settings.example.json` documents the supported shape:
-
-```json
-{
-  "review": {
-    "subagent": {
-      "model": null,
-      "thinking": null
-    }
-  }
-}
-```
-
-- `model`: optional model id passed to the subagent call.
-- `thinking`: optional effort value passed to the subagent call, such as
-  `medium` or `high` when the host supports it.
-- `null`, missing keys, or missing `settings.json` mean "do not set this field;
-  use runtime default".
-- Choose `thinking` by **the complexity of the check itself**, not by the
-  importance of the issue.
-- Do not infer a model from the project under verification. The project runtime
-  model is unrelated to verify review budget.
-- If `settings.json` is malformed or contains unsupported values, ignore the
-  broken field and record that fallback in `verify.md` under Scope Reviewed.
+Parent/session may still override model or thinking at spawn when the host
+allows. Choose effort by **the complexity of the check itself**, not by the
+importance of the issue.
 
 ## Guardrails
 
