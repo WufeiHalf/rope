@@ -82,4 +82,4 @@ Command or Steps:
 Pass Criteria:
 - User OK or lists wording fixes
 Result:
-- pending
+- pending (optional; E1–E5 agent_passed + issue-level verify PASS cover contract)
