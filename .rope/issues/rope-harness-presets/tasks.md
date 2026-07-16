@@ -40,7 +40,7 @@
 
 ## Slice 2: Pi model discovery + unsupported-host behavior
 
-- Status: pending
+- Status: completed
 - Goal: Skill instructs/implements reliable discovery of pi available models and clear failure/not-implemented paths
 - Scope:
   - pi: read user `settings.json` enabledModels / models.json as documented in skill references
@@ -55,8 +55,8 @@
   - if pure markdown skill: reference examples + agent-run checklist that go must execute
 - Implementation notes:
   - prefer read-only discovery; no mutation in this slice except docs/examples under repo
-- Verification: fixture/checklist pass
-- Review: required
+- Verification: discovery-fixtures.md A/B/C + pi-adapter error classes; live settings.json readable on this host
+- Review: review_degraded — self-review; host coupling wording checked against pi-subagents enabledModels form
 - Review reason: host coupling and failure modes
 - Stop conditions: cannot locate any pi model config path on target host docs
 
