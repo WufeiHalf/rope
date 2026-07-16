@@ -137,7 +137,13 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - none
 Result:
-- pending (user-run)
+- user_passed
+- Final accepted mapping (after user re-ranks):
+  - implementer: xai-auth/grok-4.5 medium
+  - reviewer: xai-auth/grok-4.5 high
+  - explore: arkegnines/deepseek-v4-flash low
+  - verify-inspector: aio/gpt-5.6-sol medium
+- User confirmed OK on 2026-07-16 (user-run)
 
 ## User validation steps (E6)
 
