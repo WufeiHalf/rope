@@ -1,5 +1,22 @@
 # Rope Go Execution Rules
 
+## Harness Leaf Presets (bridge)
+
+If `~/.config/rope/harness/<host>.json` exists (pi: `~/.config/rope/harness/pi.json`):
+
+- Prefer named `rope-*` agents for leaf work (`rope-implementer`, `rope-reviewer`,
+  `rope-explore`, `rope-verify-inspector`) so model/thinking defaults come from
+  harness-native presets written by `rope-harness-presets`.
+- Parent may still override model/thinking at spawn when the host allows.
+
+If the manifest or a needed `rope-*` agent is missing:
+
+- Soft-degrade: use a generic host worker without a forced model pin.
+- Record `preset_missing` in `tasks.md` (review notes or final status).
+- Continue. Do **not** hard-block go. Do **not** auto-run `rope-harness-presets`.
+
+This is a forward-compat bridge only — not the full parent-orchestrator rewrite.
+
 ## Review Risk Gate
 
 Use `Review: required` when the slice touches:

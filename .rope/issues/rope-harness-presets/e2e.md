@@ -19,7 +19,12 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - writing user home; network-dependent checks
 Result:
-- pending
+- agent_passed
+- Package present: SKILL.md + references (role-schema, manifest-schema,
+  agent-templates, pi-adapter, discovery-fixtures, ranking, offline-ranking-fixture)
+- `disable-model-invocation: true`; host table pi/other; nested-spawn forbid grepped
+- `quick_validate.py` not vendored — structural checklist only
+- Layout under `skills/` so `rope add` installs it
 
 ## E2 Live pi preset generation (user home write)
 
@@ -40,7 +45,14 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - delete non-`rope-*` agents; modify enabledModels; remote/network deploys; other homes
 Result:
-- pending
+- agent_passed
+- Agents:
+  - `~/.pi/agent/agents/rope-implementer.md` → arkegnines/deepseek-v4-pro medium
+  - `~/.pi/agent/agents/rope-reviewer.md` → aio/gpt-5.6-sol high
+  - `~/.pi/agent/agents/rope-explore.md` → arkegnines/deepseek-v4-flash low
+  - `~/.pi/agent/agents/rope-verify-inspector.md` → aio/gpt-5.6-terra medium
+- Manifest: `~/.config/rope/harness/pi.json` confidence high
+- Plan.md and non-rope agents untouched; enabledModels untouched
 
 ## E3 Offline / research-fail degrade
 
@@ -60,7 +72,10 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - depending on external paid APIs as the only path
 Result:
-- pending
+- agent_passed
+- Simulated via `skills/rope-harness-presets/references/offline-ranking-fixture.md`
+  (forced research failure on vendor/alpha-flash|beta-pro|gamma-max)
+- Expected record includes confidence low + offline heuristics + all four roles
 
 ## E4 Unsupported host message
 
@@ -78,7 +93,9 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - implementing full non-pi writers in this issue
 Result:
-- pending
+- agent_passed
+- Fixture C in discovery-fixtures.md + pi-adapter `writer_not_implemented`
+- Skill host table: non-pi stops without writing pi paths
 
 ## E5 rope-verify settings pin removed
 
@@ -97,7 +114,12 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - rewriting verify workflow beyond pin retirement
 Result:
-- pending
+- agent_passed
+- `skills/rope-verify/settings.example.json` deleted
+- Subagent Model Policy replaced with harness preset / soft-degrade policy
+- README Optional Skill Settings replaced with Harness leaf presets section
+- Remaining settings.example mentions are issue/research/history or migrate hints only
+- Verify workflow (inputs, dimensions, verdicts, guardrails) intact
 
 ## E6 User acceptance of generated agent quality
 
@@ -115,4 +137,11 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - none
 Result:
-- pending
+- pending (user-run)
+
+## User validation steps (E6)
+
+1. Open `~/.config/rope/harness/pi.json` and confirm role→model choices fit your budget/quality needs.
+2. Open each `~/.pi/agent/agents/rope-*.md` and skim frontmatter + body.
+3. Optionally spawn `rope-explore` on a tiny question to confirm model routing.
+4. Report accept, or which roles need re-rank (then re-run `rope-harness-presets` after adjusting constraints).

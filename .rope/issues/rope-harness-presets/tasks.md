@@ -114,7 +114,7 @@
 
 ## Slice 5: Soft-consume note for future orchestrator (minimal)
 
-- Status: pending
+- Status: completed
 - Goal: Document how go/verify should prefer `rope-*` presets when present without implementing full W1 orchestrator
 - Scope:
   - short pointer in `rope-go` and/or `rope-verify` references: if manifest exists, prefer named agents; else soft degrade `preset_missing`
@@ -126,7 +126,7 @@
   - grep for `preset_missing` / manifest path mention
 - Implementation notes:
   - keep W1 out of scope; this is a bridge, not parent orchestrator
-- Verification: read-through
-- Review: self-check
+- Verification: grep hit in rope-go + rope-verify for preset_missing and manifest path
+- Review: self-check pass
 - Review reason: docs-only bridge; low risk if wording is careful
 - Stop conditions: none

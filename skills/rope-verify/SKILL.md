@@ -50,8 +50,8 @@ Read these when present. Decide for yourself how much to read — you are the ju
 
 ## Subagent / Leaf Preset Policy
 
-When verify dispatches read-only workers for mechanical checks, prefer harness
-presets from `rope-harness-presets`:
+Bridge (not full orchestrator rewrite): when verify dispatches read-only workers
+for mechanical checks, prefer harness presets from `rope-harness-presets`:
 
 1. If `~/.config/rope/harness/<host>.json` exists and maps `verify-inspector`
    (and optionally `explore`), spawn the named `rope-*` agent so model/thinking
