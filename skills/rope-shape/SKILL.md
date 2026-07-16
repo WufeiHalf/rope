@@ -7,7 +7,12 @@ description: Shapes a clarified requirement into a .rope issue package with PRD,
 
 Turn a clarified requirement into an executable local issue package.
 
-For concrete `prd.md`, `tasks.md`, and `e2e.md` templates, read [references/issue-package.md](references/issue-package.md).
+The shape session continues as **Parent Orchestrator**. After the package is
+ready, default handoff is same-session `rope-go` (parent owns the slice loop),
+not a dual-window paste.
+
+For concrete `prd.md`, `tasks.md`, and `e2e.md` templates, read
+[references/issue-package.md](references/issue-package.md).
 
 ## Required Output
 
@@ -23,7 +28,7 @@ Create or update:
 ## Workflow
 
 1. Read `.rope/CONTEXT.md`, `.rope/routes.md`, relevant `.rope/adr/`, `.rope/research/`, and `.rope/specs/`.
-2. Inspect code/tests only enough to choose real public interfaces and verification seams.
+2. Inspect code/tests only enough to choose real public interfaces and verification seams. Prefer an explore leaf for wide surveys (context-protective parent).
 3. Write `prd.md` using the reference template:
    - problem statement
    - solution
@@ -55,9 +60,9 @@ Create or update:
    - `Executor: not-run`
 7. Resolve every non-agent validation before marking the package ready, per the E2E Executor Rules and Gate Approval Rules below: get the user's gate decision (approve / skip / user-run / not-run-waived) for each `agent-with-gate`, `user`, and `not-run` item during shaping.
 8. After the user confirms the PRD and gate decisions, commit the issue package docs. Commit message is not prescribed.
-9. Hand off to go:
-   - **Default (inline):** grill, shape, and go run in the same session. After the docs commit, say the issue package is ready and name the issue directory + commit hash. Do not emit a cross-window copy-paste prompt.
-   - **Cross-window only when the user says so:** only when the user signals switching windows for go do you emit a `Next recommended step` block with a copy-paste prompt naming the issue directory and asking `rope-go` to execute it.
+9. Hand off to go as **Parent Orchestrator**:
+   - **Default (same session):** after the docs commit, continue in this session as parent orchestrator running `rope-go` (spawn implementer/reviewer leaves per go skill). Name the issue directory + commit hash. Do not emit a cross-window copy-paste prompt.
+   - **Cross-window only when the user says so:** only when the user signals switching sessions for go (host cannot spawn workers, user wants a dedicated cheap session, etc.) emit a `Next recommended step` block with a copy-paste prompt naming the issue directory and asking `rope-go` to execute it. That top-level go session still acts as Parent Orchestrator for the slice loop.
    - If not ready, list blockers instead of moving to go.
 
 ## E2E Executor Rules

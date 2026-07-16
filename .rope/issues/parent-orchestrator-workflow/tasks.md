@@ -43,7 +43,7 @@
 
 ## Slice 3: rope-grill context-protective parent
 
-- Status: pending
+- Status: completed
 - Goal: Grill teaches parent to protect context and crystallize durable decisions
 - Scope: `skills/rope-grill/SKILL.md` (+ refs if needed)
 - Matrix rows: Primary grill path; Boundary compact loss
@@ -57,7 +57,7 @@
 
 ## Slice 4: rope-shape handoff
 
-- Status: pending
+- Status: completed
 - Goal: Shape handoff defaults to parent orchestration, not dual-window paste
 - Scope: `skills/rope-shape/SKILL.md`
 - Matrix rows: Alternate handoff when user requests cross-window
