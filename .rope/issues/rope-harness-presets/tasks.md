@@ -16,7 +16,7 @@
 
 ## Slice 1: Skill skeleton, role schema, template contract
 
-- Status: pending
+- Status: completed
 - Goal: Add `rope-harness-presets` skill package with role schema, manifest schema, medium agent body rules, and no-nested-spawn leaf rules
 - Scope:
   - `skills/rope-harness-presets/SKILL.md` (+ references as needed)
@@ -33,8 +33,8 @@
 - Implementation notes:
   - do not hardcode permanent model winners in skill body
   - host adapter table: pi = implemented; others = not implemented
-- Verification: read-through + validator; grep for nested-spawn forbid
-- Review: required
+- Verification: structural checklist pass; nested-spawn forbid grepped in SKILL + refs; validator not vendored (`quick_validate.py` unavailable)
+- Review: review_degraded — leaf implementer; no nested reviewer spawn; self-review of contract surface
 - Review reason: public skill contract and multi-harness surface
 - Stop conditions: role/manifest/path undecided (already decided in grill)
 
