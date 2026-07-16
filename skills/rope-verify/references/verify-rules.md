@@ -3,13 +3,13 @@
 ## Verdict
 
 - `PASS` — no `must-fix` findings. The issue's completion state is trustworthy against its PRD, Behavior Matrix, and E2E plan. `rope-finish` may proceed.
-- `CHANGES_REQUESTED` — one or more `must-fix` findings. A fix prompt is produced for the implementer window. The issue is not ready to finish.
+- `CHANGES_REQUESTED` — one or more `must-fix` findings. A fix brief is produced for the **Parent Orchestrator** to spawn an **implementer leaf**. The issue is not ready to finish.
 - `BLOCKED` — a human decision is required (real-environment E2E failure, ambiguous PRD conflict, missing credential the user must supply). List the blockers; do not fabricate a verdict.
 
 ## Finding Severity
 
-- `must-fix` — blocks finish. Routed to the implementer window via the fix prompt.
-- `nice-to-fix` — recorded, does not block. Picked up by the implementer window on the next pass.
+- `must-fix` — blocks finish. Routed via fix brief → parent spawns implementer leaf.
+- `nice-to-fix` — recorded, does not block. Parent may schedule later.
 - `cannot_verify` — the verifier could not confirm a claim (e.g. an E2E marked `agent_passed` with no recorded command, a review verdict with no evidence). Treated as a finding; escalate to `must-fix` if it concerns a high-risk boundary, else `nice-to-fix`.
 
 ## What Verify May Edit Directly (Document Fixes Only)
@@ -24,15 +24,16 @@ Each document fix is recorded in `verify.md` under `Document Fixes Applied` with
 
 ## High-Risk Boundaries (inspect more deeply when touched)
 
-Reuse `rope-go`'s Review Risk Gate list verbatim — do not re-list it here. Read [`execution-rules.md`](../rope-go/references/execution-rules.md) for the authoritative list (public interface, external/adapter, auth/secret, persistence/schema, routing/runtime wiring, multi-layer, E2E-critical path).
+Reuse `rope-go`'s Review Risk Gate list verbatim — do not re-list it here. Read [`execution-rules.md`](../../rope-go/references/execution-rules.md) for the authoritative list (public interface, external/adapter, auth/secret, persistence/schema, routing/runtime wiring, multi-layer, E2E-critical path).
 
 ## Token-Conscious Inspection
 
 The verify model is the budget-scarcest resource. To keep its tokens on judgment rather than mechanical reading:
 
-- Dispatch read-only subagents for mechanical checks: "does Behavior Matrix row X have a real test in the diff?", "was E2E item E5 re-run after its `agent_failed`?", "list the public-interface signatures changed by commits A..B".
+- Dispatch **verify-inspector** (prefer `rope-verify-inspector`) or explore leaves for mechanical checks: "does Behavior Matrix row X have a real test in the diff?", "was E2E item E5 re-run after its `agent_failed`?", "list the public-interface signatures changed by commits A..B".
 - Read changed files yourself only for judgment calls: a contract break, a Non-goal violation, a high-risk boundary touch.
 - The `Scope Reviewed` section of `verify.md` records what you read yourself versus what you delegated, so the decision is auditable.
+- Soft-degrade with `preset_missing` if harness presets are absent; continue with a generic read-only worker.
 
 ## Drift
 
@@ -52,7 +53,8 @@ PASS | CHANGES_REQUESTED | BLOCKED
 
 ### Scope Reviewed
 - Read directly: <files/sections the verify model read itself>
-- Delegated to subagents: <what each subagent checked and returned>
+- Delegated to leaves: <what each verify-inspector/explore leaf checked and returned>
+- preset_missing: <yes/no and which roles>
 
 ### Findings
 - [must-fix|nice-to-fix|cannot_verify] <finding> — evidence: <commit / file / matrix row / e2e item>
@@ -61,16 +63,24 @@ PASS | CHANGES_REQUESTED | BLOCKED
 ### Document Fixes Applied
 - <file>: <what was changed> — reason: <why>
 
-### Fix Prompt for Implementer Window
-(Only when Verdict = CHANGES_REQUESTED. A copy-paste prompt for the implementer window.)
+### Fix Brief for Implementer Leaf
+(Only when Verdict = CHANGES_REQUESTED. Self-contained brief for parent to spawn implementer leaf.)
 
-<structured prompt naming each must-fix finding, the evidence, and the expected fix direction>
+<structured brief naming each must-fix finding, the evidence, expected fix direction, paths, and acceptance>
 ```
 
-## Loop With the Implementer Window
+## Fix Loop (parent + implementer leaf)
 
-1. Verify returns `CHANGES_REQUESTED` + fix prompt.
-2. User pastes the fix prompt into the implementer window (the `rope-go` session).
-3. Implementer window applies fixes, commits, and re-runs its own slice/E2E verification.
-4. User re-runs `rope-verify` in the planner window on the same issue.
-5. Verify appends Round N+1 to `verify.md`. Repeat until `PASS` or the user waives.
+Primary path (same parent session):
+
+1. Verify returns `CHANGES_REQUESTED` + fix brief.
+2. Parent spawns an **implementer leaf** with that brief (prefer `rope-implementer`).
+3. Leaf applies fixes, commits, re-runs relevant verification; returns summary + paths.
+4. Parent re-runs `rope-verify` on the same issue; appends Round N+1.
+5. **Human Escalation Stop:** after **two** unsuccessful automated fix rounds on the same problem, or when the parent judges a design/requirements/contract defect, stop and present a short precise problem to the user. No third silent retry.
+
+Degraded / historical path (only when parent cannot spawn a code-writing worker):
+
+1. Emit the fix brief for a top-level implement session (historical "Window B" / implementer window paste).
+2. After that session fixes, re-run verify in the parent/judge session.
+3. Record the degrade mode in `verify.md` Scope Reviewed.

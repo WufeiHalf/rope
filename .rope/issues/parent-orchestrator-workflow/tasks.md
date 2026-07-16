@@ -70,7 +70,7 @@
 
 ## Slice 5: rope-verify role-based fix loop
 
-- Status: pending
+- Status: completed
 - Goal: Verify stays issue-level read-only on code; fix routing is parent re-brief + implementer leaf
 - Scope: `skills/rope-verify/SKILL.md`, `references/verify-rules.md`
 - Matrix rows: Existing verify separation; mechanical leaf; fix loop wording
