@@ -90,11 +90,22 @@ While grilling:
    undecided set as a **decision tree**: resolve dependency blockers first; do
    not jump to a question that assumes an unresolved prior choice. Optionally
    label “本问题阻塞：&lt;topic&gt;” when helpful.
+
+   **Question preference (default):** prioritize **product, UX/design, scope,
+   and policy** decisions over implementation micro-choices. Prefer asking:
+   who is this for, what “good” looks like, what is out of scope, risk/human
+   gates, naming users will see, edge behavior the product must own. Defer
+   file layout, class names, and framework trivia unless they change the
+   Behavior Contract or a human gate. If you catch yourself only probing
+   code structure, step back to a product/design question.
+
    Communication style:
    - use plain language, not jargon dumps; if one sentence is enough, do not use three
+   - **explain with simple wording and a concrete example** (用户场景、一次点击、
+     一条命令、一屏结果) — prefer the current issue’s real scenario over a generic one
    - when a decision involves an abstract relationship or a boundary condition,
-     pair it with a concrete scenario example — prefer the current issue’s real
-     scenario over a generic one
+     pair the recommendation with that example so the user can answer without
+     rephrasing your question
    - the recommended answer must be something the user can understand on first
      read, not something they have to ask you to rephrase
 6. Keep the clarification loop moving:

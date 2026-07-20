@@ -34,6 +34,12 @@
 
 - <callable API, UI behavior, CLI, config, schema, side effect, or observable result>
 
+## Testing Decisions
+
+- Good test: observe external behavior at agreed seams — not implementation details
+- Seams under test: <list confirmed with user during shape>
+- Prior art (optional): <paths or patterns of similar tests in-repo>
+
 ## Behavior Contract
 
 - System under test: <behavior being specified and tested>
@@ -87,10 +93,12 @@
 ## Slice 1: <Title>
 
 - Status: pending
-- Goal:
-- Scope:
+- Kind: vertical | wide-refactor-expand | wide-refactor-migrate | wide-refactor-contract
+- Goal: <user-perspective end-to-end result this slice makes true — not a layer list>
+- Blocked by: none | Slice N, …
+- Scope: <path/area bounds; for parallel frontier, non-overlap with sibling slices>
 - Matrix rows:
-- Public behavior:
+- Public behavior: <one user-visible sentence of what works when this slice is done>
 - Tests:
 - Implementation notes:
 - Verification:

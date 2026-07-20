@@ -32,10 +32,21 @@ rules, and overall review checklist, read
 
 ## Slice Loop (parent owns)
 
-For each pending slice:
+Schedule from `tasks.md` **Blocked by** edges when present:
+
+- **Default:** run one ready slice at a time in dependency order (blockers
+  completed first). Safe on every host.
+- **Optional frontier parallel:** if two or more pending slices have all blockers
+  done (`Blocked by: none` or listed blockers `completed`), **and** their `Scope`
+  paths/areas do not overlap, the parent **may** spawn multiple implementer
+  leaves in parallel. Parent still owns review and **serializes commits** (no
+  concurrent writers on the same branch without coordination). If Scope is vague
+  or files may collide, stay serial. Never ask a leaf to spawn another leaf.
+
+For each slice selected to run:
 
 1. Set slice status to `in_progress`.
-2. **Spawn implementer leaf** with a self-contained brief (slice goal, matrix rows, acceptance criteria, artifact paths, TDD expectation). Prefer `rope-implementer` when available.
+2. **Spawn implementer leaf** with a self-contained brief (slice goal, matrix rows, acceptance criteria, artifact paths, TDD expectation, Blocked by context). Prefer `rope-implementer` when available.
 3. From the leaf **summary + paths/diff** (not full traces by default):
    - confirm tests/verification ran
    - confirm the slice committed independently (or commit if the leaf returned a ready diff and host policy requires parent commit — prefer leaf commits when the host allows)
