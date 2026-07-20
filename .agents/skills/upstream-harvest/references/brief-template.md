@@ -1,160 +1,163 @@
-# Review brief template
+# 审查 brief 模板
 
-Write briefs under `.rope/upstream/mattpocock-skills/reviews/`.
+brief 写入 `.rope/upstream/mattpocock-skills/reviews/`。
 
-## Naming
+**语言：中文**（标题、摘要、逐 skill 对照、建议标记说明均用中文；路径、SHA、skill 名可保留原文标识）。
 
-- Baseline: `YYYY-MM-DD-<shortsha>-baseline.md` (shortsha = first 7 of reviewed tip)
-- Delta: `YYYY-MM-DD-<shortsha>.md` (shortsha = first 7 of reviewed tip)
-- One primary brief per harvest batch; do not duplicate noisily on re-run of the same tip
+## 命名
 
-## Common header
+- Baseline：`YYYY-MM-DD-<shortsha>-baseline.md`（shortsha = 已审 tip 前 7 位）
+- Delta：`YYYY-MM-DD-<shortsha>.md`
+- 同一 tip 同一批次不要重复刷文件
 
-```markdown
-# Upstream harvest review — <baseline|delta>
+## 对照基准（所有分支都要写清）
 
-- Upstream: https://github.com/mattpocock/skills
-- Reviewed tip: <full sha>
-- Range: <last-reviewed-sha or "none (baseline)"> → <tip>
-- Clone: <path from source.md>
-- Correspondence policy: C1 high only
-- Status: open | closed
-- Closed at: _(empty until close)_
-```
-
-## Baseline body
-
-```markdown
-## Baseline note
-
-First pin of this upstream for Rope harvest. No adopt/adapt recommendation list
-on baseline (B1). Delta harvest starts on the next run after close.
-
-## Allowlist snapshot (C1 high)
-
-Names only — not recommendations.
-
-| Matt skill | Rope target | Notes |
-| --- | --- | --- |
-| …from correspondence.md high rows… | … | optional one-liner |
-
-## Human marks
-
-_(none on baseline — close only pins SHA)_
-
-## Close
-
-- [ ] Human closed batch
-- last-reviewed-sha after close: <tip or unchanged if abandoned>
-```
-
-### Baseline structural rules (checkable)
-
-| Rule | Required |
+| 情况 | 对照什么 |
 | --- | --- |
-| Filename ends with `-baseline.md` | yes |
-| Header `Reviewed tip` is full SHA from fetch | yes |
-| Range starts with `none (baseline)` | yes |
-| **No** section titled like “Suggested marks”, “Adopt list”, or per-skill `Suggested mark:` rows | **forbid** |
-| **No** `adopt` / `adapt` recommendation list (table or bullets) | **forbid** |
-| Allowlist snapshot may list correspondence **names** only | yes |
-| `Status: open` until human close | yes |
-| Product `skills/rope-*` not edited when writing this brief | yes |
+| **有**上次已审 SHA / 上次 closed brief | 上游 `上次 SHA → 本次 tip` 的 allowlist 差异；并简述相对**本地 Rope 落点**是否仍相关 |
+| **无**上次记录（Baseline 首次） | 无法做上游区间 diff；对每个 C1 high skill，对照 **本地 Rope 目标 skill**（`correspondence` 的 target，如 `skills/rope-grill`）做思路/流程差异摘要 |
 
-**Baseline forbid:** adopt/adapt suggestion lists, product skill edits, advancing
-SHA before human close.
+「本地」默认指本仓库产品 skill（`skills/rope-*` 等 correspondence 落点），不是 `~/.agents/skills` 全局安装副本，除非人明确要求。
 
-## Delta body
+## 公共页眉
 
 ```markdown
-## Summary
+# 上游收获审查 — <baseline|delta>
 
-- Commits in range (allowlist-touching): <n or "none">
-- Material allowlist changes: yes | no
-- Suggested attention: <one short paragraph>
+- 上游：https://github.com/mattpocock/skills
+- 已审 tip：`<full sha>`
+- 区间：`<上次 SHA 或「无（baseline）」>` → `<tip>`
+- 对照基准：<上次已审记录 | 本地 Rope 落点（首次 baseline）>
+- 克隆路径：<source.md 中的路径>
+- 扫描策略：C1 仅 high
+- 状态：open | closed
+- 关闭时间：_（关闭前留空）_
+```
 
-## Per-skill changes (C1 high)
+## Baseline 正文
 
-### `<matt-skill>`
+```markdown
+## 基线说明
 
-- Rope target: `skills/rope-…` or `_(none yet)_` (from correspondence)
-- Change summary: <what moved in SKILL.md / references; or "unchanged">
-- Suggested mark: adopt | adapt | ignore | watch
-- Rationale: <one or two sentences; proposals only>
-- Human mark: _(pending)_
+首次钉住该上游（B1）。本 brief **必须**对 C1 high 做「上游 skill ↔ 本地 Rope 落点」对照，
+便于你判断以后要不要吸收；**不是**要求你立刻全部 adopt 的推销清单。
+真正按上游 commit 区间扫变更，从**下一次** Delta 开始。
 
-_(Prefer one subsection per **changed** or **missing** high skill.
-Unchanged high skills may be omitted or listed in a single “Unchanged” line.)_
+## 摘要
 
-## Paths missing upstream
+- 已审 tip / shortsha
+- C1 high 数量；重命名/缺失（如有）
+- 相对本地：整体像「已大量分叉 / 部分可借 / 仅同名」一句话
 
-- `<matt-skill>` (`<path>`): not present at tip — listed, not silently skipped
-- _(or “none” if every high path exists at tip)_
+## 逐 skill 对照（C1 high，必填）
 
-## Watch (only if human named)
+### `<matt-skill>` → `<本地 Rope 路径>`
 
-_(omit section entirely if the human did not name watch rows for this run)_
+- 上游路径：`skills/<bucket>/<name>/…`
+- 上游在做什么：（3～8 句中文，抓流程/门禁/产物，勿贴全文）
+- 本地现状：（对应 Rope skill 当前职责，3～8 句中文）
+- **差异要点：**（条目列表：本地已覆盖 / 上游多出来的 / 语义冲突 / 命名变更）
+- 可选建议标记：adopt | adapt | ignore | watch | _（仅建议，可留空）_
+- 人工标记：_（待填）_
 
-### `<named-watch-skill>`
+## 上游结构观察
 
-- Rope target: …
-- Change summary: …
-- Suggested mark: watch | ignore | …
-- Human mark: _(pending)_
+- 例如：skill 嵌套在 `skills/<bucket>/`；重命名（to-prd→to-spec）等
 
-## Human marks (batch)
+## 人工标记汇总
 
-| Item | Suggested | Human | Follow-up |
+| 项 | 建议 | 人工 | 后续 |
 | --- | --- | --- | --- |
-| … | adapt | _(pending)_ | ordinary edit after say-so; **not** this skill |
+| … | adapt | 待填 | 关闭后普通小改；**本 skill 不改** `skills/rope-*` |
 
-## Close
+## 关闭
 
-- [ ] Human closed batch
-- last-reviewed-sha after close: <reviewed tip full SHA, or unchanged if abandoned>
+- [ ] 人工关闭本批
+- 关闭后 last-reviewed-sha：`<tip 或放弃则不变>`
 ```
 
-### Delta structural rules (checkable)
+### Baseline 结构规则
 
-| Rule | Required |
+| 规则 | 要求 |
 | --- | --- |
-| Filename `YYYY-MM-DD-<shortsha>.md` (**not** `*-baseline.md`) | yes |
-| Header `Reviewed tip` is full SHA of fetched tip | yes |
-| Range is `<last-reviewed-sha> → <tip>` (both full SHAs) | yes |
-| Summary states material allowlist changes yes/no | yes |
-| Suggested marks are labeled **Suggested** (proposals only) | yes |
-| Human mark fields start pending until human provides them | yes |
-| Missing allowlist paths listed (or explicit “none”) — not silent skip-all | yes |
-| Watch section only if human named watch rows | yes |
-| **No** product `skills/rope-*` edits when writing or closing this brief | **forbid** |
-| **No** advancing SHA before human close | **forbid** |
-| Clean no-op (tip == last): **no** invent adopt list; optional skip file | yes |
+| 文件名 `*-baseline.md` | 是 |
+| **中文**正文 | 是 |
+| 区间起点为「无（baseline）」 | 是 |
+| **逐 skill 对照**一节，覆盖每个 C1 high | **是** |
+| 首次 baseline 对照**本地 Rope 落点** | **是** |
+| 禁止空 brief（只有 SHA + 名字列表） | **是** |
+| 可选建议标记；禁止假装已应用 | 是 |
+| 关闭前不推进 SHA | 是 |
+| 写 brief 时不改 `skills/rope-*` | 是 |
 
-**Delta forbid:** auto-editing product skills, advancing SHA without close,
-full-repo scan as default, treating suggested marks as applied work.
+## Delta 正文
 
-### Clean no-op report (tip == last-reviewed-sha)
+```markdown
+## 摘要
 
-Do **not** open a noisy empty delta brief. Report to the human, e.g.:
+- 区间 commits（触及 allowlist）：<n 或 无>
+- 是否有实质 allowlist 变更：是 | 否
+- 相对上次：一句话
+- 相对本地（若相关）：一句话
+
+## 逐 skill 变更（C1 high）
+
+### `<matt-skill>` → `<本地 Rope 路径>`
+
+- 上游变更摘要：（相对上次 SHA；unchanged 可合并到「未变更」一行）
+- 相对本地：（该变更对 Rope 落点是否仍值得看）
+- 建议标记：adopt | adapt | ignore | watch
+- 理由：（1～3 句中文）
+- 人工标记：_（待填）_
+
+## 上游缺失路径
+
+- `<matt-skill>`：tip 上不存在（须列出，禁止静默全跳过）
+- 或写「无」
+
+## Watch（仅当人点名）
+
+…
+
+## 人工标记汇总
+
+| 项 | 建议 | 人工 | 后续 |
+| --- | --- | --- | --- |
+| … | … | … | 关闭后普通编辑 / 大改另开 issue |
+
+## 关闭
+
+- [ ] 人工关闭本批
+- 关闭后 last-reviewed-sha：…
+```
+
+### Delta 结构规则
+
+| 规则 | 要求 |
+| --- | --- |
+| **中文**正文 | 是 |
+| 相对**上次已审 SHA** 的上游 diff 为主 | 是 |
+| 建议标记仅是提案 | 是 |
+| 缺失路径列出或写「无」 | 是 |
+| tip == last 时 clean no-op，不发明 adopt | 是 |
+| 不改 `skills/rope-*`；关闭前不推进 SHA | 是 |
+
+### Clean no-op（tip == last）
+
+可用中文短报，不必硬写空 delta 文件：
 
 ```text
-Delta no-op: origin/<branch> tip equals last-reviewed-sha (<full sha>).
-No material C1 allowlist changes. Pin unchanged (close not required).
-skills/rope-* not touched.
+Delta 无变更：origin/<branch> tip 与 last-reviewed-sha 相同（<full sha>）。
+C1 allowlist 无实质变更。pin 未改（无需 close）。未改动 skills/rope-*。
 ```
 
-If a brief is still written, it must say material changes **no** and contain
-**zero** invented adopt/adapt items.
+## 标记词
 
-## Marks vocabulary
-
-| Mark | Meaning |
+| 标记 | 含义 |
 | --- | --- |
-| `adopt` | Idea fits; plan a small ordinary edit into Rope after close |
-| `adapt` | Useful with Rope-shaped rewrite; still a separate edit/issue |
-| `ignore` | Not for Rope; do not re-raise unless upstream changes again |
-| `watch` | Interesting later; not acting now |
+| `adopt` | 可直接吸收为小改 |
+| `adapt` | 有用，需改写成 Rope 语义 |
+| `ignore` | 不收 |
+| `watch` | 先记着，本批不动 |
 
-Harvest **never** applies marks by editing `skills/rope-*` (A1).
-Suggested marks on the brief are **proposals only** until the human records a
-human mark; even then, product edits are a separate ordinary follow-up.
+Harvest **从不**通过改 `skills/rope-*` 来「完成」标记（A1）。

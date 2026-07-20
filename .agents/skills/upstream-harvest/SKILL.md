@@ -67,12 +67,14 @@ Offline dry path: [references/baseline-dry-narrative.md](references/baseline-dry
 4. **Resolve reviewed tip.** After a successful fetch, tip =
    `origin/<default-branch>` object name (full SHA). That is the only meaning of
    “reviewed tip” for baseline. Shortsha = first 7 hex chars.
-5. **Write baseline brief** under
+5. **Write baseline brief（中文）** under
    `.rope/upstream/mattpocock-skills/reviews/` named
-   `YYYY-MM-DD-<shortsha>-baseline.md` using the baseline body in
-   brief-template. Include: upstream URL, full tip, range
-   `none (baseline) → <tip>`, clone path, C1 allowlist snapshot (names only),
-   `Status: open`. **No** adopt/adapt/ignore/watch recommendation list.
+   `YYYY-MM-DD-<shortsha>-baseline.md` per brief-template. **Required:**
+   - 中文正文（路径/SHA/skill 名可保留原文）
+   - 区间：`无（baseline）→ <tip>`；对照基准 = **本地 Rope 落点**（无上次记录）
+   - 每个 C1 high skill：上游在做什么 / 本地 `skills/rope-*` 现状 / **差异要点**
+   - 可附可选建议标记；**禁止**只有 SHA + 名字列表的空壳 brief
+   - 读本地 target 只为对照，**不**编辑 `skills/rope-*`
 6. **Present and wait.** Show the brief path and tip. Wait for human
    **close** or **abandon** (see close-gate phrases). Do not advance SHA yet.
 7. **Close only:** set brief `Status: closed` + closed timestamp; update
@@ -84,14 +86,15 @@ Offline dry path: [references/baseline-dry-narrative.md](references/baseline-dry
 **Idempotency (baseline):**
 
 - Re-run while SHA still empty and a baseline brief for the **same tip** already
-  exists: reuse that brief; do not open a second noisy file.
+  exists: reuse/rewrite that brief; do not open a second noisy file.
 - Re-close of an already-closed baseline for the same tip: no SHA churn; no
   second brief.
 - If tip moved upstream before first close: update or supersede the open baseline
-  brief to the new tip; still no adopt list; SHA remains empty until close.
+  brief to the new tip; still full per-skill 对照; SHA remains empty until close.
 
-**Done when:** baseline brief exists; on close, `Last reviewed SHA` equals the
-reviewed tip; on abandon, SHA still empty/unchanged; `skills/rope-*` untouched.
+**Done when:** 中文 baseline brief 含完整逐 skill 对照; on close, `Last reviewed SHA`
+equals the reviewed tip; on abandon, SHA still empty/unchanged; `skills/rope-*`
+untouched.
 
 ### Delta
 
@@ -124,8 +127,8 @@ Offline dry path: [references/delta-dry-narrative.md](references/delta-dry-narra
    - Do **not** advance SHA (close not required for no-op; re-close is a no-op).
    - Stop. Done.
 7. **Allowlist diff (C1 high only).** Diff **only** correspondence rows with
-   interest `high` between last-reviewed and tip. Path filter = each Matt skill
-   tree root (`<skill>/…`). Prefer helper
+   interest `high` between last-reviewed and tip. Resolver finds
+   `skills/<bucket>/<skill>/SKILL.md` (nested tree). Prefer helper
    [`scripts/allowlist-diff.sh`](scripts/allowlist-diff.sh):
 
    ```bash
@@ -139,18 +142,13 @@ Offline dry path: [references/delta-dry-narrative.md](references/delta-dry-narra
    - `watch` rows only when the human **names** them for this run.
    - `out` rows never scanned.
    - Allowlist path missing at tip and/or last: **list** under brief
-     “Paths missing upstream” — not silent skip-all.
-8. **Write delta brief** under
+     “上游缺失路径” — not silent skip-all.
+8. **Write delta brief（中文）** under
    `.rope/upstream/mattpocock-skills/reviews/` named
-   `YYYY-MM-DD-<shortsha>.md` (shortsha of **tip**) using the delta body in
-   brief-template. Include:
-   - summary (commits touching allowlist, material yes/no, short attention note)
-   - per-skill changes for high rows that moved (or explicit “unchanged” only if
-     useful — prefer listing **changed** + **missing**)
-   - each item: Rope target from correspondence, change summary, **Suggested
-     mark** (`adopt` / `adapt` / `ignore` / `watch`), rationale
-   - **Suggested marks are proposals only** — not applied edits
-   - human mark fields pending; `Status: open`
+   `YYYY-MM-DD-<shortsha>.md` (shortsha of **tip**) per brief-template:
+   - 中文摘要（相对**上次已审 SHA**；并点一句相对本地落点）
+   - 逐 skill：上游变更 + 对本地是否仍值得看 + 建议标记（提案 only）
+   - human mark 待填；`Status: open`
    - never edit `skills/rope-*` while writing the brief (**A1**)
 9. **Present and wait.** Show brief path, range, material yes/no. Record human
    marks on the brief when given (update Human mark fields / batch table).
