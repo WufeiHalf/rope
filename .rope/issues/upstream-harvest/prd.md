@@ -22,8 +22,11 @@ shipped by `rope add`) that:
 5. Does **not** edit `skills/rope-*` itself; small accepted tweaks are ordinary
    follow-up edits after human say-so
 
-First run is **baseline only** (pin SHA, no adopt list). Author the skill to
-Matt’s `write-a-skill` / `writing-great-skills` quality bar.
+First run is **baseline** (pin SHA). Brief is **Chinese** and must include
+per-skill comparison vs **local Rope targets** when no prior review range exists;
+optional suggested marks are OK. Not a bare SHA+name list and not a mass-adopt
+mandate. Author the skill to Matt’s `write-a-skill` / `writing-great-skills`
+quality bar.
 
 ## Goals
 
@@ -71,7 +74,9 @@ Matt’s `write-a-skill` / `writing-great-skills` quality bar.
   existing Rope skills only as **read context** when suggesting adapt targets;
   human for marks and close
 - Observable result:
-  - baseline or delta review artifact under `reviews/`
+  - baseline or delta review artifact under `reviews/` (**Chinese**; baseline
+    includes per-skill 对照 vs local Rope when no prior pin range; delta vs
+    last-reviewed SHA)
   - human marks recorded when provided
   - `last-reviewed-sha` advanced **only** on explicit close
   - product `skills/rope-*` unchanged by the harvest skill itself
@@ -85,7 +90,7 @@ Matt’s `write-a-skill` / `writing-great-skills` quality bar.
   - default full-repo scan ignoring correspondence
   - submodule as the pin mechanism
   - place skill under product `skills/` so `rope add` ships it
-  - treat first baseline as a mass adopt pass
+  - treat first baseline as a mass adopt mandate or empty SHA-only brief
 
 ## References
 
@@ -112,7 +117,7 @@ Matt’s `write-a-skill` / `writing-great-skills` quality bar.
   only
 - Risk: network fetch; writes outside repo under cache home path
 - Pass criteria: clone exists; `source.md` has last-reviewed-sha; baseline review
-  file exists with no adopt list
+  file exists in Chinese with per-skill local comparison (optional suggested marks OK)
 - Failure report: git stderr, path, network error class
 - Forbidden out-of-scope actions: push to upstream; modify `skills/rope-*`;
   install Matt skills into global agent dirs as part of harvest

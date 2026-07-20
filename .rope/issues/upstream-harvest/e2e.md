@@ -44,7 +44,7 @@ Command or Steps:
 Pass Criteria:
 - Local clone present
 - `last-reviewed-sha` set
-- Baseline review exists and has no adopt/adapt recommendation list
+- Baseline review exists (Chinese per-skill local comparison after E4 refine)
 - `skills/rope-*` unchanged by the harvest run
 Failure Report:
 - git/network errors; paths written; partial state
@@ -56,7 +56,7 @@ Result:
   (HTTPS + proxy 8118)
 - Tip pin: `9603c1cc8118d08bc1b3bf34cf714f62178dea3b`
 - Brief: `.rope/upstream/mattpocock-skills/reviews/2026-07-20-9603c1c-baseline.md`
-  (no adopt list; closed for E2 baseline)
+  (closed for E2 pin; later rewritten Chinese 对照版, user_passed E4)
 - `source.md` last-reviewed SHA set; product `skills/rope-*` untouched
 - Follow-up fix: allowlist path resolve nested `skills/<bucket>/<name>`;
   correspondence updated for upstream `to-spec`/`to-tickets` renames

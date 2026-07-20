@@ -48,14 +48,14 @@
 - Goal: Implement baseline workflow when last-reviewed-sha is empty, and the
   explicit close gate that writes SHA only on human close
 - Scope:
-  - baseline review artifact shape (no adopt list)
+  - baseline review artifact shape (Chinese; per-skill vs local Rope; optional suggested marks)
   - update `source.md` fields on close
   - abandoned review leaves SHA empty/unchanged
 - Matrix rows: Primary (baseline part); Empty last-reviewed-sha; Duplicate/idempotent close; Boundary (no advance without close)
 - Public behavior:
   - first run produces `reviews/*-baseline.md` (or equivalent naming)
   - after human close, `last-reviewed-sha` set to reviewed tip
-  - no adopt/adapt recommendation list on baseline
+  - baseline must not be empty SHA-only; optional suggested marks OK (E4 refined B1)
 - Tests:
   - fixture or dry narrative: empty SHA → baseline steps → close updates source.md
   - abandoned path does not write SHA
