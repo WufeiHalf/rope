@@ -102,9 +102,11 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - n/a
 Result:
-- blocked_on_user
-- Please read `.rope/upstream/mattpocock-skills/reviews/2026-07-20-9603c1c-baseline.md`
-  and say if format is usable for periodic harvest decisions
+- blocked_on_user（格式已按反馈加厚后重请确认）
+- 用户指出：baseline 不能只有 pin+名单；要有 skill 对照（有上次比上次，无则比本地）；中文
+- 已改 brief-template + SKILL，并重写
+  `reviews/2026-07-20-9603c1c-baseline.md` 为中文逐 skill 对照版
+- 请再读该 brief，确认是否可用
 
 ## E5 Product install surface unchanged
 

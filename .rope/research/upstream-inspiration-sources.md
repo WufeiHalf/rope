@@ -70,8 +70,10 @@ harvest is a separate maintenance concern for this repo.
   change is a **separate, usually lightweight edit** after human accept (same or
   later session: “apply brief item 2 to rope-grill”). Full rope-grill/shape is
   only for large semantic workflow shifts, not routine small upstream tweaks.
-- **B1**: First run is baseline only — pin current upstream SHA, write a short
-  baseline review note, no adopt list. Delta harvest starts on the next run.
+- **B1**: First run is baseline — pin current upstream SHA. Brief is **Chinese**
+  and must include per-skill comparison vs **local Rope targets** when no prior
+  review exists (not a bare SHA+name list). Delta runs compare vs last-reviewed
+  SHA. Optional suggested marks only; still no auto-edit of product skills.
 - **N1**: Maintenance skill path/name is
   `.agents/skills/upstream-harvest/` (not under product `skills/`, not `rope-*`).
 - **Quality bar**: Author `upstream-harvest` to satisfy Matt's skill-writing norms
