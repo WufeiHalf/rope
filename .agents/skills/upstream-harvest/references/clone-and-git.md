@@ -12,6 +12,11 @@ Upstream is not a Rope runtime or `rope add` dependency.
 | Default branch | `main` (from `source.md`) |
 | Local clone | `~/.cache/rope-upstream/mattpocock-skills` unless `source.md` overrides |
 | Reviewed pin | `last-reviewed-sha` in `.rope/upstream/mattpocock-skills/source.md` |
+| Skill files in upstream tree | Nested: `skills/<bucket>/<skill-name>/SKILL.md` (not repo-root dirs) |
+
+`allowlist-diff.sh` resolves correspondence skill names by finding
+`…/<skill-name>/SKILL.md` under the tip (then last) tree. Renamed upstream
+skills appear as `missing-*` until correspondence is updated.
 
 Expand `~` to the maintainer home. Do not invent a second cache root without
 updating `source.md`.

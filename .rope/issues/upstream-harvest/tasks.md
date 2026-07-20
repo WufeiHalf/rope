@@ -16,7 +16,7 @@
 
 ## Slice 1: Skill skeleton + state contract + authoring norms
 
-- Status: pending
+- Status: completed
 - Goal: Create user-invoked `upstream-harvest` skill package that points at
   `.rope/upstream/mattpocock-skills/` and meets write-a-skill / writing-great-skills
   structure (short SKILL.md, progressive disclosure, checkable criteria)
@@ -37,14 +37,14 @@
 - Implementation notes:
   - follow progressive disclosure; keep SKILL.md lean
   - optional `scripts/` only if deterministic git helpers clearly pay off
-- Verification: checklist + file layout review
-- Review: required
+- Verification: checklist + layout pass; commit `501ce0b`; not under `skills/`
+- Review: required → **APPROVE** (rope-reviewer)
 - Review reason: public maintenance contract and quality-bar skill shape
 - Stop conditions: skill path or product-vs-maintenance boundary unclear (already decided)
 
 ## Slice 2: Baseline branch + close gate mechanics
 
-- Status: pending
+- Status: completed
 - Goal: Implement baseline workflow when last-reviewed-sha is empty, and the
   explicit close gate that writes SHA only on human close
 - Scope:
@@ -61,14 +61,14 @@
   - abandoned path does not write SHA
 - Implementation notes:
   - clone may be created on baseline (network); document failure if unavailable
-- Verification: dry checklist + E2 live when gated
-- Review: required
+- Verification: dry Paths A–D + script `bash -n` + bad-URL fail; commit `3d80e77`
+- Review: required → **APPROVE** (rope-reviewer)
 - Review reason: pin semantics are easy to get wrong
 - Stop conditions: cannot define “reviewed tip” unambiguously (use fetched default-branch tip)
 
 ## Slice 3: Delta harvest brief + human marks + failure visibility
 
-- Status: pending
+- Status: completed
 - Goal: From last-reviewed-sha to current tip, produce allowlist-focused review
   brief with suggested marks; record human marks; never edit product skills;
   surface clone/fetch/allowlist failures clearly
@@ -90,7 +90,7 @@
 - Implementation notes:
   - read Rope targets only to phrase adapt suggestions, not to patch them
   - watch rows only when human names them
-- Verification: fixture/checklist + optional live delta after baseline
-- Review: required
+- Verification: dry Paths N/M/S/P/F/A1/I + allowlist-diff fixture smoke; commit `ae65d06`
+- Review: required → **APPROVE** (rope-reviewer)
 - Review reason: core harvest value and failure modes
 - Stop conditions: cannot access upstream history even with fixtures for offline structural tests

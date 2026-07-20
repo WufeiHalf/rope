@@ -143,11 +143,22 @@ if [[ ${#SKILLS[@]} -eq 0 ]]; then
   die "no high (or named-watch) skills parsed from $CORR"
 fi
 
-# Map skill name → path filter (Matt skill tree root)
-# Prefer <name>/ if tree exists at tip or last; also include bare SKILL path variants.
+# Map skill name → directory path in mattpocock/skills tree.
+# Upstream nests skills under skills/<bucket>/<name>/ (e.g. skills/engineering/tdd).
 path_for() {
-  local skill="$1"
-  echo "${skill}"
+  local skill="$1" found=""
+  found=$(git -C "$CLONE" ls-tree -r --name-only "$TIP" 2>/dev/null \
+    | grep -E "(^|/)${skill}/SKILL\.md$" | head -1 || true)
+  if [[ -z "$found" ]]; then
+    found=$(git -C "$CLONE" ls-tree -r --name-only "$LAST" 2>/dev/null \
+      | grep -E "(^|/)${skill}/SKILL\.md$" | head -1 || true)
+  fi
+  if [[ -n "$found" ]]; then
+    dirname "$found"
+  else
+    # Unresolved name (renamed/removed upstream) — surfaces as missing-*
+    echo "__missing__/${skill}"
+  fi
 }
 
 declare -a PATHS=()

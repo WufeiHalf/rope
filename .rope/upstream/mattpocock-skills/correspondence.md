@@ -8,8 +8,10 @@ Rows marked `watch` are recorded for optional named scans; `out` is ignored.
 | `grill-me` | `skills/rope-grill` | high | Core interview loop |
 | `grill-with-docs` | `skills/rope-grill` | high | Grill + durable docs |
 | `grilling` | `skills/rope-grill` | high | Shared grilling methodology |
-| `to-prd` | `skills/rope-shape` | high | Conversation → PRD |
-| `to-issues` | `skills/rope-shape` | high | PRD → vertical slices / issues |
+| `to-spec` | `skills/rope-shape` | high | Conversation → PRD/spec (upstream renamed from `to-prd`) |
+| `to-tickets` | `skills/rope-shape` | high | PRD → vertical slices / issues (upstream renamed from `to-issues`) |
+| `to-prd` | `skills/rope-shape` | out | Renamed upstream → `to-spec` (baseline 9603c1c) |
+| `to-issues` | `skills/rope-shape` | out | Renamed upstream → `to-tickets` (baseline 9603c1c) |
 | `setup-matt-pocock-skills` | `skills/rope-init` | high | Per-repo scaffold conventions; migrate stays separate |
 | `tdd` | `skills/rope-go` | high | TDD discipline inside go slice loop (not a standalone Rope skill) |
 | `triage` | _(none yet)_ | watch | Tracker intake state machine; not Rope's default path |
