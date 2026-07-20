@@ -22,7 +22,11 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - network; writing user global agent skill installs
 Result:
-- pending
+- agent_passed
+- SKILL.md + references (brief-template, clone-and-git, close-gate,
+  baseline-dry-narrative, delta-dry-narrative) + scripts present
+- `disable-model-invocation: true`; Baseline/Delta/close gate/A1/S1 present
+- Not under `skills/`; state dirs under `.rope/upstream/mattpocock-skills/`
 
 ## E2 Live baseline harvest (clone/fetch + pin SHA)
 
@@ -47,7 +51,15 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - push/modify GitHub upstream; `rope add` installs; editing product skills for “sync”
 Result:
-- pending
+- agent_passed
+- Clone: `~/.cache/rope-upstream/mattpocock-skills` via ensure-clone-and-tip
+  (HTTPS + proxy 8118)
+- Tip pin: `9603c1cc8118d08bc1b3bf34cf714f62178dea3b`
+- Brief: `.rope/upstream/mattpocock-skills/reviews/2026-07-20-9603c1c-baseline.md`
+  (no adopt list; closed for E2 baseline)
+- `source.md` last-reviewed SHA set; product `skills/rope-*` untouched
+- Follow-up fix: allowlist path resolve nested `skills/<bucket>/<name>`;
+  correspondence updated for upstream `to-spec`/`to-tickets` renames
 
 ## E3 Delta path smoke (no new commits or fixture)
 
@@ -68,7 +80,10 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - forcing unrelated product skill edits
 Result:
-- pending
+- agent_passed
+- `allowlist-diff.sh` with last==tip → `MATERIAL=no`, COMMITS=0
+- After path-resolve fix + correspondence rename: all C1 high skills
+  `unchanged` / no missing; no adopt items invented; pin not advanced by script
 
 ## E4 Human judgment: brief is usable
 
@@ -87,7 +102,9 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - n/a
 Result:
-- pending
+- blocked_on_user
+- Please read `.rope/upstream/mattpocock-skills/reviews/2026-07-20-9603c1c-baseline.md`
+  and say if format is usable for periodic harvest decisions
 
 ## E5 Product install surface unchanged
 
@@ -107,4 +124,6 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - publishing/npm
 Result:
-- pending
+- agent_passed
+- `skills/` contains only rope-* product skills; upstream-harvest only under
+  `.agents/skills/upstream-harvest/`
