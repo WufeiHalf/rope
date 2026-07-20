@@ -32,6 +32,8 @@ on baseline (B1). Delta harvest starts on the next run after close.
 
 ## Allowlist snapshot (C1 high)
 
+Names only — not recommendations.
+
 | Matt skill | Rope target | Notes |
 | --- | --- | --- |
 | …from correspondence.md high rows… | … | optional one-liner |
@@ -45,6 +47,19 @@ _(none on baseline — close only pins SHA)_
 - [ ] Human closed batch
 - last-reviewed-sha after close: <tip or unchanged if abandoned>
 ```
+
+### Baseline structural rules (checkable)
+
+| Rule | Required |
+| --- | --- |
+| Filename ends with `-baseline.md` | yes |
+| Header `Reviewed tip` is full SHA from fetch | yes |
+| Range starts with `none (baseline)` | yes |
+| **No** section titled like “Suggested marks”, “Adopt list”, or per-skill `Suggested mark:` rows | **forbid** |
+| **No** `adopt` / `adapt` recommendation list (table or bullets) | **forbid** |
+| Allowlist snapshot may list correspondence **names** only | yes |
+| `Status: open` until human close | yes |
+| Product `skills/rope-*` not edited when writing this brief | yes |
 
 **Baseline forbid:** adopt/adapt suggestion lists, product skill edits, advancing
 SHA before human close.

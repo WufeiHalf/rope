@@ -20,6 +20,7 @@ product skill, not vendor merge, not `rope-migrate-docs`.
 | Review briefs | [`.rope/upstream/mattpocock-skills/reviews/`](../../../.rope/upstream/mattpocock-skills/reviews/) |
 
 Research context (optional): `.rope/research/upstream-inspiration-sources.md`.
+GitHub network notes (this machine): `.rope/research/github-access.md`.
 Language: `.rope/CONTEXT.md` term **Upstream Harvest**.
 
 ## Decisions (do not re-litigate)
@@ -35,26 +36,66 @@ Language: `.rope/CONTEXT.md` term **Upstream Harvest**.
 
 ## Branch
 
-Read `last-reviewed-sha` from `source.md`:
+Read `last-reviewed-sha` from `source.md` (the line
+`Last reviewed SHA: …`). Treat as **empty** when the value is blank, missing,
+or the placeholder `_(none yet …)_` / `none` / `—`.
 
 | Condition | Branch |
 | --- | --- |
-| Empty / none | **Baseline** |
-| Present | **Delta** |
+| Empty / none | **Baseline** (not an error) |
+| Present (full git SHA) | **Delta** |
 
-### Baseline (skeleton — Slice 2 fleshes execution)
+### Baseline
 
-1. Ensure machine-local clone exists and is fetched (see [references/clone-and-git.md](references/clone-and-git.md)).
-2. Resolve reviewed tip = default-branch tip after fetch.
-3. Write a baseline brief under `reviews/` using [references/brief-template.md](references/brief-template.md) — **no adopt/adapt recommendation list**.
-4. Present the brief. Wait for human **close** (or abandon).
-5. On close only: set `last-reviewed-sha` (and timestamp) in `source.md` to that tip.
+Empty `last-reviewed-sha` means first pin — **not** a failure and **not** a mass
+adopt pass (**B1**). Full mechanics:
+[references/clone-and-git.md](references/clone-and-git.md),
+[references/brief-template.md](references/brief-template.md),
+[references/close-gate.md](references/close-gate.md).
+Offline dry path: [references/baseline-dry-narrative.md](references/baseline-dry-narrative.md).
 
-**Done when:** baseline brief exists; on close, SHA equals the reviewed tip; on abandon, SHA still empty/unchanged; `skills/rope-*` untouched.
+1. **Read state.** Load URL, default branch, clone path, and last-reviewed fields
+   from `source.md`. Confirm branch = Baseline (empty SHA).
+2. **Ensure machine-local clone.** Default path
+   `~/.cache/rope-upstream/mattpocock-skills` (expand `~`; honor `source.md`
+   override). Prefer the helper
+   [`scripts/ensure-clone-and-tip.sh`](scripts/ensure-clone-and-tip.sh), or follow
+   clone-and-git steps. Prefer `git@github.com:mattpocock/skills.git` or HTTPS
+   with the proxy notes in github-access / clone-and-git.
+3. **Fetch.** Update remotes. On clone/fetch failure: **stop** with explicit
+   reason (git stderr class, path, network). Never fake success or invent a tip.
+4. **Resolve reviewed tip.** After a successful fetch, tip =
+   `origin/<default-branch>` object name (full SHA). That is the only meaning of
+   “reviewed tip” for baseline. Shortsha = first 7 hex chars.
+5. **Write baseline brief** under
+   `.rope/upstream/mattpocock-skills/reviews/` named
+   `YYYY-MM-DD-<shortsha>-baseline.md` using the baseline body in
+   brief-template. Include: upstream URL, full tip, range
+   `none (baseline) → <tip>`, clone path, C1 allowlist snapshot (names only),
+   `Status: open`. **No** adopt/adapt/ignore/watch recommendation list.
+6. **Present and wait.** Show the brief path and tip. Wait for human
+   **close** or **abandon** (see close-gate phrases). Do not advance SHA yet.
+7. **Close only:** set brief `Status: closed` + closed timestamp; update
+   `source.md` `Last reviewed SHA` to the **full** reviewed tip and
+   `Last reviewed at` to a timestamp. Confirm no `skills/rope-*` edits.
+8. **Abandon:** leave `last-reviewed-sha` empty/unchanged; brief stays open or
+   marked abandoned; do not delete the draft unless human asks.
+
+**Idempotency (baseline):**
+
+- Re-run while SHA still empty and a baseline brief for the **same tip** already
+  exists: reuse that brief; do not open a second noisy file.
+- Re-close of an already-closed baseline for the same tip: no SHA churn; no
+  second brief.
+- If tip moved upstream before first close: update or supersede the open baseline
+  brief to the new tip; still no adopt list; SHA remains empty until close.
+
+**Done when:** baseline brief exists; on close, `Last reviewed SHA` equals the
+reviewed tip; on abandon, SHA still empty/unchanged; `skills/rope-*` untouched.
 
 ### Delta (skeleton — Slice 3 fleshes execution)
 
-1. Ensure clone is fetched; resolve current tip.
+1. Ensure clone is fetched; resolve current tip (same definition as baseline).
 2. If tip equals `last-reviewed-sha`, report clean no-op (no fake work). Do not invent items.
 3. Otherwise diff **C1 high** allowlist paths only between last-reviewed SHA and tip.
 4. Write a delta brief: summary, per-skill changes, suggested mark (`adopt` / `adapt` / `ignore` / `watch`), Rope target from correspondence. Suggestions are proposals only.
@@ -65,7 +106,7 @@ Read `last-reviewed-sha` from `source.md`:
 
 ## Failure visibility
 
-Stop with an explicit reason — never fake “up to date”:
+Stop with an explicit reason — never fake “up to date” or invent a tip:
 
 - missing/unreadable clone path or failed fetch / no network when fetch required
 - corrupt or unknown `last-reviewed-sha` → repair/reset guidance (no silent invent)
