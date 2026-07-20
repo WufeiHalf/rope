@@ -74,18 +74,54 @@ git -C <clone-path> rev-parse "origin/<default-branch>"
 ## Diff scope (C1) — delta only
 
 Default: only paths for correspondence rows with interest `high`
-(typically each Matt skill dir: `<skill>/SKILL.md` and that skill’s tree).
+(typically each Matt skill dir: `<skill>/` tree root, including `SKILL.md` and
+references under that skill).
+
+Current C1 high names (from correspondence — re-read file each run):
+
+- `grill-me`, `grill-with-docs`, `grilling`
+- `to-prd`, `to-issues`
+- `setup-matt-pocock-skills`
+- `tdd`
+
+Path filter per skill: the tree path `<skill>` (git pathspec). Do not scan
+`watch` or `out` unless the human **names** a watch skill for this run.
+
+Prefer the deterministic helper:
 
 ```bash
-# Illustrative — paths derived from correspondence high rows
+.agents/skills/upstream-harvest/scripts/allowlist-diff.sh \
+  --clone <clone-path> \
+  --last <last-reviewed-sha> \
+  --tip <tip-sha> \
+  --correspondence .rope/upstream/mattpocock-skills/correspondence.md \
+  [--named-watch triage,prototype]
+```
+
+Machine-readable output includes `MATERIAL=yes|no`, `COMMITS=`,
+`MISSING_AT_TIP=`, per-skill `STATUS=`, and a filtered diff. Exit `2` means bad
+or unknown last SHA (repair guidance on stderr); exit `3` means clone/tip
+problem.
+
+Illustrative raw git (equivalent path filters):
+
+```bash
 git -C <clone-path> log --oneline <last>..<tip> -- <allowlist paths…>
 git -C <clone-path> diff <last> <tip> -- <allowlist paths…>
+git -C <clone-path> cat-file -t <last-reviewed-sha>   # must print: commit
 ```
 
 Do **not** default to full-repo `git log` / `git diff` without path filters.
 `watch` rows only when the human names them. `out` rows never scanned.
 **Baseline** does not run adopt-oriented diffs; optional allowlist **snapshot**
 of skill names from correspondence only.
+
+### Delta preflight
+
+1. Fetch (required when claiming currency).
+2. Tip = `rev-parse origin/<default-branch>`.
+3. If `last-reviewed-sha` == tip → clean no-op (no invent items; no SHA write).
+4. Else validate last SHA is a commit in the clone; then allowlist-diff.
 
 ## Failure modes (must surface)
 
@@ -94,11 +130,14 @@ of skill names from correspondence only.
 | No network / proxy down / fetch fails | **Stop**; report git stderr class + path; do **not** claim up to date; do **not** write tip into `source.md` |
 | Clone path unreadable / not a git dir after failed clone | **Stop**; report path |
 | Origin URL points at a different repository | **Stop**; ask human |
-| `last-reviewed-sha` not in clone (delta) | **Stop**; suggest re-baseline or repair — no silent invent |
-| Allowlist path absent at tip (delta) | List in brief under missing paths |
+| `last-reviewed-sha` corrupt (not a SHA) | **Stop**; repair `source.md` or re-baseline after human say-so — no silent invent |
+| `last-reviewed-sha` not a commit in clone (delta) | **Stop**; `git cat-file` / re-fetch / re-baseline guidance — no silent invent |
+| Allowlist path absent at tip (delta) | **List** in brief under “Paths missing upstream”; not silent skip-all |
+| Tip equals last (delta) | Clean no-op report; not a failure |
 
-Failed clone/fetch is never a successful baseline. Partial state allowed only as
-an open draft brief that does **not** advance SHA.
+Failed clone/fetch is never a successful baseline **or** a successful “no
+changes” delta. Partial state allowed only as an open draft brief that does
+**not** advance SHA.
 
 ## Forbidden
 

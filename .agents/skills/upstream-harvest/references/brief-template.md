@@ -77,31 +77,74 @@ SHA before human close.
 
 ### `<matt-skill>`
 
-- Rope target: `skills/rope-…` (from correspondence)
-- Change summary: <what moved in SKILL.md / references>
+- Rope target: `skills/rope-…` or `_(none yet)_` (from correspondence)
+- Change summary: <what moved in SKILL.md / references; or "unchanged">
 - Suggested mark: adopt | adapt | ignore | watch
-- Rationale: <one or two sentences>
+- Rationale: <one or two sentences; proposals only>
 - Human mark: _(pending)_
+
+_(Prefer one subsection per **changed** or **missing** high skill.
+Unchanged high skills may be omitted or listed in a single “Unchanged” line.)_
 
 ## Paths missing upstream
 
-- <allowlist path>: not present at tip — listed, not silently skipped
+- `<matt-skill>` (`<path>`): not present at tip — listed, not silently skipped
+- _(or “none” if every high path exists at tip)_
 
 ## Watch (only if human named)
 
-_(omit section if unused)_
+_(omit section entirely if the human did not name watch rows for this run)_
+
+### `<named-watch-skill>`
+
+- Rope target: …
+- Change summary: …
+- Suggested mark: watch | ignore | …
+- Human mark: _(pending)_
 
 ## Human marks (batch)
 
 | Item | Suggested | Human | Follow-up |
 | --- | --- | --- | --- |
-| … | adapt | _(pending)_ | ordinary edit after say-so; not this skill |
+| … | adapt | _(pending)_ | ordinary edit after say-so; **not** this skill |
 
 ## Close
 
 - [ ] Human closed batch
-- last-reviewed-sha after close: <reviewed tip>
+- last-reviewed-sha after close: <reviewed tip full SHA, or unchanged if abandoned>
 ```
+
+### Delta structural rules (checkable)
+
+| Rule | Required |
+| --- | --- |
+| Filename `YYYY-MM-DD-<shortsha>.md` (**not** `*-baseline.md`) | yes |
+| Header `Reviewed tip` is full SHA of fetched tip | yes |
+| Range is `<last-reviewed-sha> → <tip>` (both full SHAs) | yes |
+| Summary states material allowlist changes yes/no | yes |
+| Suggested marks are labeled **Suggested** (proposals only) | yes |
+| Human mark fields start pending until human provides them | yes |
+| Missing allowlist paths listed (or explicit “none”) — not silent skip-all | yes |
+| Watch section only if human named watch rows | yes |
+| **No** product `skills/rope-*` edits when writing or closing this brief | **forbid** |
+| **No** advancing SHA before human close | **forbid** |
+| Clean no-op (tip == last): **no** invent adopt list; optional skip file | yes |
+
+**Delta forbid:** auto-editing product skills, advancing SHA without close,
+full-repo scan as default, treating suggested marks as applied work.
+
+### Clean no-op report (tip == last-reviewed-sha)
+
+Do **not** open a noisy empty delta brief. Report to the human, e.g.:
+
+```text
+Delta no-op: origin/<branch> tip equals last-reviewed-sha (<full sha>).
+No material C1 allowlist changes. Pin unchanged (close not required).
+skills/rope-* not touched.
+```
+
+If a brief is still written, it must say material changes **no** and contain
+**zero** invented adopt/adapt items.
 
 ## Marks vocabulary
 
@@ -113,3 +156,5 @@ _(omit section if unused)_
 | `watch` | Interesting later; not acting now |
 
 Harvest **never** applies marks by editing `skills/rope-*` (A1).
+Suggested marks on the brief are **proposals only** until the human records a
+human mark; even then, product edits are a separate ordinary follow-up.

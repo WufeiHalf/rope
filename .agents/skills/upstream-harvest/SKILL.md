@@ -93,24 +93,115 @@ Offline dry path: [references/baseline-dry-narrative.md](references/baseline-dry
 **Done when:** baseline brief exists; on close, `Last reviewed SHA` equals the
 reviewed tip; on abandon, SHA still empty/unchanged; `skills/rope-*` untouched.
 
-### Delta (skeleton — Slice 3 fleshes execution)
+### Delta
 
-1. Ensure clone is fetched; resolve current tip (same definition as baseline).
-2. If tip equals `last-reviewed-sha`, report clean no-op (no fake work). Do not invent items.
-3. Otherwise diff **C1 high** allowlist paths only between last-reviewed SHA and tip.
-4. Write a delta brief: summary, per-skill changes, suggested mark (`adopt` / `adapt` / `ignore` / `watch`), Rope target from correspondence. Suggestions are proposals only.
-5. Record human marks on the brief when given.
-6. On explicit close only: advance `last-reviewed-sha` to the tip that was reviewed (see [references/close-gate.md](references/close-gate.md)).
+Present `last-reviewed-sha` means compare pin → current tip. Full mechanics:
+[references/clone-and-git.md](references/clone-and-git.md),
+[references/brief-template.md](references/brief-template.md),
+[references/close-gate.md](references/close-gate.md).
+Offline dry path: [references/delta-dry-narrative.md](references/delta-dry-narrative.md).
 
-**Done when:** brief (or clean no-op report) exists; marks recorded if human provided them; SHA advanced **iff** human closed; product skills unchanged by this skill.
+1. **Read state.** Load URL, default branch, clone path, and full
+   `last-reviewed-sha` from `source.md`. Confirm branch = Delta (SHA present).
+2. **Validate pin shape.** If the value is not a plausible full git SHA
+   (40 hex) — corrupt / placeholder left in place — **stop** with repair
+   guidance (see Failure visibility). Do not invent a pin.
+3. **Ensure machine-local clone + fetch.** Same helper and failure rules as
+   baseline ([`scripts/ensure-clone-and-tip.sh`](scripts/ensure-clone-and-tip.sh)).
+   On missing clone / fetch fail / no network: **stop** — never claim “up to
+   date” from a stale worktree.
+4. **Resolve tip.** After successful fetch, tip =
+   `origin/<default-branch>` full SHA (same definition as baseline).
+5. **Validate pin exists in clone.**
+   `git -C <clone> cat-file -t <last-reviewed-sha>` must be `commit`.
+   If unknown (rewritten history, wrong clone, typo): **stop** with repair/
+   re-baseline guidance — no silent invent, no partial fake brief that pretends
+   the range is known.
+6. **Clean no-op.** If tip **equals** `last-reviewed-sha`:
+   - Report cleanly: no material allowlist changes; pin already current.
+   - Do **not** invent adopt/adapt items.
+   - Do **not** write a noisy empty delta brief (optional one-line note is OK).
+   - Do **not** advance SHA (close not required for no-op; re-close is a no-op).
+   - Stop. Done.
+7. **Allowlist diff (C1 high only).** Diff **only** correspondence rows with
+   interest `high` between last-reviewed and tip. Path filter = each Matt skill
+   tree root (`<skill>/…`). Prefer helper
+   [`scripts/allowlist-diff.sh`](scripts/allowlist-diff.sh):
+
+   ```bash
+   .agents/skills/upstream-harvest/scripts/allowlist-diff.sh \
+     --clone <clone-path> --last <last-reviewed-sha> --tip <tip-sha> \
+     [--correspondence .rope/upstream/mattpocock-skills/correspondence.md] \
+     [--named-watch skill1,skill2]   # only if human named watch rows
+   ```
+
+   - Do **not** full-repo scan by default.
+   - `watch` rows only when the human **names** them for this run.
+   - `out` rows never scanned.
+   - Allowlist path missing at tip and/or last: **list** under brief
+     “Paths missing upstream” — not silent skip-all.
+8. **Write delta brief** under
+   `.rope/upstream/mattpocock-skills/reviews/` named
+   `YYYY-MM-DD-<shortsha>.md` (shortsha of **tip**) using the delta body in
+   brief-template. Include:
+   - summary (commits touching allowlist, material yes/no, short attention note)
+   - per-skill changes for high rows that moved (or explicit “unchanged” only if
+     useful — prefer listing **changed** + **missing**)
+   - each item: Rope target from correspondence, change summary, **Suggested
+     mark** (`adopt` / `adapt` / `ignore` / `watch`), rationale
+   - **Suggested marks are proposals only** — not applied edits
+   - human mark fields pending; `Status: open`
+   - never edit `skills/rope-*` while writing the brief (**A1**)
+9. **Present and wait.** Show brief path, range, material yes/no. Record human
+   marks on the brief when given (update Human mark fields / batch table).
+   Wait for **close** or **abandon** (close-gate phrases).
+10. **Close only:** set brief `Status: closed` + closed timestamp; update
+    `source.md` `Last reviewed SHA` to the **full reviewed tip** (the tip in the
+    brief header) and `Last reviewed at`. Confirm no `skills/rope-*` edits.
+11. **Abandon:** leave `last-reviewed-sha` unchanged; brief stays open or marked
+    abandoned; do not delete draft unless human asks.
+
+**Suggesting marks (proposals only):**
+
+| Signal | Lean toward |
+| --- | --- |
+| Small wording/structure improvement that fits existing Rope skill | `adapt` or `adopt` |
+| Idea useful but Rope-shaped differently | `adapt` |
+| Noise / already covered / wrong product surface | `ignore` |
+| Interesting later, not acting now | `watch` |
+
+Read Rope targets **only** as phrasing context for suggestions. Never patch them
+in this skill. Large semantic shifts → note “consider a Rope issue later”; still
+do not open grill/shape automatically.
+
+**Idempotency (delta):**
+
+- Re-run when tip still equals `last-reviewed-sha`: clean no-op; no fake adopt
+  list; SHA stable.
+- Re-run while an **open** delta brief already exists for the **same tip**: reuse
+  / refresh that brief; do not spawn a second noisy file for the same tip.
+- Re-close of an already-closed delta for the same tip: no SHA churn.
+- Tip moved while a prior delta brief is still open: supersede/update the open
+  brief to the new tip range; SHA unchanged until close.
+
+**Done when:** clean no-op report **or** delta brief exists; human marks recorded
+if provided; SHA advanced **iff** human closed; `skills/rope-*` untouched by
+this skill.
 
 ## Failure visibility
 
-Stop with an explicit reason — never fake “up to date” or invent a tip:
+Stop with an explicit reason — never fake “up to date” or invent a tip/pin:
 
-- missing/unreadable clone path or failed fetch / no network when fetch required
-- corrupt or unknown `last-reviewed-sha` → repair/reset guidance (no silent invent)
-- allowlist path missing upstream → list in brief; do not silent skip-all
+| Situation | Behavior |
+| --- | --- |
+| Missing / unreadable clone path | Stop; report path |
+| Failed fetch / no network when fetch required | Stop; git stderr class + path; do **not** claim up to date |
+| Corrupt `last-reviewed-sha` (not 40-hex / garbage) | Stop; repair: fix `source.md` or re-baseline after human say-so; no silent invent |
+| Unknown SHA (not a commit in clone after fetch) | Stop; repair: confirm clone URL, `git cat-file -t <sha>`, or clear pin and re-baseline with human close; no silent invent |
+| Allowlist path missing upstream | List in delta brief “Paths missing upstream”; do **not** silent skip-all |
+| Origin URL points at a different repository | Stop; ask human |
+
+Failed fetch is never a successful “no changes” delta.
 
 ## Forbidden shortcuts
 

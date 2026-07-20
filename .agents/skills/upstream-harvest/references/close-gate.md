@@ -27,12 +27,26 @@ the brief first.
 1. Ensure the brief reflects human intent:
    - **Baseline:** no adopt/adapt list; close only pins SHA (**B1**).
    - **Delta:** human marks recorded when provided (including explicit ignores).
+     Suggested marks alone are **not** human marks — copy human decisions into
+     `Human mark:` fields and the batch table before close when the human gave
+     them. If the human closes without per-item marks, record that explicitly
+     (e.g. human mark `_(none — closed without item marks)_`) rather than
+     pretending suggested == human.
 2. Set brief `Status: closed` and `Closed at: <ISO date or local timestamp>`.
 3. Update `.rope/upstream/mattpocock-skills/source.md`:
    - `Last reviewed SHA: <full tip that was reviewed>`
    - `Last reviewed at: <timestamp>`
 4. Confirm out loud: new SHA, brief path, and that **no** `skills/rope-*` files
    were edited by this skill.
+
+### Delta close specifics
+
+- Advance pin to the **reviewed tip** in the brief header (fetched default-branch
+  tip at brief time), not to an intermediate commit, not to `last` again.
+- Clean no-op delta (tip already equals pin): **no close required**; if human
+  still says “close”, leave SHA unchanged (idempotent).
+- Recording marks is **not** the same as absorbing them: product edits remain a
+  separate ordinary follow-up (**A1**).
 
 ### `source.md` field shapes after close
 
@@ -60,6 +74,9 @@ and `_(none)_` only on successful close.
 | Re-run baseline while SHA still empty, **tip moved** | Supersede/update open brief to new tip; SHA still empty until close |
 | Close after abandon of earlier open brief | Allowed: close the brief that matches the tip being pinned; update `source.md` once |
 | Delta re-run when tip still equals `last-reviewed-sha` | Clean no-op report; do not open a noisy empty adopt list; do not change SHA |
+| Delta re-run while open brief exists for **same tip** | Reuse/refresh that brief; no second file for same tip |
+| Delta tip moved before close of open brief | Supersede/update open brief to new tip; SHA unchanged until close |
+| Delta close after human marks recorded | SHA → reviewed tip; marks stay on brief; product skills still untouched |
 
 ## After close (A1)
 
