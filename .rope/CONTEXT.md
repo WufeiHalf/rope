@@ -35,3 +35,7 @@ _Avoid_: auto-fix, retry (too generic)
 **Escalation**:
 The act of the verify model deciding on its own that a finding needs deeper inspection — either by reading more itself or by dispatching a read-only leaf (prefer `verify-inspector` / `explore`). Driven by the model's judgment, not by mechanical trigger rules.
 _Avoid_: upgrade, promote (mechanical connotation)
+
+**Upstream Harvest**:
+A maintenance workflow for this Rope repository that compares pinned external inspiration sources (initially Matt Pocock skills, optionally Trellis) against the last reviewed revision, produces a human-facing review brief of idea/reference changes, and only after human accept/adapt/ignore decisions lands changes into Rope-native skills or `.rope/` docs. Not a product skill shipped by `rope add`, and not automatic vendor merge.
+_Avoid_: sync (ambiguous with file copy), submodule update (mechanism only), migrate-docs (one-time adoption)

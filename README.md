@@ -29,19 +29,19 @@ issue shaping, TDD execution, and closeout.
 Install the bundled skills into the default agent skills directory:
 
 ```bash
-npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add
+npx git+ssh://git@github.com/WufeiHalf/rope.git add
 ```
 
 Install to a project-local skills directory:
 
 ```bash
-npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target ./.agents/skills
+npx git+ssh://git@github.com/WufeiHalf/rope.git add --target ./.agents/skills
 ```
 
 Install to a custom directory:
 
 ```bash
-npx git+ssh://git@git.haizhi.com:10022/wufei/rope-skill.git add --target /path/to/skills
+npx git+ssh://git@github.com/WufeiHalf/rope.git add --target /path/to/skills
 ```
 
 `rope add` copies bundled skills and overwrites bundled files.

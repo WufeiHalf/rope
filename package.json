@@ -4,7 +4,7 @@
   "description": "Lightweight repo-local coding harness skills for agentic coding tools.",
   "repository": {
     "type": "git",
-    "url": "ssh://git@git.haizhi.com:10022/wufei/rope-skill.git"
+    "url": "git@github.com:WufeiHalf/rope.git"
   },
   "bin": {
     "rope": "./bin/rope.js"
