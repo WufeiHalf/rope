@@ -76,8 +76,10 @@ Read first:
 - relevant `skills/rope-*` targets named by correspondence
 
 Verify with:
-- Unknown — maintenance skill not implemented yet; human review of harvest brief
+- Structural: `.agents/skills/upstream-harvest/SKILL.md` present; not under `skills/`
+- Human review of the harvest brief under `.rope/upstream/mattpocock-skills/reviews/`
 
 Notes:
-- Not a product skill shipped by `rope add`
+- Skill path: `.agents/skills/upstream-harvest/` (user-invoked; not product `skills/`)
+- Not shipped by `rope add`
 - Pin is machine-local clone + last-reviewed SHA (no submodule)
