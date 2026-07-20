@@ -1,6 +1,6 @@
 ---
 name: rope-go
-description: Executes a .rope issue package slice by slice with TDD, verification, review gates, commit discipline, and classified E2E execution. Use after rope-shape has created a .rope issue directory with prd.md, tasks.md, and e2e.md.
+description: Executes a .rope issue package slice by slice with acceptance-driven TDD, verification, review gates, commit discipline, and classified E2E execution. Use after rope-shape has created a .rope issue directory with prd.md, tasks.md, and e2e.md.
 ---
 
 # Rope Go
@@ -15,6 +15,9 @@ For review gates, fix-round limits, leaf brief contract, E2E statuses, commit
 rules, and overall review checklist, read
 [references/execution-rules.md](references/execution-rules.md).
 
+For the red→green playbook, anti-patterns, and mocking rules, read
+[references/tdd.md](references/tdd.md).
+
 ## Startup Checks
 
 1. Confirm the target issue directory.
@@ -22,13 +25,26 @@ rules, and overall review checklist, read
    - `.rope/CONTEXT.md`
    - `.rope/routes.md`
    - referenced `.rope/adr/`, `.rope/research/`, `.rope/specs/`
-   - `.rope/issues/<issue>/prd.md`
+   - `.rope/issues/<issue>/prd.md` (Behavior Contract, **Testing Decisions / seams**)
    - `.rope/issues/<issue>/tasks.md`
    - `.rope/issues/<issue>/e2e.md`
 3. Inspect git status and avoid unrelated dirty files.
-4. Confirm every slice has status, behavior matrix coverage, verification, and review mode.
+4. Confirm every slice has status, behavior matrix coverage, verification,
+   review mode, **Public behavior**, and **Blocked by** when the package uses them.
 5. Confirm every `agent-with-gate`, `user`, and `not-run` validation has a shape-time gate decision.
 6. Soft-load harness presets if present (`~/.config/rope/harness/<host>.json`). Prefer named `rope-*` agents. Missing presets → record `preset_missing` and continue (no hard block). See execution-rules.
+
+## Acceptance-driven TDD (default for code slices)
+
+Default path for slices that change runtime behavior or tests:
+
+1. **Acceptance** — slice `Public behavior` + owned Matrix rows (human-language).
+2. **Red** — automated spec at a **shape-confirmed seam** only; run and capture failure.
+3. **Green** — minimal implementation; re-run until green.
+4. **Next acceptance** in the same slice — repeat (no bulk-write-all-tests-first).
+
+Docs-only / no production code: brief sets `TDD: waived (docs-only)` with another
+verification method. Full rules: [references/tdd.md](references/tdd.md).
 
 ## Slice Loop (parent owns)
 
@@ -46,13 +62,23 @@ Schedule from `tasks.md` **Blocked by** edges when present:
 For each slice selected to run:
 
 1. Set slice status to `in_progress`.
-2. **Spawn implementer leaf** with a self-contained brief (slice goal, matrix rows, acceptance criteria, artifact paths, TDD expectation, Blocked by context). Prefer `rope-implementer` when available.
+2. **Spawn implementer leaf** with a self-contained brief that includes the
+   **TDD hard fields** in [execution-rules.md](references/execution-rules.md)
+   (acceptance, seams from PRD, red/green commands, anti-pattern constraints,
+   docs-only waiver if any). Prefer `rope-implementer` when available.
 3. From the leaf **summary + paths/diff** (not full traces by default):
-   - confirm tests/verification ran
-   - confirm the slice committed independently (or commit if the leaf returned a ready diff and host policy requires parent commit — prefer leaf commits when the host allows)
+   - **Acceptance alignment:** tests/names match `Public behavior` / matrix rows
+   - **Red evidence** on code-bearing slices (command + failure signal) — missing
+     red → implementation miss → re-brief (unless docs-only waiver)
+   - **Green evidence** and seam ∈ PRD Testing Decisions
+   - confirm the slice committed independently (or commit if the leaf returned a
+     ready diff and host policy requires parent commit — prefer leaf commits when
+     the host allows)
 4. Update `tasks.md` with status and verification result from leaf evidence.
 5. **Review (parent dispatches):**
    - `Review: required` → parent spawns a **reviewer leaf** (prefer `rope-reviewer`, else generic read-only worker). Parent records the verdict in `tasks.md`.
+   - Reviewer must apply [references/tdd.md](references/tdd.md) anti-patterns and
+     acceptance alignment, not only “does it compile.”
    - `Review: self-check` → parent self-reviews unless the actual diff touches a high-risk boundary (then upgrade to required).
    - upgrade to required when public interface, external system, auth, persistence, routing, runtime wiring, or E2E-critical behavior is touched
    - **Do not** instruct the implementer leaf to spawn a review subagent. Nested spawn is forbidden.
@@ -67,7 +93,7 @@ When a leaf fails, drifts, or review rejects:
 1. Parent judges from **summary + artifacts** (not full leaf traces by default).
 2. Classify the failure:
    - **Design / requirements / contract defect** → **Human Escalation Stop** immediately. Do not thrash with more implement rounds.
-   - **Implementation miss** → rewrite a tighter brief (pin the missed decision) and re-spawn implementer leaf.
+   - **Implementation miss** (including green-without-red, wrong seam, tautological tests) → rewrite a tighter brief (pin the missed decision) and re-spawn implementer leaf.
 3. Count automated fix rounds **per problem**. Max **2**. On the third need → **Human Escalation Stop**: short precise problem statement to the user; wait.
 4. If more facts are required before re-briefing, spawn an **explore** leaf first, then re-brief — do not dump large greps into parent context.
 
@@ -81,20 +107,25 @@ If the plan is incomplete or wrong:
 4. Commit the plan/doc adjustment separately when it changes tracked docs.
 5. Continue unless it triggers a human gate or Human Escalation Stop.
 
-## Overall Verification
+## Overall Verification (assembled behavior)
 
-After all slices pass review:
+After all slices pass review, prefer **behavior acceptance of the whole issue**
+over re-running every slice unit test already proven green:
 
-1. Run full verification defined by the issue (prefer implementer/explore leaf for noisy test runs when helpful; parent may run short commands).
-2. Check Behavior Matrix coverage: every applicable row has test, smoke, or explicit waiver.
-3. Execute classified E2E items from `e2e.md`:
+1. Spot-check only if slice evidence is missing or suspicious; do not ritualistically
+   replay the full unit suite when red/green logs already exist for each slice.
+2. Check Behavior Matrix coverage: every applicable row has a real test/smoke/waiver
+   **and** still makes sense for the assembled change.
+3. Execute classified E2E items from `e2e.md` (primary acceptance net for “slices
+   green but product broken”):
    - `agent`: execute now and record result
-   - `agent-with-gate` with `Gate Decision: approved`: execute the approved action without asking again, choosing concrete commands as needed
+   - `agent-with-gate` with `Gate Decision: approved`: execute the approved action without asking again
    - `agent-with-gate` with `Gate Decision: skipped`: do not execute; record `skipped_by_user_at_shape`
    - `agent-with-gate` with missing or stale approval: stop and ask only if the action, scope, risk, environment, or target resource changed
    - `user`: leave clear user validation steps and wait for user-reported result
    - `not-run`: record accepted waiver reason
-4. Run overall review against PRD, tasks, matrix coverage, E2E results, and refs.
+4. Run overall review against PRD Behavior Contract, public behavior, matrix, E2E
+   results, and refs — **does the integrated behavior hold?**
 5. Fix findings via course-correction (implementer leaf), not open-ended parent self-edit loops. Respect the 2-round Human Escalation Stop.
 6. Stop with final status and pending user validations. Do **not** recommend `rope-finish`. Hand off to issue-level verify in the **same parent session**:
    - recommended skill: `$rope-verify`
@@ -110,6 +141,7 @@ If the host cannot spawn workers at all:
 - Record the degrade mode in `tasks.md`.
 - Still forbid fictional nested orchestration.
 - Still apply Human Escalation Stop after 2 failed fix rounds / design defects.
+- Still require red-before-green evidence when the parent self-implements code.
 
 ## Stop Conditions
 
@@ -126,7 +158,7 @@ If the host cannot spawn workers at all:
 Report:
 - completed slices
 - commits
-- verification commands/results
+- red/green and acceptance evidence per code slice (or docs-only waiver)
 - review verdicts (and any `review_degraded` / `preset_missing`)
 - E2E item statuses: `agent_passed`, `agent_failed`, `blocked_on_gate`, `blocked_on_user`, `skipped_by_user_at_shape`, `not_run_with_reason`
 - any Human Escalation Stop raised

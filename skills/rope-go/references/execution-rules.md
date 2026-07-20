@@ -38,10 +38,25 @@ Every implementer/reviewer spawn brief should include:
 
 1. Issue path and slice id/title
 2. Goal and out-of-scope
-3. Acceptance criteria / Behavior Matrix rows
-4. Relevant artifact paths (prd/tasks/e2e, specs, files)
-5. Constraints (no nested spawn; commit rules; test commands if known)
-6. Expected return shape: summary, paths changed, verification run, blockers
+3. **Acceptance (user-visible):** slice `Public behavior` + owned Matrix rows
+4. **Seams:** only those listed in PRD Testing Decisions (copy the list; do not invent)
+5. **TDD mode:** `required` (default for code) | `waived (docs-only)` + reason
+6. When TDD required — hard fields:
+   - Red command(s) the leaf must run before implementation
+   - What failure signal counts as red
+   - Green command(s) after minimal implementation
+   - Anti-patterns to avoid (pointer to `references/tdd.md` is enough)
+7. Relevant artifact paths (prd/tasks/e2e, specs, files)
+8. Constraints (no nested spawn; commit rules; Blocked by / Scope)
+9. Expected return shape:
+   - summary, paths changed, commit hash
+   - acceptance text exercised
+   - red evidence (command + failure) unless waived
+   - green evidence (command + pass)
+   - blockers
+
+Reviewer briefs must require checking acceptance alignment and `tdd.md`
+anti-patterns, not only style/compile.
 
 ## Review Risk Gate
 
@@ -106,9 +121,13 @@ Record stop reason in `tasks.md` when escalating.
 ## Overall Review Checklist
 
 - PRD goals and non-goals still match the final diff.
+- Behavior Contract / public behaviors hold for the **assembled** change.
 - Each applicable Behavior Matrix row has test, smoke, or explicit waiver.
-- E2E `agent` items were actually executed.
+- Code slices show red-before-green evidence (or docs-only waiver); do not require
+  replaying every unit test if evidence is already recorded.
+- E2E `agent` items were actually executed (primary integration acceptance).
 - E2E `agent-with-gate` items have shape-time decisions and are executed, skipped, or blocked according to that decision.
 - Existing behavior compatibility was tested or explicitly waived.
 - No unrelated dirty files were included.
 - Per-slice `Review: required` used parent-spawned reviewer (or recorded true `review_degraded`).
+- No new test seams appeared outside PRD Testing Decisions without plan adjustment.

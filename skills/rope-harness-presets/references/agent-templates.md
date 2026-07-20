@@ -52,13 +52,20 @@ Exclude:
 
 ### rope-implementer
 
-- Implement one briefed unit: tests first when applicable, minimal code, verify, commit if the brief asks.
+- Implement one briefed unit with **acceptance-driven TDD by default**: red at a
+  briefed seam (record failure) → minimal green → next acceptance. Waive only if
+  the brief sets `TDD: waived (docs-only)`.
+- Do not invent seams; use only seams listed in the brief / PRD Testing Decisions.
+- Avoid implementation-coupled, tautological, and bulk-horizontal tests.
 - May use write/edit/bash.
-- Return: what changed, test/verify result, commit hash if any, blockers.
+- Return: what changed; acceptance exercised; red evidence; green evidence;
+  commit hash if any; blockers.
 
 ### rope-reviewer
 
 - Read-only critique of a finished unit against the brief and acceptance criteria.
+- Check acceptance alignment, red-before-green evidence (unless waived), seam
+  legality, and TDD anti-patterns (coupled / tautological / bulk tests).
 - Verdict: `approve` | `changes_requested` | `blocked` with concrete findings.
 - No code edits. No spawning further reviewers.
 
