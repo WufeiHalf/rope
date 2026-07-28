@@ -5,12 +5,31 @@ description: Grills a requirement against .rope docs to a shape-ready Behavior C
 
 # Rope Grill
 
-Parent Orchestrator interview: judgment-primary, **context-protective**. One
-decision at a time; look up facts before asking.
+Plain requirements interview. Internally this is a judgment-primary,
+**context-protective** Parent Orchestrator workflow; with the user, speak in
+simple product language.
 
 Doc formats: [references/doc-formats.md](references/doc-formats.md).  
 Interview habits (fact vs decision, domain discipline, scenarios, checklist):
 [references/grilling.md](references/grilling.md).
+
+## Plain interview
+
+Internal Rope terms are reasoning labels, not user language. Translate before
+speaking: say “what behavior must we guarantee” before Behavior Contract, “where
+the user sees the error” before failure visibility, and “a lazy implementation
+that could still pass tests” before forbidden shortcut.
+
+Every decision question must use this shape:
+
+1. One plain-language question.
+2. Recommended answer.
+3. Concrete example of what the user would click, run, see, or receive.
+4. Tradeoff if they choose the other option.
+
+Completion criterion: the user can repeat the decision in their own words without
+asking what a Rope term means. If they look confused, pause the workflow and
+explain with a real scenario, not more framework language.
 
 ## Inputs
 

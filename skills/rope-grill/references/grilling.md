@@ -23,10 +23,23 @@ you are only probing structure, step back to a product question.
 
 ## Communication
 
-- Plain language; one sentence when enough.
-- Pair recommendations with a concrete example (user scenario, click, command,
-  screen result).
-- Recommended answer must be understandable on first read.
+Use a plain interview. The user-facing answer must be simpler than the internal
+Rope reasoning.
+
+- Translate internal terms before speaking:
+  - Behavior Contract -> “what behavior must we guarantee”
+  - Failure visibility -> “where the user sees the error”
+  - Forbidden shortcut -> “a lazy implementation that could still pass tests”
+  - Human gate -> “this needs your explicit approval before we touch it”
+- Ask one plain-language question.
+- Pair the recommended answer with a concrete example: user scenario, click,
+  command, screen result, file, or message.
+- State the tradeoff of the other option when it affects product behavior.
+- If the user does not understand, stop advancing the checklist and re-explain
+  through a real scenario.
+
+Completion criterion: the recommendation is understandable on first read, and
+the user can choose without learning Rope vocabulary.
 
 ## Decision tree
 
