@@ -4,7 +4,7 @@ Stable implementation contracts and project coding rules.
 
 ## Areas
 
-- `guides/` - general thinking and verification guides.
+- `guides/` - general thinking and verification guides, including `architecture-continuity.md` for issue decision handoff and evidence.
 - `<area>/` - area-specific implementation contracts.
 
 ## Usage

@@ -60,7 +60,13 @@ Notes:
 Read first:
 - `.rope/CONTEXT.md`
 - `.rope/adr/`
+- `.rope/specs/`
 - `.rope/routes.md`
+
+For issue workflow changes, also read:
+- `.rope/adr/0002-architecture-decision-continuity.md`
+- `.rope/specs/guides/architecture-continuity.md`
+- `skills/rope-shape/references/architecture-continuity.md`
 
 Verify with:
 - Unknown — documentation-only; no automated doc tests discovered

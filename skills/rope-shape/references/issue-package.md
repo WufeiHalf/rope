@@ -49,6 +49,36 @@
 - Failure visibility: <where and how errors are visible>
 - Forbidden shortcuts: <implementation paths that would violate intent>
 
+## Architecture Impact
+
+- Impact: required | not-applicable
+- Trigger check: <for required, name the matched trigger; for not-applicable, explain why all triggers were checked and missed>
+- Relevant decisions:
+  - ID: D1
+    Source: `.rope/adr/NNNN-slug.md` or `.rope/specs/<area>/<topic>.md`
+    Decision status: active | superseded | deprecated | provisional | unknown
+    Scope: <behavior and boundary covered>
+    Decision disposition: inherit | extend | supersede | exception | not-applicable
+    Inherited invariants:
+      - <behavior or dependency invariant>
+    Affected public interfaces: <seams or none>
+    Forbidden shortcuts:
+      - <lazy path that could pass shallow tests but violate intent>
+    Required evidence: <test, integration check, review judgment, or document>
+    Applies to: issue | Slice N | e2e | verify
+    Documentation update: pending-finish | updated-existing | added-new | no-new-decision | exception-recorded
+    Unresolved conflicts: <none or conflicting sources and affected behavior>
+- New decision candidate: none | <scope, risk, and required decision/rationale>
+- Constraint Bundle:
+  - Decision sources: <IDs and paths>
+  - Decision statuses: <source statuses>
+  - Scope: <issue-wide and slice/e2e/verify mapping>
+  - Invariants: <IDs or concise list>
+  - Public seams: <confirmed seams>
+  - Forbidden shortcuts: <IDs or concise list>
+  - Acceptance evidence: <test, integration, review, or document evidence>
+  - Open conflicts: <none or explicit conflicts>
+
 ## References
 
 - Research: `.rope/research/<topic>.md#<anchor>`
@@ -98,6 +128,8 @@
 - Blocked by: none | Slice N, …
 - Scope: <path/area bounds; for parallel frontier, non-overlap with sibling slices>
 - Matrix rows:
+- Constraint IDs: <decision/invariant IDs owned by this slice>
+- Required evidence: <evidence for those IDs>
 - Public behavior: <one user-visible sentence of what works when this slice is done>
 - Tests:
 - Implementation notes:
@@ -114,6 +146,7 @@
 
 ## E1 <Validation Name>
 
+Architecture evidence: <constraint/decision IDs and the behavior or invariant this validates>
 Executor: agent | agent-with-gate | user | not-run
 Risk: local-readonly | local-write | remote-readonly | remote-write | production | human-judgment
 Gate Decision: not-required | approved | skipped | user-run | blocked | not-run-waived

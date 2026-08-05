@@ -10,13 +10,18 @@ issue shaping, TDD execution, and closeout.
 - `rope-grill` discusses requirements and updates `.rope/CONTEXT.md`,
   `.rope/adr/`, `.rope/research/`, and `.rope/specs/`.
 - `rope-shape` turns clarified requirements into `.rope/issues/<issue>/` with
-  PRD, vertical slices, behavior matrix, and E2E classification.
-- `rope-go` executes slices as **Parent Orchestrator**: spawns implementer and
-  reviewer leaf workers, TDD, commits, and classified E2E.
+  PRD, vertical slices, behavior matrix, E2E classification, and conditional
+  Architecture Impact plus a canonical Constraint Bundle.
+- `rope-go` executes slices as **Parent Orchestrator**: passes global and
+  slice-relevant architecture constraints to implementer/reviewer leaves, runs
+  TDD, commits, and classified E2E.
 - `rope-verify` verifies an issue's completion state against its PRD, Behavior
-  Matrix, and E2E plan after `rope-go` finishes. Parent-owned, read-only on
-  code; produces findings and a fix brief for an implementer leaf when needed.
-- `rope-finish` closes a Rope issue after implementation, validation, and verify.
+  Matrix, E2E plan, and Constraint Bundle after `rope-go` finishes. Parent-owned,
+  read-only on code; checks invariants, exceptions, dependency direction, and
+  evidence, then produces findings and a fix brief when needed.
+- `rope-finish` closes a Rope issue after implementation, validation, and verify,
+  completing confirmed pending architecture documentation through existing `.rope/`
+  routing.
 - `rope-summary` updates `.rope/` architecture/context docs after implementation
   when reusable contracts or bug-fix learnings should be preserved.
 - `rope-migrate-docs` migrates existing Matt Pocock-style docs and Trellis docs

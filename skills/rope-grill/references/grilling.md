@@ -31,7 +31,9 @@ Rope reasoning.
   - Failure visibility -> “where the user sees the error”
   - Forbidden shortcut -> “a lazy implementation that could still pass tests”
   - Human gate -> “this needs your explicit approval before we touch it”
-- Ask one plain-language question.
+- Ask one plain-language question at a time for blockers. Independent decisions
+  may be grouped into one structured batch; each item still has its own plain
+  question, recommendation, concrete example, and tradeoff.
 - Pair the recommended answer with a concrete example: user scenario, click,
   command, screen result, file, or message.
 - State the tradeoff of the other option when it affects product behavior.

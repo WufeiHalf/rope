@@ -40,23 +40,36 @@ Every implementer/reviewer spawn brief should include:
 2. Goal and out-of-scope
 3. **Acceptance (user-visible):** slice `Public behavior` + owned Matrix rows
 4. **Seams:** only those listed in PRD Testing Decisions (copy the list; do not invent)
-5. **TDD mode:** `required` (default for code) | `waived (docs-only)` + reason
-6. When TDD required — hard fields:
+5. **Architecture constraints:** copy the global constraints and this slice's
+   Constraint IDs from the PRD bundle, including source, status, disposition,
+   scope, invariants, public seam, forbidden shortcuts, required evidence, and
+   open conflicts. Do not substitute a bare “follow the ADR” instruction.
+6. **TDD mode:** `required` (default for code) | `waived (docs-only)` + reason
+7. When TDD required — hard fields:
    - Red command(s) the leaf must run before implementation
    - What failure signal counts as red
    - Green command(s) after minimal implementation
    - Anti-patterns to avoid (pointer to `references/tdd.md` is enough)
-7. Relevant artifact paths (prd/tasks/e2e, specs, files)
-8. Constraints (no nested spawn; commit rules; Blocked by / Scope)
-9. Expected return shape:
+8. Relevant artifact paths (prd/tasks/e2e, specs, files)
+9. Constraints (no nested spawn; commit rules; Blocked by / Scope)
+10. Expected return shape:
    - summary, paths changed, commit hash
    - acceptance text exercised
    - red evidence (command + failure) unless waived
    - green evidence (command + pass)
+   - architecture constraints checked, evidence, and disposition conflicts
    - blockers
 
-Reviewer briefs must require checking acceptance alignment and `tdd.md`
-anti-patterns, not only style/compile.
+Reviewer briefs must require checking acceptance alignment, `tdd.md`
+anti-patterns, and architecture continuity: inherited invariants, responsibility
+ownership, dependency direction, public compatibility, exception scope, and the
+required evidence. Their return includes the checked constraint IDs, evidence,
+final disposition, and conflicts. Review behavior and boundaries, not a required
+function or class name.
+
+If a leaf discovers that the recorded disposition cannot hold, it returns the
+conflict and evidence to the parent. The parent updates the package/brief and
+re-dispatches; the leaf does not invent `exception`, `extend`, or `supersede`.
 
 ## Review Risk Gate
 
@@ -122,6 +135,11 @@ Record stop reason in `tasks.md` when escalating.
 
 - PRD goals and non-goals still match the final diff.
 - Behavior Contract / public behaviors hold for the **assembled** change.
+- Architecture Impact has a disposition for every relevant decision, or an
+  explicit `not-applicable`/New decision candidate outcome.
+- Every inherited invariant and exception has the required evidence; no second
+  state, persistence, permission, or error strategy silently duplicates an
+  existing owner.
 - Each applicable Behavior Matrix row has test, smoke, or explicit waiver.
 - Code slices show red-before-green evidence (or docs-only waiver); do not require
   replaying every unit test if evidence is already recorded.
@@ -131,3 +149,4 @@ Record stop reason in `tasks.md` when escalating.
 - No unrelated dirty files were included.
 - Per-slice `Review: required` used parent-spawned reviewer (or recorded true `review_degraded`).
 - No new test seams appeared outside PRD Testing Decisions without plan adjustment.
+- `tasks.md` constraint IDs and evidence remain mapped to the canonical PRD bundle.

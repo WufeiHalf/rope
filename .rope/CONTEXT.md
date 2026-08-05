@@ -43,3 +43,15 @@ _Avoid_: sync (ambiguous with file copy), submodule update (mechanism only), mig
 **Acceptance Behavior**:
 The user- or caller-visible outcome a slice or issue must make true (Public behavior, Behavior Matrix row, or E2E item). In go, each acceptance drives a red→green automated spec at a shape-confirmed seam; issue-level E2E/verify accept the **assembled** behavior and do not replace slice TDD with a second full unit-test ritual.
 _Avoid_: TDD as “write many unit tests then code”, acceptance test as synonym for issue-level verify only, re-running every green unit test at verify by default
+
+**Architecture Impact**:
+The conditional shape-stage record of whether an issue touches an existing architecture decision, public seam, dependency direction, lifecycle, state, persistence, permission, concurrency, error semantics, adapter, runtime entrypoint, or duplicated responsibility. A `not-applicable` result is still an explicit lightweight check; an uncertain result is treated as requiring resolution.
+_Avoid_: full architecture review for every task, inference from filenames or diff alone, architecture impact as an automatic ADR request
+
+**Decision Disposition**:
+The per-decision statement of how an issue handles a relevant existing architecture decision: `inherit`, `extend`, `supersede`, `exception`, or `not-applicable`. It is distinct from the source decision's status, which describes whether that source is active, superseded, deprecated, provisional, or unknown.
+_Avoid_: one issue-level disposition for several decisions, silently choosing a disposition during implementation, treating exception as an undocumented shortcut
+
+**Constraint Bundle**:
+The portable architecture constraint set derived during shaping: decision sources and statuses, scope, invariants, public seams, forbidden shortcuts, acceptance evidence, and unresolved conflicts. The parent keeps the issue-level bundle; each leaf receives the global constraints plus the subset relevant to its slice.
+_Avoid_: a bare instruction to “follow the ADR”, leaf-local reinterpretation, or a second canonical architecture document

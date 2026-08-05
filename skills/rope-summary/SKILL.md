@@ -20,10 +20,14 @@ disable-model-invocation: true
    - relevant `.rope/adr/`
    - referenced `.rope/research/`
 3. Decide whether docs need updates:
+   - read the issue's Architecture Impact and Constraint Bundle when present
    - update when work created or clarified reusable architecture rule, adapter contract, config contract, deployment constraint, validation pattern, or recurring failure mode
    - skip when change is one-off, private implementation detail, or already covered by existing docs
+   - distinguish `pending-finish` documentation closure from a new, unconfirmed architecture change; the latter pauses for parent/user disposition
    - **completion criterion:** every changed file since the issue's shape commit has been considered against the four doc homes (specs / adr / research / CONTEXT); each is either updated or explicitly skipped with reason. Do not declare done while any changed file is unconsidered.
-4. Update the smallest durable doc:
+4. Update the smallest durable doc. If the issue already confirmed a disposition,
+   preserve its source, status, scope, invariants, exception bounds, and evidence;
+   do not invent a new disposition during summary:
    - `.rope/specs/` for stable implementation contracts and tests required
    - `.rope/adr/` for architecture decisions with trade-offs
    - `.rope/research/` for external/platform facts
