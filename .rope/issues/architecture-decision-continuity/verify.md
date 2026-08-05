@@ -42,7 +42,7 @@ Not applicable; Verdict is PASS.
 - Verify verdict: PASS
 - Slice status: 6/6 completed; docs-only; self-check reviews
 - E2E status: 5/5 `agent_passed`
-- Commits: pending final documentation commit
+- Commits: `2a78bdc` — workflow implementation and issue package; finish metadata recorded in this closeout commit
 - Remaining gates: none
 - Docs updated: `.rope/CONTEXT.md`, `.rope/routes.md`, `.rope/specs/`, `.rope/adr/0002-architecture-decision-continuity.md`, README, bundled skills, and requested target installation
 - Architecture documentation outcome: added-new (`.rope/specs/guides/architecture-continuity.md`); existing ADR used (`.rope/adr/0002-architecture-decision-continuity.md`)
