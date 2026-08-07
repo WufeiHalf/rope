@@ -9,11 +9,13 @@
 - Review findings are resolved or explicitly waived.
 - E2E entries have terminal statuses:
   - `agent_passed`
+  - `covered_by_slice`
   - `user_confirmed`
   - `waived`
   - `blocked_on_gate`
   - `blocked_on_user`
   - `not_run_with_reason`
+- Terminal statuses are about **recorded outcomes** (with evidence); finish does not re-run validation that go/verify already recorded as green.
 
 ## Architecture Documentation Closure
 

@@ -31,7 +31,7 @@ Details: tdd.md.
 Schedule by **Blocked by** (default serial; optional parallel frontier if Scope
 non-overlapping — execution-rules). For each ready slice:
 
-1. `in_progress`; spawn implementer with **TDD hard fields** (execution-rules).
+1. `in_progress`; spawn implementer with **TDD hard fields** (execution-rules; commands focused/incremental, may cite prior full-suite evidence).
 2. Check summary: acceptance alignment, **red evidence** (or waiver), green,
    seam legal, commit present, and the leaf's constraint evidence. A leaf-reported
    disposition conflict returns to the parent for re-brief; it is not silently
@@ -48,7 +48,7 @@ non-overlapping — execution-rules). For each ready slice:
 Prefer **assembled behavior acceptance** over replaying every unit suite:
 
 1. Matrix still covered for the integrated change.
-2. Run e2e.md classifications (primary net for “green slices, broken product”).
+2. Run e2e.md classifications (primary net for “green slices, broken product”). An E2E item whose validation is already covered by slice-level runs is recorded as `covered_by_slice` with the cited slice + evidence instead of being re-run.
 3. Overall review vs Behavior Contract and the Constraint Bundle: inherited
    invariants have evidence, exceptions are bounded, and public behavior keeps
    the recorded dependency direction. Fix via implementer leaf if needed.

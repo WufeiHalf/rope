@@ -49,6 +49,7 @@ Every implementer/reviewer spawn brief should include:
    - Red command(s) the leaf must run before implementation
    - What failure signal counts as red
    - Green command(s) after minimal implementation
+   - Commands must be **focused/incremental** — target the slice's tests at its seam, not a full-suite replay. A full suite run is needed only when the slice's change is not already covered by a recorded full-suite run; cite that prior evidence instead of re-running
    - Anti-patterns to avoid (pointer to `references/tdd.md` is enough)
 8. Relevant artifact paths (prd/tasks/e2e, specs, files)
 9. Constraints (no nested spawn; commit rules; Blocked by / Scope)
@@ -116,8 +117,9 @@ Record stop reason in `tasks.md` when escalating.
 
 ## E2E Execution Statuses
 
-- `agent_passed`: agent ran the classified validation and it passed.
+- `agent_passed`: agent ran the classified validation and it passed. Record command + evidence in `e2e.md` so verify can check the evidence without re-running.
 - `agent_failed`: agent ran it and it failed; fix or record blocker.
+- `covered_by_slice`: validation fully covered by slice-level runs already recorded (cite slice id + evidence location). Terminal status; no re-run required. Use this instead of duplicating a full-suite E2E item that slice runs already proved green.
 - `blocked_on_gate`: missing, stale, or changed shape-time approval prevents execution.
 - `blocked_on_user`: requires human judgment or unavailable user-only access.
 - `skipped_by_user_at_shape`: user skipped an agent-with-gate action during shaping.

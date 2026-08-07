@@ -72,6 +72,8 @@ The verify model is the budget-scarcest resource. To keep its tokens on judgment
 
 The failure mode verify exists to catch: an `agent_failed` or `pending` E2E item drifting into a `completed` slice with no re-verification. Hunt drift on every `agent_failed`/`pending` E2E item — confirm it was re-run and resolved, not silently absorbed.
 
+`agent_passed` and `covered_by_slice` items are **not** re-run: verify checks the recorded command + evidence in `e2e.md` (for `covered_by_slice`, the cited slice runs) instead. Re-run only `agent_failed`/`pending` items.
+
 ## `verify.md` Format
 
 Append a new round each verify run; do not overwrite prior rounds.
@@ -117,7 +119,7 @@ Primary path (same parent session):
 1. Verify returns `CHANGES_REQUESTED` + fix brief.
 2. Parent spawns an **implementer leaf** with that brief (prefer `rope-implementer`).
 3. Leaf applies fixes, commits, re-runs relevant verification; returns summary + paths.
-4. Parent re-runs `rope-verify` on the same issue; appends Round N+1.
+4. Parent re-runs `rope-verify` on the same issue; appends Round N+1. Round N+1 re-checks only the must-fix scope plus any E2E still `agent_failed`/`pending`; items already `agent_passed`/`covered_by_slice` are evidence-checked, not re-run.
 5. **Human Escalation Stop:** after **two** unsuccessful automated fix rounds on the same problem, or when the parent judges a design/requirements/contract defect, stop and present a short precise problem to the user. No third silent retry.
 
 Degraded / historical path (only when parent cannot spawn a code-writing worker):
