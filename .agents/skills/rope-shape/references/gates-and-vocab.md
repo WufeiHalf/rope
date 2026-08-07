@@ -8,6 +8,8 @@
 - `user`: visual/business judgment, 2FA, private session, unreachable env.
 - `not-run`: out of scope; reason + user-accepted waiver.
 
+E2E Command should not duplicate validation that slice-level runs already cover. When a would-be E2E command is fully covered by slice runs, mark the item `covered_by_slice` (cite slice id + evidence) instead of re-running the full suite at go/verify/finish time.
+
 ## Gate Approval Rules
 
 - Approve **actions**, not exact commands (e.g. restart local dev server).
@@ -24,6 +26,7 @@
 | **Slice** | Vertical unit in `tasks.md` |
 | **Spec** | `.rope/specs/**` architecture contracts — **not** the PRD |
 | **ADR** | Hard-to-reverse architecture decisions |
+| **covered_by_slice** | E2E result meaning the validation is fully covered by recorded slice-level runs (cited in `e2e.md`); terminal, no re-run |
 
 Upstream “spec/ticket” is kernel only; keep Rope names in artifacts we write.
 
