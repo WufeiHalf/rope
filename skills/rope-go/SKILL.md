@@ -28,8 +28,18 @@ Details: tdd.md.
 
 ## Slice loop
 
-Schedule by **Blocked by** (default serial; optional parallel frontier if Scope
-non-overlapping — execution-rules). For each ready slice:
+Read `mode` from `prd.md` frontmatter (`serial` default | `dynamic`).
+
+- **Serial** (absent or `serial`): schedule by **Blocked by**, one slice at a
+  time — unchanged.
+- **Dynamic** (`mode: dynamic`): the frontier is slices with **no unresolved
+  blockers**. DISJOINT-scope frontier slices are spawned to **concurrent
+  implementer leaves** (parent spawns one leaf per slice); overlapping slices
+  serialize; contract and integration slices stay serial. Per-slice **review
+  gates** and **commit rules** still apply — do not weaken them. Parent owns
+  all dispatch; a parallel implementer leaf must not spawn another leaf.
+
+For each ready slice:
 
 1. `in_progress`; spawn implementer with **TDD hard fields** (execution-rules; commands focused/incremental, may cite prior full-suite evidence).
 2. Check summary: acceptance alignment, **red evidence** (or waiver), green,
