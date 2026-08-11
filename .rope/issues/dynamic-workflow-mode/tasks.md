@@ -16,7 +16,7 @@
 
 ## Slice 0: Dynamic-Mode Contract
 
-- Status: pending
+- Status: done
 - Kind: contract
 - Goal: Define the `mode: dynamic` field schema, the three-piece dynamic slice
   discipline (contract slice first, disjoint file ownership, per-slice size
