@@ -12,6 +12,10 @@
 ## `prd.md`
 
 ```md
+---
+mode: serial | dynamic
+---
+
 # <Issue Title>
 
 ## Problem Statement
@@ -123,10 +127,12 @@
 ## Slice 1: <Title>
 
 - Status: pending
-- Kind: vertical | wide-refactor-expand | wide-refactor-migrate | wide-refactor-contract
+- Kind: vertical | contract | wide-refactor-expand | wide-refactor-migrate | wide-refactor-contract
 - Goal: <user-perspective end-to-end result this slice makes true — not a layer list>
 - Blocked by: none | Slice N, …
-- Scope: <path/area bounds; for parallel frontier, non-overlap with sibling slices>
+- Scope: <path/area bounds; disjoint from sibling slices when parallel/dynamic>
+- Owned files: <explicit files this slice owns; no file owned by more than one implementation slice>
+- Size cap: <default ~400 diff lines or ~4 owned files; exceeded ⇒ split>
 - Matrix rows:
 - Constraint IDs: <decision/invariant IDs owned by this slice>
 - Required evidence: <evidence for those IDs>
