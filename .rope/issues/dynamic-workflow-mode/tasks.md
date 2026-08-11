@@ -45,6 +45,7 @@
   - ADR 0003 + spec present; rule set matches PRD Constraint Bundle
 - Review: required
 - Review reason: defines the public contract every other slice depends on
+- Review verdict: PASS (parent/judgment; ADR 0003 + spec coherent with PRD)
 - Stop conditions: ADR + spec committed and internally consistent
 
 ## Slice A: rope-shape dynamic mode
@@ -81,6 +82,7 @@
   - Both dry-runs above pass; overlap flagged
 - Review: required
 - Review reason: changes the public issue-package interface and shape flow
+- Review verdict: PASS (rope-reviewer leaf, I3/I4/I6/F1/F5 confirmed)
 - Stop conditions: dynamic and serial shape dry-runs both correct
 
 ## Slice B: rope-go dynamic mode
@@ -120,6 +122,7 @@
   - go dry-runs above pass; no-workers degradation recorded
 - Review: required
 - Review reason: changes go concurrency semantics and the review/verify contract
+- Review verdict: PASS (rope-reviewer leaf, I1/I2/I3/I6/F1/F2/F3/F4 confirmed)
 - Stop conditions: fan-out and serialization dry-runs both correct
 
 ## Slice C: rope-harness-presets worker pool
@@ -148,11 +151,12 @@
   - doc note present; presets unchanged
 - Review: self-check
 - Review reason: low-risk documentation-only slice
+- Review verdict: self-check PASS (diff reviewed by parent)
 - Stop conditions: doc note added, presets unchanged
 
 ## Slice E: Integration
 
-- Status: in_progress
+- Status: done
 - Kind: vertical
 - Goal: Wire the assembled dynamic mode end to end: CONTEXT term consistency,
   README typical-workflow mention, and a dry-run confirming `mode: dynamic`
@@ -175,4 +179,5 @@
   - end-to-end dry-run passes; docs consistent
 - Review: required
 - Review reason: touches public docs and exercises the assembled flow
+- Review verdict: PASS (parent/judgment; E1–E4 agent_passed, docs consistent)
 - Stop conditions: end-to-end dry-run green; docs consistent with ADR 0003
