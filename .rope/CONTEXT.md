@@ -28,6 +28,10 @@ _Avoid_: review, check (too generic), acceptance test (wrong level)
 The review that runs for each completed slice during `rope-go`. The Parent Orchestrator dispatches a reviewer leaf (or self-checks when allowed). Not owned by the implementer leaf, and not re-done by issue-level verify. Verify only checks that per-slice review actually happened (not silently degraded).
 _Avoid_: verify (wrong level), gate
 
+**Dynamic Workflow Mode**:
+An **opt-in per-issue** mode chosen at shape time: `rope-shape` asks the user whether dynamic mode is wanted; if yes it writes `mode: dynamic` into the issue package and go reads the field. When on, shape must produce a **contract-first, disjoint file-ownership** slice set, and go concurrently spawns cheap implementer leaves for the **non-overlapping** slices. Shape discipline: a **contract slice** (interfaces/data-structures/call-boundaries only) is serial and first; implementation slices are cut by **disjoint file ownership** (one core file owned by multiple slices is a shape defect); a **per-slice size cap** is enforced. go fans out only non-overlapping slices; each slice still passes a review gate; a light serial **integration slice** wires the module slices and verifies contract alignment; issue-level verify stays parent-owned and read-only. Model routing **reuses existing role presets** (no new model mechanism). Parallelism is the weak case for coding agents (Cognition/Anthropic), so disjoint ownership + contract-first is the load-bearing safety rule — slices sharing a core file stay serial.
+_Avoid_: blanket parallelization, treating the mode as a licence to fan out overlapping slices, spawning implementer leaves that themselves spawn leaves
+
 **Self-Fix Loop**:
 A check/verify pattern (from Trellis) where the verifying model finds a problem and fixes it directly, then reruns checks, looping until green. Not used at issue-level verify in Rope, because verify must not edit code (cross-role separation of implement vs accept).
 _Avoid_: auto-fix, retry (too generic)
