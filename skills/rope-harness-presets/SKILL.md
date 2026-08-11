@@ -123,6 +123,20 @@ Return a short report only:
 - any degrade notes (`research_offline`, migrate hint if old
   `rope-verify/settings.json` found on disk)
 
+## Dynamic workflow mode (concurrent multi-spawn)
+
+When an issue runs with `mode: dynamic`, `rope-go` may spawn **multiple
+`rope-implementer` leaves concurrently** for disjoint frontier slices, all from
+the existing role presets written above.
+
+- The manifest and agent naming already support concurrent multi-spawn: one
+  preset per role, instantiated once per spawned leaf.
+- **No schema change** to the manifest, role-schema, or rankings.
+- **No new model mechanism** — model routing reuses the same harness presets;
+  parent may still override model/thinking at spawn time per leaf.
+- Each concurrent leaf is still an ordinary `rope-implementer` leaf: no nested
+  spawn, same tool bounds, same output format.
+
 ## Soft-degrade contract (for consumers)
 
 If the manifest or `rope-*` agents are missing later, orchestrators
