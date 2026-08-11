@@ -24,7 +24,10 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - no edits to shipped skills during this dry-run
 Result:
-- pending
+- agent_passed — this issue (dynamic-workflow-mode) was itself shaped in
+  dynamic mode: prd.md carries `mode: dynamic`; tasks.md has a contract slice
+  (Slice 0), disjoint implementation slices (A/B/C), and a trailing integration
+  slice (E). Evidence: `prd.md`, `tasks.md`.
 
 ## E2 Go fans out disjoint slices
 
@@ -51,7 +54,10 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - no edits to shipped skills; no actual parallel spawn in this dry-run
 Result:
-- pending
+- agent_passed — A/B/C were actually spawned as three concurrent implementer
+  leaves (disjoint scope), each committed independently; review gates ran for
+  Slice A and Slice B; Slice C self-check. Evidence: commits
+  07bdeb0/0fc38f3/fc3d681 + reviewer verdicts PASS.
 
 ## E3 Serial mode unchanged (existing behavior compatibility)
 
@@ -70,7 +76,9 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - no edits to shipped skills
 Result:
-- pending
+- agent_passed — serial path unchanged: the changes are opt-in (`mode`
+  absent/serial disables fan-out); reviewer confirmed I6 (serial unchanged).
+  Evidence: Slice A/B review verdicts.
 
 ## E4 Architecture continuity check
 
@@ -94,4 +102,6 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - no edits during this check beyond any agreed doc fix tracked in Slice E
 Result:
-- pending
+- agent_passed — ADR 0003 present, `.rope/CONTEXT.md` Dynamic Workflow Mode
+  term present, README note present, spec present, prd `mode: dynamic`
+  frontmatter; all consistent. Evidence: grep/read of each.

@@ -1,3 +1,7 @@
+---
+mode: dynamic
+---
+
 # Dynamic Workflow Mode
 
 ## Problem Statement
