@@ -87,6 +87,16 @@ Optional: run `rope-harness-presets` once per machine/model-catalog change so
 go/verify can prefer `rope-implementer` / `rope-reviewer` / `rope-explore` /
 `rope-verify-inspector`. Missing presets soft-degrade; they are not a hard block.
 
+**Dynamic workflow mode (optional):** at `rope-shape` time you may opt into a
+dynamic-mode issue. Shape then enforces a contract-first, disjoint file-ownership
+slice set (contract slice first, implementation slices that each own disjoint
+files, a per-slice size cap, a trailing integration slice) and records
+`mode: dynamic` in `prd.md`. `rope-go` then fans out the disjoint implementation
+slices to concurrent cheap implementer leaves, keeps per-slice review gates and
+issue-level verify, and serializes any overlapping slices. Serial behavior is
+unchanged when the mode is off or absent. See
+`.rope/adr/0003-dynamic-workflow-mode.md`.
+
 ## `.rope/` Layout
 
 ```text

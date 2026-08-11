@@ -49,7 +49,7 @@
 
 ## Slice A: rope-shape dynamic mode
 
-- Status: pending
+- Status: done
 - Kind: vertical
 - Goal: When a user shapes an issue, rope-shape asks at the start whether
   dynamic mode is wanted; if yes, it enforces the three-piece slice discipline
@@ -85,7 +85,7 @@
 
 ## Slice B: rope-go dynamic mode
 
-- Status: pending
+- Status: done
 - Kind: vertical
 - Goal: When go runs on a `mode: dynamic` package, it fans out disjoint
   non-blocked frontier slices to concurrent cheap implementer leaves, keeps
@@ -124,7 +124,7 @@
 
 ## Slice C: rope-harness-presets worker pool
 
-- Status: pending
+- Status: done
 - Kind: vertical
 - Goal: Document in the harness-presets skill that dynamic mode may spawn
   multiple concurrent implementer leaves from the existing role presets, and
@@ -152,7 +152,7 @@
 
 ## Slice E: Integration
 
-- Status: pending
+- Status: in_progress
 - Kind: vertical
 - Goal: Wire the assembled dynamic mode end to end: CONTEXT term consistency,
   README typical-workflow mention, and a dry-run confirming `mode: dynamic`
