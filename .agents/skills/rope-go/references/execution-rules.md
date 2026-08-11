@@ -19,6 +19,26 @@ Rules:
 - Correction = rewrite brief + re-spawn implementer (or explore then re-brief). Max **2** automated fix rounds per problem → **Human Escalation Stop**.
 - Design / requirements / contract defect → immediate Human Escalation Stop (no thrash).
 
+## Dynamic mode / parallel frontier
+
+When `prd.md` carries `mode: dynamic`:
+
+- **Frontier** = slices with no unresolved blockers.
+- **Fan-out**: disjoint-scope frontier slices are spawned to **concurrent
+  implementer leaves** — parent spawns one leaf per slice. Contract
+  (`kind: contract`) and integration slices stay serial.
+- **Overlap ⇒ serialize**: slices whose `Scope` / `owned_files` overlap are
+  never parallel; run them serially (a core file owned by multiple slices is a
+  shape defect, not a go problem).
+- **Gates kept**: per-slice **review gates** and **commit rules** apply
+  unchanged to parallel slices; do not skip or weaken them in dynamic mode.
+- **No nested spawn**: a parallel implementer leaf must not spawn another
+  leaf; the parent owns all dispatch.
+- **Degradation**: if go cannot spawn concurrent workers, degrade to serial
+  and record the reason in `tasks.md`.
+
+Serial behavior is unchanged when `mode` is absent or `serial`.
+
 ## Harness Leaf Presets
 
 If `~/.config/rope/harness/<host>.json` exists (pi: `~/.config/rope/harness/pi.json`):
