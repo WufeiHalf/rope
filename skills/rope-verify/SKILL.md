@@ -25,7 +25,12 @@ Architecture continuity fields: [../rope-shape/references/architecture-continuit
    global Constraint Bundle plus the relevant decision IDs and evidence mapping;
    keep architecture judgment local.
 3. At minimum check:
-   - required reviews real (not silent `review_degraded`)
+   - required reviews real (not silent `review_degraded`); batch-slice
+     verdicts real and auditable (same check extended — see
+     [execution-rules](../rope-go/references/execution-rules.md) "Batch
+     Review Execution"): a `batch` marking with no parent-spawned batch
+     reviewer verdict (run/agent identity, per-slice coverage) is a finding,
+     and `batch` treated as self-check is a must-fix
    - matrix/Contract hold for **integrated** change (spot-check units only if
      red/green evidence missing)
    - **E2E drift** (primary integration net)

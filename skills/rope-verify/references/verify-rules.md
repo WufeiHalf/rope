@@ -16,7 +16,7 @@
 
 Verify may correct stale or wrong metadata **in issue documents**, never in code:
 
-- `tasks.md`: a slice `Status: completed` whose `Review verdict` is still `pending` or blank; a slice missing a verification result.
+- `tasks.md`: a slice `Status: completed` whose `Review verdict` is still `pending` or blank; a slice missing a verification result; for a `batch` slice, the verdict may be the shared batch-review verdict line — verify requires that line to exist, name the covered slices, and carry run/agent identity (batch execution is defined in [execution-rules](../../rope-go/references/execution-rules.md) "Batch Review Execution", not re-listed here). A missing or unauditable batch verdict is a `cannot_verify` finding, escalated to `must-fix` on high-risk boundaries per the existing severity rule.
 - `e2e.md`: a `Result:` field left blank or marked `agent_passed` with no command/evidence; an `agent_failed` that was never re-run but whose slice drifted to `completed`.
 - `prd.md`: a typo or a stale Open Question that was actually resolved during go.
 

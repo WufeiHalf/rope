@@ -10,7 +10,12 @@ This contract applies to newly shaped Rope issue packages and to the parent/leaf
 - A relevant source decision has a source path, source status, issue disposition, scope, invariants, public seams, forbidden shortcuts, required evidence, applicability mapping, documentation outcome, and conflict state.
 - Source status and issue disposition are separate fields.
 - `prd.md` owns the complete Constraint Bundle. `tasks.md` references decision/constraint IDs and maps them to slice evidence.
-- Implementer and reviewer briefs carry global constraints plus slice-relevant constraints. Leaves report a changed disposition or conflict to the parent.
+- Implementer and reviewer briefs carry the Constraint Bundle by reference:
+  bundle path + the slice's Constraint IDs + the short global invariant list
+  inline; the leaf reads the bundle detail itself, so the full field set
+  (source, status, disposition, invariant, forbidden shortcut, evidence,
+  conflict) still reaches the leaf — via reference, not inline copy. Leaves
+  report a changed disposition or conflict to the parent.
 - Verify checks behavior, invariants, ownership, dependency direction, public compatibility, exception bounds, and evidence. It does not enforce a concrete implementation shape.
 - Confirmed documentation work may be `pending-finish` during verify. Finish changes it to `updated-existing`, `added-new`, `no-new-decision`, or `exception-recorded`.
 - Finish pauses when it discovers an unconfirmed architecture change.
@@ -38,12 +43,12 @@ The leaf must infer which decision applies, what invariant matters, and what pro
 
 ```text
 Slice 2 constraints:
-- Source: .rope/adr/0002-architecture-decision-continuity.md
-- Status: active
-- Disposition: inherit
-- Invariant: prd.md is the canonical full bundle
-- Public seam: issue-package template
-- Forbidden shortcut: create a second canonical architecture file
-- Evidence: template check + installed-source parity
-- Conflict: none
+- Bundle path: .rope/issues/<issue>/prd.md (Constraint Bundle section)
+- Constraint IDs: D1
+- Global invariant list (short, inline): verify is the sole parent-level
+  accept gate; prd.md is the canonical full bundle
+
+The leaf reads the constraint detail for each ID from the bundle itself —
+source, status, disposition, invariant, forbidden shortcut, evidence,
+conflict — and returns a one-line confirmation per ID plus any conflicts.
 ```
