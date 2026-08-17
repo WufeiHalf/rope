@@ -22,7 +22,10 @@ Default handoff: same-session `rope-go`.
    three-piece slice discipline below (contract slice first, implementation
    slices with disjoint file ownership, per-slice size cap, trailing integration
    slice). If no: record `mode: serial` — behavior unchanged (serial is the
-   default).
+   default). Then ask the user for the **review mode**: `per-slice` (default) |
+   `batch` (opt-in, same manual pattern as dynamic mode — no auto-detect).
+   Record `review: per-slice | batch` in the issue package; absent or
+   `per-slice` ⇒ unchanged per-slice review behavior.
 2. Read CONTEXT, routes, the architecture-continuity reference, and relevant
    adr/research/**specs** (architecture, not PRD).
 3. Inspect only enough for public interfaces and verification **seams** (explore leaf if wide).
@@ -34,14 +37,19 @@ Default handoff: same-session `rope-go`.
    candidate, supersede, exception, or unresolved conflict needs a decision.
 6. **Slice outline quiz:** title, user-visible delivery, `Blocked by`, matrix
    rows, constraint IDs, evidence, review hint → iterate until approved → then
-   write full files.
+   write full files. The review hint now means choosing `required | batch |
+   self-check` per slice using the Review Risk Gate: Risk Gate hit ⇒ `required`;
+   other code slices ⇒ `batch` (only valid when the package is `review: batch`,
+   else `required`); docs/fixture-only slices ⇒ `self-check`.
 7. Write `prd.md` (problem/solution, goals/non-goals, Behavior Contract, public
    behavior, **Testing Decisions**, Architecture Impact, full Constraint Bundle,
    refs, gates).
 8. Behavior Matrix in prd or tasks; N/A rows need a reason.
 9. `tasks.md` vertical **slices**: complete path each; matrix rows; `Blocked by`;
    **Public behavior** one user sentence; constraint IDs and evidence; tests;
-   review mode. Wide refactor → expand–contract (gates-and-vocab.md).
+   review mode (`required | batch | self-check` — `batch` only in a
+   `review: batch` package; Review Risk Gate slices always `required`). Wide
+   refactor → expand–contract (gates-and-vocab.md).
    When `mode: dynamic`, enforce the three-piece slice discipline:
    - a **contract slice** (`kind: contract`, `Blocked by: none`, first) that
      defines interfaces / data structures / call boundaries only — no feature
@@ -68,5 +76,8 @@ Default handoff: same-session `rope-go`.
 - Do not mark a high-risk New decision candidate ready without a decision.
 - Do not auto-detect dynamic mode; it is a manual, shape-time user decision —
   `mode` stays `serial` unless the user opts in.
+- Do not auto-detect review mode; it is a manual, shape-time user decision —
+  `review` stays `per-slice` unless the user opts in. Do not mark a Review Risk
+  Gate slice `batch` — it must be `required`.
 - No stale file-by-file plans in PRD — public interfaces and seams only.
 - Do not call the PRD a “spec” or slices “tickets” in written artifacts.
