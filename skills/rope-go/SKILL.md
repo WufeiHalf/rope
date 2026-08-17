@@ -63,7 +63,7 @@ For each ready slice:
 
 Prefer **assembled behavior acceptance** over replaying every unit suite:
 
-1. Matrix still covered for the integrated change.
+1. Matrix coverage bookkeeping: every applicable row has recorded slice/e2e evidence (assembled matrix judgment is verify-owned).
 2. Run e2e.md classifications (primary net for “green slices, broken product”). An E2E item whose validation is already covered by slice-level runs is recorded as `covered_by_slice` with the cited slice + evidence instead of being re-run.
 3. If ≥1 slice is marked `batch`: spawn **one** batch reviewer leaf per ADR
    0004 (see execution-rules "Batch Review Execution") **before** verify;

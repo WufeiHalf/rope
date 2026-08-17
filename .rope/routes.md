@@ -65,6 +65,7 @@ Read first:
 
 For issue workflow changes, also read:
 - `.rope/adr/0002-architecture-decision-continuity.md`
+- `.rope/adr/0004-risk-tiered-review-mode-and-lean-briefs.md`
 - `.rope/specs/guides/architecture-continuity.md`
 - `skills/rope-shape/references/architecture-continuity.md`
 

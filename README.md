@@ -13,8 +13,8 @@ issue shaping, TDD execution, and closeout.
   PRD, vertical slices, behavior matrix, E2E classification, and conditional
   Architecture Impact plus a canonical Constraint Bundle.
 - `rope-go` executes slices as **Parent Orchestrator**: passes global and
-  slice-relevant architecture constraints to implementer/reviewer leaves, runs
-  TDD, commits, and classified E2E.
+  slice-relevant architecture constraints to implementer/reviewer leaves (by
+  reference), runs TDD, commits, and classified E2E.
 - `rope-verify` verifies an issue's completion state against its PRD, Behavior
   Matrix, E2E plan, and Constraint Bundle after `rope-go` finishes. Parent-owned,
   read-only on code; checks invariants, exceptions, dependency direction, and
@@ -73,8 +73,10 @@ windows as the architecture.
 3. Use `rope-shape` to create `.rope/issues/<issue>/prd.md`, `tasks.md`, and
    `e2e.md`. Default: continue in the same session.
 4. Use `rope-go` as parent orchestrator: for each slice, spawn implementer leaf,
-   then reviewer leaf when `Review: required` (self-check when allowed). Max two
-   automated fix rounds per problem, then Human Escalation Stop.
+   then review per the slice's `Review: required | batch | self-check` marking;
+   `batch` slices defer to one end-of-issue batch review leaf, and `rope-verify`
+   remains the final gate. Max two automated fix rounds per problem, then Human
+   Escalation Stop.
 5. Use `rope-verify` in the same parent session to verify issue completion against
    PRD/E2E. If `CHANGES_REQUESTED`, parent spawns an implementer leaf with the
    fix brief and re-verifies. (Hosts that cannot spawn workers may use a
