@@ -14,8 +14,11 @@ Red→green playbook: [references/tdd.md](references/tdd.md).
 
 ## Startup
 
-1. Confirm issue dir; read CONTEXT, routes, refs, the Architecture Impact and
-   full Constraint Bundle in `prd.md`, tasks, and e2e.
+1. Confirm issue dir; load lean: prd frontmatter (mode + review), Behavior
+   Contract, Testing Decisions, Architecture Impact, and the Constraint Bundle
+   index (IDs + paths) in `prd.md`, tasks slice statuses, plus CONTEXT, routes,
+   refs, and e2e. Deep-read bundle entries and references only when dispatching
+   the slice that needs them.
 2. Clean git; every slice has status/matrix/constraint IDs/verification/review;
    gates decided.
 3. Soft-load harness presets; `preset_missing` is soft-degrade only.
@@ -46,9 +49,12 @@ For each ready slice:
    seam legal, commit present, and the leaf's constraint evidence. A leaf-reported
    disposition conflict returns to the parent for re-brief; it is not silently
    absorbed.
-3. Review: required → reviewer leaf (tdd anti-patterns + acceptance + architecture
-   continuity); self-check
-   only when low-risk; upgrade on high-risk boundaries.
+3. Review: dispatch by the slice's review value — `required` → reviewer leaf
+   (tdd anti-patterns + acceptance + architecture continuity; unchanged rules);
+   `batch` → deferred to the end-of-issue batch review (record nothing yet
+   beyond slice status); `self-check` → unchanged (only when low-risk; upgrade
+   on high-risk boundaries). `batch` appears only in `review: batch` packages;
+   absent or `per-slice` ⇒ today's binary `required | self-check` behavior.
 4. Fail → course correction (≤2 implement rounds / problem; design defect →
    Human Escalation Stop).
 5. **Slice done when** verification + review pass.
@@ -59,12 +65,18 @@ Prefer **assembled behavior acceptance** over replaying every unit suite:
 
 1. Matrix still covered for the integrated change.
 2. Run e2e.md classifications (primary net for “green slices, broken product”). An E2E item whose validation is already covered by slice-level runs is recorded as `covered_by_slice` with the cited slice + evidence instead of being re-run.
-3. Overall review vs Behavior Contract and the Constraint Bundle: inherited
-   invariants have evidence, exceptions are bounded, and public behavior keeps
-   the recorded dependency direction. Fix via implementer leaf if needed.
-4. Hand off same-session **rope-verify** (not finish). Finish only after verify PASS.
+3. If ≥1 slice is marked `batch`: spawn **one** batch reviewer leaf per ADR
+   0004 (see execution-rules "Batch Review Execution") **before** verify;
+   findings route to fix rounds like any review finding.
+4. Light handoff checklist: per-slice commits present; review verdict lines
+   recorded for every `required` AND `batch` slice (a batch verdict covers its
+   slice list); E2E statuses recorded; no unrelated dirty files. Judgment over
+   the assembled diff belongs to the batch reviewer brief (Behavior Contract +
+   constraint IDs) and to rope-verify — not to a go parent pass.
+5. Hand off same-session **rope-verify** (not finish). Finish only after verify PASS.
 
 ## Stop / report
 
 Stop on missing gates, human gates, escalation, dirty unrelated tree, missing
-env. Report: slices, commits, red/green evidence, reviews, E2E statuses, stops.
+env. Report: slices, commits, red/green evidence, reviews (incl. batch review
+verdicts), E2E statuses, stops.
