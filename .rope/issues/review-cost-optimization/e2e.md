@@ -26,7 +26,7 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - none beyond reading repo files
 Result:
-- agent_pass — walked shape SKILL step 1 (review-mode question: "Then ask the
+^- agent_passed — walked shape SKILL step 1 (review-mode question: "Then ask the
   user for the **review mode** … Record `review: per-slice | batch`", lines
   21-27) + issue-package.md template (`review: per-slice | batch` frontmatter;
   slice field `Review: required | batch | self-check` + validity note) for a
@@ -64,7 +64,7 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - none beyond reading repo files
 Result:
-- agent_pass — walked `.rope/issues/dynamic-workflow-mode/prd.md` (frontmatter
+^- agent_passed — walked `.rope/issues/dynamic-workflow-mode/prd.md` (frontmatter
   `mode: dynamic` only; no `review:` field) through go SKILL slice loop item 3
   ("absent or `per-slice` ⇒ today's binary `required | self-check` behavior")
   and execution-rules (batch execution is scoped to "In `review: batch`
@@ -97,7 +97,7 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - none beyond reading repo files
 Result:
-- agent_pass — grepped the three values across CONTEXT, ADR 0004, spec, the
+^- agent_passed — grepped the three values across CONTEXT, ADR 0004, spec, the
   shape/go/verify skill sets (skills/ + .agents/skills/), README, routes:
   `required`/`batch`/`self-check` all present where expected (routes.md is a
   navigation map and carries none — ADR 0004 reference supplies the
