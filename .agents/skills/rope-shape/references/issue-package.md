@@ -14,6 +14,7 @@
 ```md
 ---
 mode: serial | dynamic
+review: per-slice | batch
 ---
 
 # <Issue Title>
@@ -140,10 +141,12 @@ mode: serial | dynamic
 - Tests:
 - Implementation notes:
 - Verification:
-- Review: required | self-check
+- Review: required | batch | self-check
 - Review reason:
 - Stop conditions:
 ```
+
+Review validity: `batch` is valid only when the package is `review: batch`; Review Risk Gate slices are always `required`.
 
 ## `e2e.md`
 

@@ -39,6 +39,11 @@ When `prd.md` carries `mode: dynamic`:
 
 Serial behavior is unchanged when `mode` is absent or `serial`.
 
+In `review: batch` packages (R3): `required` slices keep their per-slice
+review leaf; `batch` slices' reviews run once at end-of-issue via the batch
+reviewer leaf; parallel implementer fan-out, commit rules, and no-nested-spawn
+are unchanged.
+
 ## Harness Leaf Presets
 
 If `~/.config/rope/harness/<host>.json` exists (pi: `~/.config/rope/harness/pi.json`):
@@ -60,10 +65,13 @@ Every implementer/reviewer spawn brief should include:
 2. Goal and out-of-scope
 3. **Acceptance (user-visible):** slice `Public behavior` + owned Matrix rows
 4. **Seams:** only those listed in PRD Testing Decisions (copy the list; do not invent)
-5. **Architecture constraints:** copy the global constraints and this slice's
-   Constraint IDs from the PRD bundle, including source, status, disposition,
-   scope, invariants, public seam, forbidden shortcuts, required evidence, and
-   open conflicts. Do not substitute a bare “follow the ADR” instruction.
+5. **Architecture constraints (by reference):** the brief carries the
+   Constraint Bundle **path**, this slice's **Constraint IDs**, and the short
+   **global invariant list** inline. The leaf reads the bundle detail itself —
+   source, status, disposition, scope, invariants, public seam, forbidden
+   shortcuts, required evidence, and conflicts per ID — and returns a
+   one-line confirmation per ID plus any conflicts. No bare “follow the ADR”
+   instruction; no full inline bundle copy.
 6. **TDD mode:** `required` (default for code) | `waived (docs-only)` + reason
 7. When TDD required — hard fields:
    - Red command(s) the leaf must run before implementation
@@ -103,7 +111,32 @@ Use `Review: required` when the slice touches:
 - multi-layer behavior
 - E2E critical path
 
+The gate classifies `required` vs the rest: in `review: batch` packages the
+non-gate code slices take `batch` (deferred to the end-of-issue batch review);
+the gate trigger list itself is unchanged.
+
 Use `Review: self-check` only for low-risk docs, fixture, or isolated behavior.
+
+## Batch Review Execution (parent-owned)
+
+In `review: batch` packages, when ≥1 slice is marked `Review: batch`:
+
+1. After all slices complete and **before** verify, the parent spawns **one**
+   `rope-reviewer` leaf over the **cumulative diff of all batch slices** — one
+   leaf for the whole set, however many slices it covers. Prefer
+   `rope-reviewer` from the harness manifest.
+2. The brief carries the Behavior Contract, the covered slice list, and the
+   Constraint IDs **by reference**: the Constraint Bundle path is given, and
+   the leaf reads the bundle detail itself. Context stays fresh and clean —
+   the diff + criteria only, no implementation transcripts.
+3. The verdict is recorded **per covered slice** in `tasks.md` with run/agent
+   identity, so verify can audit that the batch review really ran.
+4. A batch finding routes to fix rounds like any review finding (≤2 automated
+   rounds per problem, then Human Escalation Stop).
+5. Zero `batch` slices ⇒ no batch leaf is spawned.
+6. `batch` is **never** degraded to self-check: if the parent cannot spawn any
+   worker at all, the `review_degraded` rules from Required Review Execution
+   apply.
 
 ## Required Review Execution (parent-owned)
 
@@ -153,22 +186,15 @@ Record stop reason in `tasks.md` when escalating.
 - Do not combine unrelated slices.
 - Do not push, merge, rebase, or delete branches unless the user explicitly asks.
 
-## Overall Review Checklist
+## Handoff Checklist
 
-- PRD goals and non-goals still match the final diff.
-- Behavior Contract / public behaviors hold for the **assembled** change.
-- Architecture Impact has a disposition for every relevant decision, or an
-  explicit `not-applicable`/New decision candidate outcome.
-- Every inherited invariant and exception has the required evidence; no second
-  state, persistence, permission, or error strategy silently duplicates an
-  existing owner.
-- Each applicable Behavior Matrix row has test, smoke, or explicit waiver.
-- Code slices show red-before-green evidence (or docs-only waiver); do not require
-  replaying every unit test if evidence is already recorded.
-- E2E `agent` items were actually executed (primary integration acceptance).
-- E2E `agent-with-gate` items have shape-time decisions and are executed, skipped, or blocked according to that decision.
-- Existing behavior compatibility was tested or explicitly waived.
-- No unrelated dirty files were included.
-- Per-slice `Review: required` used parent-spawned reviewer (or recorded true `review_degraded`).
-- No new test seams appeared outside PRD Testing Decisions without plan adjustment.
-- `tasks.md` constraint IDs and evidence remain mapped to the canonical PRD bundle.
+Before handing off to rope-verify:
+
+- Per-slice commits are present.
+- Review verdict lines are recorded for every `required` AND `batch` slice
+  (one batch verdict line covers its covered slice list).
+- E2E statuses are recorded.
+- No unrelated dirty files remain.
+
+Assembled-diff judgment lives in the batch reviewer brief (Behavior Contract +
+constraint IDs) and in rope-verify (ADR 0004) — not in a go parent pass.
