@@ -1,5 +1,22 @@
 # Risk-Tiered Review Mode and Lean Leaf Briefs Tasks
 
+## Batch Review (issue review: batch)
+
+- Slices covered: 1, 2, 4, 5 (Slice 3 was `required` — independently
+  reviewed: rope-reviewer leaf `approve`, commit de1852d)
+- Executor: parent-spawned `rope-reviewer` leaf, fresh clean context, one
+  leaf over cumulative diff of batch commits (07773f0, d81f241, cd7a9fe,
+  b84f0b3, cc65191)
+- Verdict: **approve** — per-slice pass (1: terms+spec ADR-consistent;
+  2: shape question/guardrails/templates; 4: verify audit + guide transport;
+  5: README/routes/resync + deferred matrix reword executed; diff -r clean)
+- Assembled check: one vocabulary across shape↔go↔verify↔README↔CONTEXT/spec;
+  no parent overall-review phrasing in active docs; gate list identical at
+  all 4 sites; E1–E3 spot-checked accurate
+- Findings: 1 minor (this file's stale Slice 4/5 statuses) — fixed by this
+  commit
+
+
 ## Behavior Matrix
 
 | Row | Applies? | Verification |
@@ -134,7 +151,7 @@
 
 ## Slice 4: verify-side contract and continuity guide
 
-- Status: pending
+- Status: done (commit cd7a9fe; seam red→green recorded; review: batch → covered by batch review)
 - Kind: vertical
 - Goal: rope-verify audits batch verdicts as real reviews, and the
   architecture-continuity guide states the by-reference brief transport.
@@ -164,7 +181,7 @@
 
 ## Slice 5: Integration — README, routes, install resync, end-to-end dry-run
 
-- Status: pending
+- Status: done (commits b84f0b3 + cc65191 + 7d840f6; E1–E3 agent_pass; review: batch → covered by batch review)
 - Kind: vertical
 - Goal: public docs mention the review mode, navigation points at ADR 0004,
   the installed copies match `skills/`, and the assembled document set reads
