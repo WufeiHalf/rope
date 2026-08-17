@@ -15,7 +15,7 @@
 
 ## Slice 1: CONTEXT terms and spec entry
 
-- Status: pending
+- Status: done (commit 07773f0; seam red→green recorded; review: batch → deferred)
 - Kind: vertical
 - Goal: the shared vocabulary defines review mode and batch review so every
   later slice cites one language.
@@ -45,10 +45,9 @@
 - Review reason: docs-only language layer
 - Stop conditions: ADR 0004 wording conflict that cannot be resolved by
   quoting it
-
 ## Slice 2: shape-side review-mode contract
 
-- Status: pending
+- Status: done (commit d81f241; seam red→green recorded; review: batch → deferred)
 - Kind: vertical
 - Goal: rope-shape asks for review mode and produces packages that carry it,
   with the three-valued slice marking and its guardrail.
@@ -79,7 +78,7 @@
 
 ## Slice 3: go execution contract (review dispatch, batch execution, briefs, lean load)
 
-- Status: pending
+- Status: done (commit de1852d; review: required → reviewer leaf approve; 1 minor deferred to Slice 5)
 - Kind: vertical
 - Goal: rope-go schedules reviews by mode, runs one parent-spawned batch
   reviewer leaf before verify, has no parent overall review, and uses
@@ -123,6 +122,13 @@
 - Review: required
 - Review reason: changes the public go execution contract (review gates and
   the go→verify boundary) — the highest-risk surface of this issue
+- Review verdict: PASS — rope-reviewer leaf `approve` (all required-evidence
+  bullets present; Risk Gate list verbatim; ADR 0001/0003/0004 continuity;
+  F1–F4 guarded; seams independently re-run green)
+- Deferred minor finding → Slice 5: reword go SKILL "After all slices" item 1
+  ("Matrix still covered for the integrated change") from parent-judgment
+  phrasing to evidence-bookkeeping phrasing; assembled matrix judgment is
+  verify-owned per ADR 0004 D4.
 - Stop conditions: any change that weakens ADR 0001 audit checks or commit
   rules
 
@@ -164,10 +170,12 @@
   the installed copies match `skills/`, and the assembled document set reads
   coherently shape→go→verify.
 - Blocked by: Slice 2, Slice 3, Slice 4
-- Scope: `README.md`; `.rope/routes.md`; resync
+- Scope: `README.md`; `.rope/routes.md`; `skills/rope-go/SKILL.md` (one-line
+  matrix reword — deferred Slice 3 review finding); resync
   `.agents/skills/rope-shape/`, `.agents/skills/rope-go/`,
   `.agents/skills/rope-verify/` from `skills/`
-- Owned files: README.md, .rope/routes.md, .agents/skills/rope-{shape,go,verify}/** (copies)
+- Owned files: README.md, .rope/routes.md, skills/rope-go/SKILL.md (one line),
+  .agents/skills/rope-{shape,go,verify}/** (copies)
 - Size cap: ~150 diff lines / ≤10 files (mostly synced copies)
 - Matrix rows: Real entrypoint or integration path; Existing behavior
   compatibility
