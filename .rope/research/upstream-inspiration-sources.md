@@ -30,21 +30,22 @@ Fact: Trellis is a team-level agent harness with repo-local wiki/workflow under
 Source: GitHub repo metadata; docs.trytrellis.app architecture notes
 Verified by: web_search
 Stability: medium
-Implication: Useful as **workflow/layout inspiration** (already reflected in
-`rope-migrate-docs` mapping). AGPL makes vendoring/copying code or shipping
+Implication: Useful as **workflow/layout inspiration** for Rope's `.rope/`
+layout. AGPL makes vendoring/copying code or shipping
 Trellis files as product surface risky; harvest should prefer idea extraction and
 Rope-native rewrite, not file sync. Treat as secondary/careful source.
 
-### Existing one-time bridge in Rope
+### One-time bridge in Rope (retired)
 
-Fact: `skills/rope-migrate-docs` already maps Matt-style docs and Trellis
-`.trellis/` layout into `.rope/`, without deleting originals. It is adoption
-migration, not ongoing upstream tracking.
-Source: `skills/rope-migrate-docs/SKILL.md`, `references/mapping.md`
+Fact: `skills/rope-migrate-docs` previously mapped Matt-style docs and Trellis
+`.trellis/` layout into `.rope/`, without deleting originals. The skill has been
+removed (2026-08) because it is no longer needed; Rope's current layout is
+`.rope/` and adoption migration is handled case-by-case, not by a shipped skill.
+Source: git history; `README.md`
 Verified by: repo read
-Stability: high for current code
-Implication: Do not overload migrate-docs into a recurring sync tool. Recurring
-harvest is a separate maintenance concern for this repo.
+Stability: high
+Implication: Do not reintroduce a shipped migration bridge; recurring harvest
+remains a separate maintenance concern for this repo.
 
 ## Assumptions
 

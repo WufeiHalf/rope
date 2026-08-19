@@ -25,8 +25,6 @@ issue shaping, TDD execution, and closeout.
   routing.
 - `rope-summary` updates `.rope/` architecture/context docs after implementation
   when reusable contracts or bug-fix learnings should be preserved.
-- `rope-migrate-docs` migrates existing Matt Pocock-style docs and Trellis docs
-  into `.rope/` without deleting originals.
 - `rope-harness-presets` discovers the host model catalog and writes Rope leaf
   agent presets (`rope-*`) plus a user-global harness manifest (manual refresh).
 

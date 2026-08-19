@@ -9,7 +9,7 @@ disable-model-invocation: true
 Compare the pinned Matt Pocock skills upstream to the last reviewed revision,
 write a human review brief, record marks, and advance the pin **only on
 explicit human close**. This is **Upstream Harvest** for this Rope repo — not a
-product skill, not vendor merge, not `rope-migrate-docs`.
+product skill, not vendor merge, not a one-time migration bridge.
 
 ## State (read first)
 
