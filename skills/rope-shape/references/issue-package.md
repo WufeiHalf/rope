@@ -27,6 +27,10 @@ review: per-slice | batch
 
 <User-facing solution.>
 
+## Contract Note
+
+- <3–5 one-sentence bullets: when this issue is done, what can you observe? Include failure visibility where relevant. Direct projection of Behavior Contract — not a separate wish list.>
+
 ## Goals
 
 - <goal>
@@ -50,7 +54,7 @@ review: per-slice | batch
 - System under test: <behavior being specified and tested>
 - Trigger/input: <user action, API call, event, command, or state change>
 - Collaborators: <dependencies that participate but do not own the behavior>
-- Observable result: <output, state, artifact, UI, log, or side effect proving success>
+- Observable result: <output, state, artifact, UI, log, or side effect proving success>  <!-- each Contract Note bullet must project from this / Failure visibility -->
 - Failure visibility: <where and how errors are visible>
 - Forbidden shortcuts: <implementation paths that would violate intent>
 

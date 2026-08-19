@@ -44,7 +44,10 @@ Read `mode` from `prd.md` frontmatter (`serial` default | `dynamic`).
 
 For each ready slice:
 
-1. `in_progress`; spawn implementer with **TDD hard fields** (execution-rules; commands focused/incremental, may cite prior full-suite evidence).
+1. `in_progress`; spawn implementer with a **minimal brief** (ADR 0005
+   allowlist + ≤60-line cap; execution-rules) including **TDD hard fields**
+   (execution-rules; commands focused/incremental, may cite prior full-suite
+   evidence).
 2. Check summary: acceptance alignment, **red evidence** (or waiver), green,
    seam legal, commit present, and the leaf's constraint evidence. A leaf-reported
    disposition conflict returns to the parent for re-brief; it is not silently

@@ -41,7 +41,7 @@ Default handoff: same-session `rope-go`.
    self-check` per slice using the Review Risk Gate: Risk Gate hit ⇒ `required`;
    other code slices ⇒ `batch` (only valid when the package is `review: batch`,
    else `required`); docs/fixture-only slices ⇒ `self-check`.
-7. Write `prd.md` (problem/solution, goals/non-goals, Behavior Contract, public
+7. Write `prd.md` (problem/solution, goals/non-goals, **Contract Note**, Behavior Contract, public
    behavior, **Testing Decisions**, Architecture Impact, full Constraint Bundle,
    refs, gates).
 8. Behavior Matrix in prd or tasks; N/A rows need a reason.
@@ -63,7 +63,12 @@ Default handoff: same-session `rope-go`.
      the main entrypoint and verifies contract alignment.
 10. `e2e.md` every item classified; include architecture evidence and resolve
     non-agent gates at shape time.
-11. User confirms PRD + architecture decisions + gates → commit package.
+11. **Contract Note gate:** output the `## Contract Note` from `prd.md` (3–5
+    one-sentence bullets: “when this issue is done, what can you observe?” +
+    failure visibility where relevant). The user confirms the note **instead of
+    reading the full PRD**; confirming the note confirms the Behavior Contract,
+    because the note is its direct human projection — not a separate wish list.
+    Then confirm architecture decisions + gates → commit package.
 12. **Done when** package committed, every impact entry has a disposition or
     recorded blocker, and gates are decided. Handoff go in-session
     (issue path + commit); cross-window only if user switches sessions.
@@ -81,3 +86,8 @@ Default handoff: same-session `rope-go`.
   Gate slice `batch` — it must be `required`.
 - No stale file-by-file plans in PRD — public interfaces and seams only.
 - Do not call the PRD a “spec” or slices “tickets” in written artifacts.
+- Contract Note must be 3–5 bullets derived from Behavior Contract fields
+  (Observable result / Failure visibility / boundary), never a second contract
+  that can drift from the PRD.
+- Do not ask the user to read the full PRD by default; step 11 confirms the
+  Contract Note. Full-PRD review is opt-in.

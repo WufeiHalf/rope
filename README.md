@@ -10,8 +10,9 @@ issue shaping, TDD execution, and closeout.
 - `rope-grill` discusses requirements and updates `.rope/CONTEXT.md`,
   `.rope/adr/`, `.rope/research/`, and `.rope/specs/`.
 - `rope-shape` turns clarified requirements into `.rope/issues/<issue>/` with
-  PRD, vertical slices, behavior matrix, E2E classification, and conditional
-  Architecture Impact plus a canonical Constraint Bundle.
+  PRD (including a human-facing **Contract Note**), vertical slices, behavior
+  matrix, E2E classification, and conditional Architecture Impact plus a
+  canonical Constraint Bundle.
 - `rope-go` executes slices as **Parent Orchestrator**: passes global and
   slice-relevant architecture constraints to implementer/reviewer leaves (by
   reference), runs TDD, commits, and classified E2E.
@@ -71,7 +72,9 @@ windows as the architecture.
    (spawn explore leaves for polluting investigation; write decisions to `.rope/`
    early).
 3. Use `rope-shape` to create `.rope/issues/<issue>/prd.md`, `tasks.md`, and
-   `e2e.md`. Default: continue in the same session.
+   `e2e.md`. The final confirmation is the **Contract Note** — 3–5 observable
+   outcomes projected from the Behavior Contract — not a full-PRD read
+   (ADR 0005). Default: continue in the same session.
 4. Use `rope-go` as parent orchestrator: for each slice, spawn implementer leaf,
    then review per the slice's `Review: required | batch | self-check` marking;
    `batch` slices defer to one end-of-issue batch review leaf, and `rope-verify`

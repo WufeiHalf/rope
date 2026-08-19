@@ -66,7 +66,10 @@ When present: `.rope/CONTEXT.md`, `routes.md`, relevant `adr/`, `research/`,
 9. Stress-test scenarios (primary / failure visibility / forbidden shortcut).
 10. Write CONTEXT / ADR / research / specs as decisions land (ADR three-tests).
 11. **Shared-understanding gate:** recap 3–6 bullets; user confirms before shape.
-   Do not write the issue package until confirm (unless they said “直接 shape”).
+    Do not write the issue package until confirm (unless they said “直接 shape”).
+    Shape later projects this recap into a **Contract Note** for the final
+    PRD confirmation (ADR 0005) — not a separate wish list, a human projection
+    of the Behavior Contract.
 12. **Done when** grilling.md Ready checklist holds + user confirm. Else list blockers.
 13. Handoff shape in-session by default; cross-window paste only if user switches
     sessions. Inline shape: summary then nod before commit.

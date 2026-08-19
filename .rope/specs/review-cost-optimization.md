@@ -57,6 +57,8 @@ sole parent-level assembled judgment). go ends with a light handoff checklist:
 - The leaf reads bundle detail itself and returns **per-ID confirmation +
   conflicts**.
 - No full inline bundle copy; no bare "follow the ADR".
+- Full minimal-brief allowlist + line cap: see
+  `plan-artifact-reader-layering.md` (ADR 0005).
 
 ## Lean parent load
 

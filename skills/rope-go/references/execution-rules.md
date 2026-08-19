@@ -57,37 +57,44 @@ If the manifest or a needed `rope-*` agent is missing:
 - Record `preset_missing` in `tasks.md` (review notes or final status).
 - Continue. Do **not** hard-block go. Do **not** auto-run `rope-harness-presets`.
 
-## Leaf Brief Contract (minimum)
+## Leaf Brief Contract (hard budget)
 
-Every implementer/reviewer spawn brief should include:
+Per ADR 0005, every implementer/reviewer spawn brief is a **minimal brief**:
+an allowlist plus a line cap. The parent checks the budget before dispatch.
 
-1. Issue path and slice id/title
-2. Goal and out-of-scope
-3. **Acceptance (user-visible):** slice `Public behavior` + owned Matrix rows
-4. **Seams:** only those listed in PRD Testing Decisions (copy the list; do not invent)
-5. **Architecture constraints (by reference):** the brief carries the
-   Constraint Bundle **path**, this slice's **Constraint IDs**, and the short
-   **global invariant list** inline. The leaf reads the bundle detail itself —
-   source, status, disposition, scope, invariants, public seam, forbidden
-   shortcuts, required evidence, and conflicts per ID — and returns a
-   one-line confirmation per ID plus any conflicts. No bare “follow the ADR”
-   instruction; no full inline bundle copy.
-6. **TDD mode:** `required` (default for code) | `waived (docs-only)` + reason
-7. When TDD required — hard fields:
-   - Red command(s) the leaf must run before implementation
-   - What failure signal counts as red
-   - Green command(s) after minimal implementation
-   - Commands must be **focused/incremental** — target the slice's tests at its seam, not a full-suite replay. A full suite run is needed only when the slice's change is not already covered by a recorded full-suite run; cite that prior evidence instead of re-running
-   - Anti-patterns to avoid (pointer to `references/tdd.md` is enough)
-8. Relevant artifact paths (prd/tasks/e2e, specs, files)
-9. Constraints (no nested spawn; commit rules; Blocked by / Scope)
-10. Expected return shape:
-   - summary, paths changed, commit hash
-   - acceptance text exercised
-   - red evidence (command + failure) unless waived
-   - green evidence (command + pass)
-   - architecture constraints checked, evidence, and disposition conflicts
-   - blockers
+**Content payload (allowed inline):**
+
+1. Issue path + slice id/title
+2. **Public behavior:** one user-visible sentence
+3. **Behavior Contract:** the 6 fields cut to their thinnest form
+4. **Architecture constraints (by reference):** Constraint Bundle **path** +
+   slice **Constraint IDs** + short **global invariant list**. The leaf reads
+   the bundle detail itself — source, status, disposition, scope, invariants,
+   public seam, forbidden shortcuts, required evidence, conflicts per ID — and
+   returns a one-line confirmation per ID plus any conflicts. No bare “follow
+   the ADR”; no full inline bundle copy.
+5. **Test seam + prior art:** the seam from PRD Testing Decisions (copy the
+   list; do not invent) + one prior-art path
+
+**Operational contract (required, not counted as content):**
+
+- TDD mode: `required` (default for code) | `waived (docs-only)` + reason; when
+  required — red command(s) before implementation, what failure signal counts
+  as red, green command(s) after minimal implementation. Commands are
+  **focused/incremental** — target the slice's tests at its seam; cite a prior
+  full-suite run instead of re-running when already recorded
+- Expected return shape: summary, paths changed, commit hash, acceptance text
+  exercised, red evidence (command + failure) unless waived, green evidence
+  (command + pass), architecture constraints checked + disposition conflicts,
+  blockers
+- Relevant artifact paths (prd/tasks/e2e, bundle, specs, files) — the locators
+  that make by-reference reads possible
+- No nested spawn; commit rules; Blocked by / Scope
+- Anti-pattern pointer to `references/tdd.md` is enough
+
+**Line cap:** brief body ≤ 60 lines (paths and command blocks excluded).
+Everything else — slice notes, PRD paragraphs, bundle detail, implementation
+notes, speculative file-by-file plans — is **by reference only**, never inline.
 
 Reviewer briefs must require checking acceptance alignment, `tdd.md`
 anti-patterns, and architecture continuity: inherited invariants, responsibility
@@ -128,7 +135,8 @@ In `review: batch` packages, when ≥1 slice is marked `Review: batch`:
 2. The brief carries the Behavior Contract, the covered slice list, and the
    Constraint IDs **by reference**: the Constraint Bundle path is given, and
    the leaf reads the bundle detail itself. Context stays fresh and clean —
-   the diff + criteria only, no implementation transcripts.
+   the diff + criteria only, no implementation transcripts. Apply the same
+   Minimal Leaf Brief allowlist + ≤60-line cap (ADR 0005).
 3. The verdict is recorded **per covered slice** in `tasks.md` with run/agent
    identity, so verify can audit that the batch review really ran.
 4. A batch finding routes to fix rounds like any review finding (≤2 automated
