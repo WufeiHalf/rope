@@ -25,6 +25,11 @@ issue shaping, TDD execution, and closeout.
   routing.
 - `rope-summary` updates `.rope/` architecture/context docs after implementation
   when reusable contracts or bug-fix learnings should be preserved.
+- `rope-quick` runs a **solo quick-fix session** for small, already-diagnosed
+  fixes (typically a prepared briefing in a worktree): one model clarifies the
+  remaining direction, fixes red→green at the nearest seam, commits, syncs
+  `.rope/` docs inline, and leaves a one-page `quick.md` record; four stop
+  lines hand back to the full pipeline (ADR 0006).
 - `rope-harness-presets` discovers the host model catalog and writes Rope leaf
   agent presets (`rope-*`) plus a user-global harness manifest (manual refresh).
 
@@ -100,6 +105,16 @@ issue-level verify, and serializes any overlapping slices. Serial behavior is
 unchanged when the mode is off or absent. See
 `.rope/adr/0003-dynamic-workflow-mode.md`.
 
+**Quick fixes (ADR 0006):** for a small fix whose investigation is already done,
+skip the pipeline and invoke `rope-quick` (typically in a worktree with a
+prepared briefing). One model handles it start to finish: direction
+confirmation, red→green fix at the nearest seam, local commit, inline `.rope/`
+doc sync, a one-page `quick.md` record, and a closing report with a risk-focus
+section directing human review. No issue package and no verify; four stop
+lines (new architecture decision, two failed fix rounds, scope sprawl,
+schema/destructive/production) abort to the full pipeline. See
+`.rope/adr/0006-quick-fix-path.md`.
+
 ## `.rope/` Layout
 
 ```text
@@ -117,6 +132,7 @@ unchanged when the mode is off or absent. See
       tasks.md
       e2e.md
       verify.md   # written by rope-verify after go completes
+      quick.md    # written by rope-quick (solo quick-fix path)
 ```
 
 ## E2E Classification
