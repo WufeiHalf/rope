@@ -7,7 +7,7 @@ The go session is the **Parent Orchestrator**. Leaf workers:
 | Role | Typical preset | Job |
 | --- | --- | --- |
 | implementer | `rope-implementer` | TDD, implement one slice unit, commit, return summary + paths |
-| reviewer | `rope-reviewer` | Read-only critique of a finished unit; return verdict |
+| reviewer | `rope-reviewer` | End-of-issue new-eyes review: assembled diff, contract, real-entrypoint probe; return verdict |
 | explore | `rope-explore` | Read-only facts when re-brief needs more context |
 | verify-inspector | `rope-verify-inspector` | Not used mid-go; reserved for issue-level verify |
 
@@ -19,30 +19,22 @@ Rules:
 - Correction = rewrite brief + re-spawn implementer (or explore then re-brief). Max **2** automated fix rounds per problem → **Human Escalation Stop**.
 - Design / requirements / contract defect → immediate Human Escalation Stop (no thrash).
 
-## Dynamic mode / parallel frontier
+## Graph-driven execution (waves)
 
-When `prd.md` carries `mode: dynamic`:
+No mode flag — shape already read the slice graph; go runs it:
 
 - **Frontier** = slices with no unresolved blockers.
-- **Fan-out**: disjoint-scope frontier slices are spawned to **concurrent
-  implementer leaves** — parent spawns one leaf per slice. Contract
-  (`kind: contract`) and integration slices stay serial.
-- **Overlap ⇒ serialize**: slices whose `Scope` / `owned_files` overlap are
-  never parallel; run them serially (a core file owned by multiple slices is a
-  shape defect, not a go problem).
-- **Gates kept**: per-slice **review gates** and **commit rules** apply
-  unchanged to parallel slices; do not skip or weaken them in dynamic mode.
-- **No nested spawn**: a parallel implementer leaf must not spawn another
-  leaf; the parent owns all dispatch.
-- **Degradation**: if go cannot spawn concurrent workers, degrade to serial
-  and record the reason in `tasks.md`.
-
-Serial behavior is unchanged when `mode` is absent or `serial`.
-
-In `review: batch` packages (R3): `required` slices keep their per-slice
-review leaf; `batch` slices' reviews run once at end-of-issue via the batch
-reviewer leaf; parallel implementer fan-out, commit rules, and no-nested-spawn
-are unchanged.
+- **Fan-out**: frontier slices whose `Scope` / `owned_files` do not overlap
+  are spawned as **background implementer leaves** — one per slice, results
+  collected as they land. Overlapping frontier slices serialize (a core file
+  owned by multiple slices is a shape defect; go works around it, shape
+  should have caught it).
+- **Waves**: wave N+1 starts when wave N clears. Rivers — zero-dependency
+  clusters — run concurrently throughout.
+- **No nested spawn**: an implementer leaf must not spawn another leaf; the
+  parent owns all dispatch.
+- **Degradation**: if the host cannot spawn background workers, run the wave
+  foreground one slice at a time and record the reason in `tasks.md`.
 
 ## Harness Leaf Presets
 
@@ -87,8 +79,9 @@ an allowlist plus a line cap. The parent checks the budget before dispatch.
   exercised, red evidence (command + failure) unless waived, green evidence
   (command + pass), architecture constraints checked + disposition conflicts,
   blockers
-- Relevant artifact paths (prd/tasks/e2e, bundle, specs, files) — the locators
-  that make by-reference reads possible
+- Relevant artifact paths (prd/tasks/e2e, bundle, map, specs, files) — the
+  locators that make by-reference reads possible
+- Investigation map path — orient by it, update falsified lines before commit
 - No nested spawn; commit rules; Blocked by / Scope
 - Anti-pattern pointer to `references/tdd.md` is enough
 
@@ -96,20 +89,56 @@ an allowlist plus a line cap. The parent checks the budget before dispatch.
 Everything else — slice notes, PRD paragraphs, bundle detail, implementation
 notes, speculative file-by-file plans — is **by reference only**, never inline.
 
-Reviewer briefs must require checking acceptance alignment, `tdd.md`
-anti-patterns, and architecture continuity: inherited invariants, responsibility
-ownership, dependency direction, public compatibility, exception scope, and the
-required evidence. Their return includes the checked constraint IDs, evidence,
-final disposition, and conflicts. Review behavior and boundaries, not a required
-function or class name.
+Reviewer briefs (end-of-issue) must require checking acceptance alignment,
+`tdd.md` anti-patterns, and architecture continuity: inherited invariants,
+responsibility ownership, dependency direction, public compatibility,
+exception scope, and the required evidence — plus the Contract axis and the
+real-entrypoint instruction (End-of-Issue Review Execution below). Their
+return includes the checked constraint IDs, evidence, final disposition, and
+conflicts. Review behavior and boundaries, not a required function or class
+name.
 
 If a leaf discovers that the recorded disposition cannot hold, it returns the
 conflict and evidence to the parent. The parent updates the package/brief and
 re-dispatches; the leaf does not invent `exception`, `extend`, or `supersede`.
 
-## Review Risk Gate
+## End-of-Issue Review Execution (parent-owned)
 
-Use `Review: required` when the slice touches:
+After all slices and before verify, the parent spawns exactly **one**
+reviewer leaf — new eyes that never watched the build:
+
+1. Prefer `rope-reviewer` from the harness manifest. If no specialized type
+   exists but a generic worker does, use it with explicit review
+   instructions; record the type used. `review_degraded` only when the parent
+   cannot spawn any worker at all — then self-review and record
+   `review_degraded: no_subagent_tool_available`, what discovery was
+   attempted, and why self-review was used.
+2. Brief (minimal-brief allowlist + ≤60-line cap still applies):
+   - diff base..HEAD with commit list (base = pre-issue merge point)
+   - Contract Note bullets + Behavior Contract by reference
+   - Constraint Bundle path + constraint IDs by reference
+   - map path + e2e evidence paths
+   - the two axes + real-entrypoint instruction + high-risk focus list
+   - expected return: verdict `approve | changes_requested | blocked`,
+     findings with file:line evidence, per-axis notes, probe log path
+3. The reviewer is read-only on code; it may start/stop local processes and
+   drive a browser to probe the real entrypoint. It must not edit code or
+   spawn workers.
+4. Record the verdict + run/agent identity + fix rounds in `tasks.md` (one
+   issue-level verdict; per-slice review no longer exists).
+5. Findings → one fix brief → implementer leaf; ≤2 automated rounds per
+   problem, then Human Escalation Stop.
+
+Do **not**:
+
+- instruct an implementer leaf to spawn a review subagent
+- treat nested Agent inside a leaf as the review path
+- silently skip the review when a worker can be spawned
+
+## High-risk boundaries (the reviewer's deepest look)
+
+Probe these hardest when the diff touches them:
+
 - public interface or user-visible behavior
 - external system or adapter behavior
 - auth, permission, secret, or data leak risk
@@ -117,53 +146,6 @@ Use `Review: required` when the slice touches:
 - routing, app entrypoint, runtime wiring, background worker
 - multi-layer behavior
 - E2E critical path
-
-The gate classifies `required` vs the rest: in `review: batch` packages the
-non-gate code slices take `batch` (deferred to the end-of-issue batch review);
-the gate trigger list itself is unchanged.
-
-Use `Review: self-check` only for low-risk docs, fixture, or isolated behavior.
-
-## Batch Review Execution (parent-owned)
-
-In `review: batch` packages, when ≥1 slice is marked `Review: batch`:
-
-1. After all slices complete and **before** verify, the parent spawns **one**
-   `rope-reviewer` leaf over the **cumulative diff of all batch slices** — one
-   leaf for the whole set, however many slices it covers. Prefer
-   `rope-reviewer` from the harness manifest.
-2. The brief carries the Behavior Contract, the covered slice list, and the
-   Constraint IDs **by reference**: the Constraint Bundle path is given, and
-   the leaf reads the bundle detail itself. Context stays fresh and clean —
-   the diff + criteria only, no implementation transcripts. Apply the same
-   Minimal Leaf Brief allowlist + ≤60-line cap (ADR 0005).
-3. The verdict is recorded **per covered slice** in `tasks.md` with run/agent
-   identity, so verify can audit that the batch review really ran.
-4. A batch finding routes to fix rounds like any review finding (≤2 automated
-   rounds per problem, then Human Escalation Stop).
-5. Zero `batch` slices ⇒ no batch leaf is spawned.
-6. `batch` is **never** degraded to self-check: if the parent cannot spawn any
-   worker at all, the `review_degraded` rules from Required Review Execution
-   apply.
-
-## Required Review Execution (parent-owned)
-
-For every `Review: required` slice, **after** the implementer leaf finishes:
-
-1. Parent spawns a reviewer leaf. Prefer `rope-reviewer` from the harness manifest.
-2. If no specialized review type exists but a generic worker does, use the generic type with explicit read-only review instructions; record the type used.
-3. If a named review type is rejected but generic subagents exist, note `no_specialized_review_subagent_available` and still use the generic worker — this is **not** total degradation.
-4. Record the review verdict in `tasks.md`.
-5. **`review_degraded` only when the parent cannot spawn any worker at all** (no Agent/subagent tool). Then self-review and record:
-   - `review_degraded: no_subagent_tool_available`
-   - what discovery was attempted
-   - why self-review was used
-
-Do **not**:
-
-- instruct the implementer leaf to spawn a review subagent
-- treat nested Agent inside a leaf as the required review path
-- silently treat `Review: required` as ordinary self-check when a worker can be spawned
 
 ## Fix Rounds and Human Escalation Stop
 
@@ -199,10 +181,10 @@ Record stop reason in `tasks.md` when escalating.
 Before handing off to rope-verify:
 
 - Per-slice commits are present.
-- Review verdict lines are recorded for every `required` AND `batch` slice
-  (one batch verdict line covers its covered slice list).
+- The end-of-issue review verdict (+ fix rounds) is recorded with run/agent
+  identity.
 - E2E statuses are recorded.
 - No unrelated dirty files remain.
 
-Assembled-diff judgment lives in the batch reviewer brief (Behavior Contract +
-constraint IDs) and in rope-verify (ADR 0004) — not in a go parent pass.
+Assembled-diff and product-truth judgment live in the end-of-issue reviewer
+(ADR 0007) — not in a go parent pass.
