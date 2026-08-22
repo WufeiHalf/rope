@@ -7,16 +7,12 @@
   prd.md
   tasks.md
   e2e.md
+  map.md   # optional: one fact per line, path + date; shared leaf orientation
 ```
 
 ## `prd.md`
 
 ```md
----
-mode: serial | dynamic
-review: per-slice | batch
----
-
 # <Issue Title>
 
 ## Problem Statement
@@ -145,12 +141,11 @@ review: per-slice | batch
 - Tests:
 - Implementation notes:
 - Verification:
-- Review: required | batch | self-check
-- Review reason:
 - Stop conditions:
 ```
 
-Review validity: `batch` is valid only when the package is `review: batch`; Review Risk Gate slices are always `required`.
+Size cap is universal (fresh-context fit); slices that cannot fit are re-cut
+at shape, never shipped oversized.
 
 ## `e2e.md`
 

@@ -27,6 +27,9 @@ E2E Command should not duplicate validation that slice-level runs already cover.
 | **Spec** | `.rope/specs/**` architecture contracts — **not** the PRD |
 | **ADR** | Hard-to-reverse architecture decisions |
 | **covered_by_slice** | E2E result meaning the validation is fully covered by recorded slice-level runs (cited in `e2e.md`); terminal, no re-run |
+| **River** | Zero-dependency slice cluster — a second journey inside the graph |
+| **Wave** | Topological level of the slice graph; frontier slices run concurrently |
+| **Map** | `<issue>/map.md` — one fact per line with path + date; shared orientation for leaves |
 
 Upstream “spec/ticket” is kernel only; keep Rope names in artifacts we write.
 
@@ -36,8 +39,16 @@ One mechanical change with huge blast radius: do not fake vertical slices.
 Sequence expand → migrate batch(es) → contract; `Kind: wide-refactor-*`;
 Blocked by along the chain; prefer green batches.
 
-## Frontier
+## Frontier, waves, rivers
 
-Slices with `Blocked by: none` (or blockers completed) are the frontier.
-Independent frontier slices may run in parallel in go when Scope does not
-overlap; dependents stay serial.
+Read the slice graph from `Blocked by` edges — never guess it.
+
+- **Frontier** — slices with no unresolved blockers. Frontier slices whose
+  owned files do not overlap run concurrently.
+- **Wave** — one topological level of the graph; wave N+1 starts as wave N
+  clears.
+- **River** — a slice cluster with no edge, direct or transitive, to the rest
+  of the graph. Two rivers are two journeys: shape offers to split them into
+  separate issues (each its own pipeline, deliverable alone) or keeps one
+  issue and lets go run the rivers in parallel. Never merge rivers into one
+  slice to dodge the question.
