@@ -46,7 +46,7 @@ Notes:
 Read first:
 - `bin/rope.js`
 - `package.json`
-- `README.md` Install Skills section
+- `README.md` Install section
 
 Verify with:
 - `node bin/rope.js --help`

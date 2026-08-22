@@ -1,160 +1,151 @@
-# Rope Skill
+<div align="center">
 
-Rope is a lightweight repo-local coding harness for agentic coding tools. It keeps
-project knowledge under `.rope/` and uses small skills for requirement grilling,
-issue shaping, TDD execution, and closeout.
+# Rope
 
-## What It Provides
+**Grill. Shape. Go.**
 
-- `rope-init` initializes `.rope/` in a target repository.
-- `rope-grill` discusses requirements and updates `.rope/CONTEXT.md`,
-  `.rope/adr/`, `.rope/research/`, and `.rope/specs/`.
-- `rope-shape` turns clarified requirements into `.rope/issues/<issue>/` with
-  PRD (including a human-facing **Contract Note**), vertical slices, behavior
-  matrix, E2E classification, and conditional Architecture Impact plus a
-  canonical Constraint Bundle.
-- `rope-go` executes slices as **Parent Orchestrator**: passes global and
-  slice-relevant architecture constraints to implementer/reviewer leaves (by
-  reference), runs TDD, commits, and classified E2E.
-- `rope-verify` verifies an issue's completion state against its PRD, Behavior
-  Matrix, E2E plan, and Constraint Bundle after `rope-go` finishes. Parent-owned,
-  read-only on code; checks invariants, exceptions, dependency direction, and
-  evidence, then produces findings and a fix brief when needed.
-- `rope-finish` closes a Rope issue after implementation, validation, and verify,
-  completing confirmed pending architecture documentation through existing `.rope/`
-  routing.
-- `rope-summary` updates `.rope/` architecture/context docs after implementation
-  when reusable contracts or bug-fix learnings should be preserved.
-- `rope-quick` runs a **solo quick-fix session** for small, already-diagnosed
-  fixes (typically a prepared briefing in a worktree): one model clarifies the
-  remaining direction, fixes red→green at the nearest seam, commits, syncs
-  `.rope/` docs inline, and leaves a one-page `quick.md` record; four stop
-  lines hand back to the full pipeline (ADR 0006).
-- `rope-harness-presets` discovers the host model catalog and writes Rope leaf
-  agent presets (`rope-*`) plus a user-global harness manifest (manual refresh).
+**English** · [简体中文](README.zh-CN.md)
 
-## Install Skills
+A repo-local skill harness for agentic coding tools — spec-driven,
+graph-driven, and honest about what "done" means.
 
-Install the bundled skills into the default agent skills directory:
+</div>
+
+---
+
+## What is Rope
+
+Rope is a set of small skills + a `.rope/` knowledge layer that turns one
+messy feature request into shipped, verified work. It exists because agent
+sessions fail in two familiar ways: **long-session drift** (the agent forgets
+what it decided three hours ago) and **green-pipeline rot** (every test
+passes, the product is still broken — nobody started it for real).
+
+Rope answers both. Durable knowledge lives in files, not chat. Heavy work
+runs in fresh-context leaf workers, orchestrated by one lean parent. And
+nothing is called done until a reviewer with **new eyes** walks the **real
+entrypoint** — starting the product the way a user would.
+
+Works with any host that supports skills and subagents (pi, Claude Code, …);
+`rope-harness-presets` adapts leaf model routing to whatever catalog your
+machine has.
+
+## How it works
+
+One issue, one parent session, five moves:
+
+1. **Grill** — a plain-language interview that settles behavior and
+   architecture *before* planning. Decisions land in `.rope/` docs
+   immediately; chat is treated as volatile.
+2. **Shape** — requirements become an issue package: PRD with a
+   **Contract Note** (3–5 observable outcomes), vertical slices sized to a
+   fresh context window, and a behavior matrix. Then shape **reads the slice
+   graph** — waves, rivers, numbers — and asks you exactly one execution
+   question.
+3. **Go** — waves run with concurrent background implementer leaves for
+   disjoint slices; leaves orient by a shared investigation **map** and
+   commit slice by slice. TDD discipline lives here, at agreed seams.
+4. **Review (once)** — after all slices, one reviewer leaf that never
+   watched the build reads the assembled diff on two axes — Standards and
+   Contract — then probes the real entrypoint. Findings route to one fix
+   brief, max two rounds, then it stops and asks you.
+5. **Verify & finish** — verify is a thin paperwork gate (review recorded,
+   E2E terminal, tree clean); finish closes the issue and routes
+   architecture-doc updates home.
+
+Small fix with the diagnosis already done? Skip all of it: `rope-quick` is
+the solo path — red → green at the nearest seam, one page of record, four
+stop lines back to the full pipeline.
+
+## What makes it different
+
+| Idea | What it buys you |
+| --- | --- |
+| **The graph answers, not vibes** | Serial-vs-parallel is decided *after* slicing, from `Blocked by` edges, with numbers. Zero-dependency "rivers" get offered as splits. |
+| **Contract Note** | You confirm 3–5 observable bullets instead of reading a PRD. The note *is* the contract's human projection — never a second contract. |
+| **Fresh-context iron rule** | Every slice fits one clean context window. Oversized slices are re-cut at shape; a re-cut that bends the requirement goes back to grill. |
+| **One review, new eyes** | Per-slice reviews see per-slice problems. The failure classes that kill issues — cross-slice conflicts, spec-observable gaps, fixture-vs-product drift — only show at the assembled diff. The budget goes there. |
+| **Real entrypoint probe** | Fixture-green is not product-true. The reviewer starts the product — browser, CLI, or API, whatever the project ships — and walks the primary paths. |
+| **Investigation map** | One fact per line, path + date. Leaves stop re-finding the same code (in our field data, 56–71% of big-slice tool calls were wayfinding). |
+| **Architecture continuity** | Every issue records a disposition — inherit, extend, supersede — for each ADR it touches, and hands leaves a Constraint Bundle by reference. |
+| **Thin verify** | Paperwork only. It never re-judges code; it checks the gate really closed. |
+
+## How our thinking evolved
+
+- **2026-06-27 · ADR 0001** — Verify splits from go as its own gate; parent/leaf roles get names.
+- **2026-08-05 · ADR 0002** — Decisions get dispositions; issues inherit, extend, or supersede recorded architecture — never silently.
+- **2026-08-11 · ADR 0003** — First parallelism: an opt-in "dynamic mode" with disjoint file ownership. (Later superseded.)
+- **2026-08-17 · ADR 0004** — Review goes risk-tiered per-slice/batch; leaf briefs get a hard budget (≤60 lines, allowlist).
+- **2026-08-19 · ADR 0005/0006** — Humans confirm a Contract Note, not a PRD; small fixes get a solo quick path.
+- **2026-08-22 · ADR 0007** — A 7.5-hour all-green session shipped a broken product. Execution turns graph-driven; review collapses to one new-eyes gate with a real-entrypoint probe; verify goes thin.
+
+## Install
 
 ```bash
-npx git+ssh://git@github.com/WufeiHalf/rope.git add
+# into the default agent skills directory
+npx git+https://github.com/WufeiHalf/rope.git add
+
+# or project-local
+npx git+https://github.com/WufeiHalf/rope.git add --target ./.agents/skills
 ```
 
-Install to a project-local skills directory:
+Then, in the repo you want to manage:
 
 ```bash
-npx git+ssh://git@github.com/WufeiHalf/rope.git add --target ./.agents/skills
+rope-init        # scaffold .rope/ (CONTEXT, routes, adr, specs, …)
 ```
 
-Install to a custom directory:
+Optional, once per machine or model-catalog change:
 
 ```bash
-npx git+ssh://git@github.com/WufeiHalf/rope.git add --target /path/to/skills
+rope-harness-presets   # write rope-* leaf presets for your host
 ```
 
-`rope add` copies bundled skills and overwrites bundled files.
+Missing presets never block — go/verify soft-degrade and record it.
 
-## Harness leaf presets
+## Skills
 
-Leaf worker model/thinking pins live in harness-native agent presets produced by
-`rope-harness-presets` (user-level agents + `~/.config/rope/harness/<host>.json`).
-Skill-local `settings.json` pins (including the former `rope-verify` review
-subagent pin) are not a supported API. Run `rope-harness-presets` after local
-model catalog changes. If presets are missing, go/verify soft-degrade with
-`preset_missing` and continue.
+| Skill | Job |
+| --- | --- |
+| `rope-init` | Scaffold `.rope/` in a target repository |
+| `rope-grill` | Plain-language requirement interview; decisions land in durable docs |
+| `rope-shape` | Issue package: PRD + Contract Note, slices, matrix, E2E, graph read |
+| `rope-go` | Wave execution, investigation map, TDD at seams, per-slice commits |
+| `rope-verify` | Thin paperwork gate between go and finish |
+| `rope-finish` | Close the issue; route architecture-doc updates |
+| `rope-summary` | Preserve reusable contracts/learnings into `.rope/` after the fact |
+| `rope-quick` | Solo quick-fix path with four stop lines back to the pipeline |
+| `rope-harness-presets` | Bind leaf roles to harness-native presets for your host |
 
-## Typical Workflow
-
-One issue → one parent session (Parent Orchestrator). The parent spawns leaf
-workers for noisy implement/review/inspect work; it does not require dual human
-windows as the architecture.
-
-1. Run `rope-init` in a target repo.
-2. Use `rope-grill` to clarify the requirement and update durable Rope docs
-   (spawn explore leaves for polluting investigation; write decisions to `.rope/`
-   early).
-3. Use `rope-shape` to create `.rope/issues/<issue>/prd.md`, `tasks.md`, and
-   `e2e.md`. The final confirmation is the **Contract Note** — 3–5 observable
-   outcomes projected from the Behavior Contract — not a full-PRD read
-   (ADR 0005). Default: continue in the same session.
-4. Use `rope-go` as parent orchestrator: run the slice graph wave by wave —
-   frontier slices with disjoint owned files spawn concurrent background
-   implementer leaves (ADR 0007). After all slices, one **end-of-issue review**
-   leaf with new eyes reads the assembled diff on two axes and probes the real
-   entrypoint. Max two automated fix rounds per problem, then Human Escalation
-   Stop.
-5. Use `rope-verify` in the same parent session as a thin paperwork gate
-   (review recorded, E2E terminal, tree clean). If `CHANGES_REQUESTED`, parent
-   spawns an implementer leaf with the fix brief and re-verifies. (Hosts that
-   cannot spawn workers may use a top-level implement session as a degraded
-   handoff.)
-6. Use `rope-summary` when the implementation revealed reusable contracts or
-   architecture facts that should be preserved.
-7. Use `rope-finish` to close the issue.
-
-Optional: run `rope-harness-presets` once per machine/model-catalog change so
-go/verify can prefer `rope-implementer` / `rope-reviewer` / `rope-explore` /
-`rope-verify-inspector`. Missing presets soft-degrade; they are not a hard block.
-
-**Graph-driven execution (ADR 0007):** `rope-shape` reads the slice graph
-after slicing — waves, rivers, fresh-context size fit — and asks one execution
-question with numbers. Rivers may split into separate issues. `rope-go` runs
-waves with concurrent implementer leaves for disjoint frontier slices and ends
-with **one end-of-issue review**: new eyes over the assembled diff, the Contract
-Note, and a real-entrypoint probe of the primary paths. `rope-verify` is a thin
-paperwork gate. See `.rope/adr/0007-graph-driven-go-single-review.md`.
-
-**Quick fixes (ADR 0006):** for a small fix whose investigation is already done,
-skip the pipeline and invoke `rope-quick` (typically in a worktree with a
-prepared briefing). One model handles it start to finish: direction
-confirmation, red→green fix at the nearest seam, local commit, inline `.rope/`
-doc sync, a one-page `quick.md` record, and a closing report with a risk-focus
-section directing human review. No issue package and no verify; four stop
-lines (new architecture decision, two failed fix rounds, scope sprawl,
-schema/destructive/production) abort to the full pipeline. See
-`.rope/adr/0006-quick-fix-path.md`.
-
-## `.rope/` Layout
+## `.rope/` layout
 
 ```text
 .rope/
-  CONTEXT.md
-  routes.md
-  adr/
-  research/
-  specs/
-    index.md
-    guides/
-  issues/
-    <issue-slug>/
-      prd.md
-      tasks.md
-      e2e.md
-      verify.md   # written by rope-verify after go completes
-      quick.md    # written by rope-quick (solo quick-fix path)
+  CONTEXT.md        # glossary / project language
+  routes.md         # navigation map
+  adr/              # architecture decision records
+  research/         # verified external/internal facts
+  specs/            # architecture contracts
+  issues/<slug>/
+    prd.md          # contract, matrix source, constraint bundle
+    tasks.md        # slices + statuses + review verdict
+    e2e.md          # classified end-to-end plan
+    map.md          # investigation facts, one per line
+    verify.md       # paperwork rounds
+    quick.md        # solo-path record (rope-quick)
 ```
-
-## E2E Classification
-
-Rope does not default all E2E validation to manual user work. `rope-shape`
-classifies each E2E item:
-
-- `agent`: the agent must execute it.
-- `agent-with-gate`: the agent executes a shape-approved action without asking again unless action scope or risk changes.
-- `user`: human-only validation, used only when real human judgment or access is required.
-- `not-run`: intentionally skipped with a user-accepted reason.
 
 ## Development
 
-Validate a skill:
-
 ```bash
+node bin/rope.js --help          # CLI usage
 python3 /path/to/skill-creator/scripts/quick_validate.py skills/rope-init
 ```
 
-Run the CLI locally:
+---
 
-```bash
-node bin/rope.js --help
-```
+<div align="center">
+
+**Agents forget. Rope remembers — and checks.**
+
+</div>
