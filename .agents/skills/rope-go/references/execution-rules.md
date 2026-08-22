@@ -35,6 +35,27 @@ No mode flag — shape already read the slice graph; go runs it:
 - **Degradation**: if the host cannot spawn background workers, run the wave
   foreground one slice at a time and record the reason in `tasks.md`.
 
+## Worktree-parallel rivers (optional host capability)
+
+When the host can isolate a spawned leaf in a git worktree (pi subagents:
+`isolation: "worktree"`; Claude Code: agent `--worktree`; otherwise prepare
+a worktree by hand and brief the leaf to work inside it), river-level
+parallelism may run each river in its own worktree instead of relying on
+disjoint owned files:
+
+- Precondition: commit the issue package first — a worktree is cut from
+  HEAD and cannot see uncommitted briefs or maps.
+- Dispatch each river's implementer chain inside its own worktree.
+- Merge serially when rivers finish, in river order; a conflict re-dispatches
+  one implementer leaf with both sides named.
+- Verify isolation from artifacts, not flags: a worktree result names its
+  branch, or the leaf reports a copy toplevel. A result that does not means
+  the host downgraded the request to a shared-checkout run — record the
+  downgrade and hold disjoint-owned-files discipline for the rest of the
+  issue.
+- No worktree capability: unchanged behavior — waves run in the shared
+  checkout; disjoint owned files are the safety rule.
+
 ## Harness Leaf Presets
 
 If `~/.config/rope/harness/<host>.json` exists (pi: `~/.config/rope/harness/pi.json`):

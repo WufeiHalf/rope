@@ -32,7 +32,8 @@ Details: tdd.md.
 ## Slice loop
 
 The slice graph drives execution — shape already read it (waves, rivers,
-sizes). Run **wave by wave**:
+sizes). Run **wave by wave**. Rivers may run in worktrees when the host
+offers them (see execution-rules "Worktree-parallel rivers"):
 
 1. Collect the frontier: slices whose blockers are all done.
 2. Spawn each frontier slice whose owned files don't overlap as a
