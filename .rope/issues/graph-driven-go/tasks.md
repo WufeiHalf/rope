@@ -144,3 +144,15 @@
 - Reviewer: 主会话（本 issue 无派生评审员；docs-only，用户走查 E2 待确认）
 - Fix rounds: 1（README 遗留 per-slice 段落，E1 扫出后修正）
 - 证据：E1 grep 零残留 + rope add 同步零差异；E2 用户走查 pending
+
+## Follow-up（2026-08-23，预设刷新）
+
+- verify-inspector 叶子角色移除（preset + role-schema/agent-templates/manifest
+  引用 + rope-verify 派发行），薄 verify 由父会话直接查文书——ADR 0007 语义收尾。
+- 预设刷新：reviewer = aio/gpt-5.6-luna thinking high（期末唯一真值门配强模型）；
+  explore = muse-spark-1.2-contributor thinking off（live 基准：16.1s/44.4k tok/5
+  calls/15 行精准 vs mimo 45.4s/7 calls + 一次无声停摆）；implementer 不变。
+- 修复 opencode-go/deepseek-v4-flash maxTokens 384000→131072（models-store）。
+- 发现并修复 agent 预设 YAML 坑：description 含裸冒号会导致 frontmatter 解析
+  失败、agent 静默不注册（与 Matt 上游 4f28947 同类问题）。
+- 冒烟：rope-reviewer@luna/high 注册命中、3 次调用 34.7s 通过。
