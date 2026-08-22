@@ -1,5 +1,9 @@
 # 0004 Risk-Tiered Review Mode and Lean Leaf Briefs
 
+> **Status: superseded by [0007](0007-graph-driven-go-single-review.md)** —
+> the single end-of-issue review replaced per-slice/batch modes; lean-brief
+> discipline (ADR 0005) carries over.
+
 Rope adds an **opt-in, per-issue review mode** decided at `rope-shape` time:
 `review: per-slice | batch` in `prd.md` frontmatter (absent or `per-slice` ⇒
 current behavior). In `batch` mode, high-risk slices keep a per-slice reviewer

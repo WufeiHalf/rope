@@ -21,20 +21,42 @@ A binding of Rope leaf roles (implementer, reviewer, explore, verify-inspector) 
 _Avoid_: hard-coded model list in skills, provider lock-in, Rope-only shadow agent runtime, default project-committed model ids, project-committed private model catalogs, automatic preset refresh
 
 **Issue-Level Verify**:
-The stage that checks whether a whole issue's completion state actually satisfies its PRD, Behavior Matrix, and E2E plan — after `rope-go` finishes all slices and before `rope-finish`. Owned by the Parent Orchestrator (read-only on code). Distinct from per-slice review. It also audits that batch-slice review verdicts are real and auditable (extends the required-review reality check).
-_Avoid_: review, check (too generic), acceptance test (wrong level)
+The thin paperwork gate between go and finish (ADR 0007): the end-of-issue
+review really ran (verdict + identity + fix rounds recorded), every E2E item
+is terminal with drift hunted, per-slice commits present, tree clean,
+architecture documentation outcomes routed. Read-only on everything; never
+re-judges code or product truth — that verdict belongs to the end-of-issue
+reviewer.
+_Avoid_: second code review, replaying green tests, trusting verdict claims
+without identity
 
-**Review Mode**:
-An **opt-in per-issue** field chosen at shape time: `rope-shape` asks the user for the review mode (same manual opt-in pattern as Dynamic Workflow Mode) and writes `review: per-slice | batch` into `prd.md` frontmatter. Absent or `per-slice` ⇒ per-slice review behavior unchanged. `batch` defers non-gate slices to one end-of-issue batch review.
-_Avoid_: auto-detect, go-time flag, treating batch as review removal
+**End-of-Issue Review**:
+The single review gate after all slices (ADR 0007): one parent-spawned
+reviewer leaf with **new eyes** — it never watched the build. It reads the
+assembled diff base..HEAD on two axes: Standards (repo conventions, TDD
+anti-patterns, architecture continuity: invariants, dependency direction, no
+second owner of state/persistence/permission/error) and Contract (Contract
+Note bullets: promised-but-missing, built-but-not-promised, built-but-wrong);
+it also probes the **real entrypoint** — starting the product the way a user
+would and walking the primary paths. Read-only on code; may run processes and
+drive a browser. Findings route to one fix brief (≤2 rounds, then Human
+Escalation Stop). Per-slice review no longer exists; high-risk boundaries are
+the reviewer's deepest-look list, not a separate gate.
+_Avoid_: review (wrong level), per-slice verdict bookkeeping, silent
+self-check degradation, fixture-only acceptance
 
-**Per-Slice Review**:
-The review that runs for each completed slice during `rope-go`. Slice review marking is three-valued `required | batch | self-check` — `batch` is valid only when the issue package is `review: batch`. The Parent Orchestrator dispatches a reviewer leaf for each `required` slice (Review Risk Gate); `batch` slices get one end-of-issue batch reviewer leaf over their cumulative diff, parent-spawned, with the verdict recorded per covered slice; `self-check` applies to docs/fixture-only slices. `batch` is never silent self-check. Not owned by the implementer leaf, and not re-done by issue-level verify. Verify only checks that per-slice review actually happened (not silently degraded).
-_Avoid_: verify (wrong level), gate, batch as silent self-check
-
-**Dynamic Workflow Mode**:
-An **opt-in per-issue** mode chosen at shape time: `rope-shape` asks the user whether dynamic mode is wanted; if yes it writes `mode: dynamic` into the issue package and go reads the field. When on, shape must produce a **contract-first, disjoint file-ownership** slice set, and go concurrently spawns cheap implementer leaves for the **non-overlapping** slices. Shape discipline: a **contract slice** (interfaces/data-structures/call-boundaries only) is serial and first; implementation slices are cut by **disjoint file ownership** (one core file owned by multiple slices is a shape defect); a **per-slice size cap** is enforced. go fans out only non-overlapping slices; each slice still passes a review gate; a light serial **integration slice** wires the module slices and verifies contract alignment; issue-level verify stays parent-owned and read-only. Model routing **reuses existing role presets** (no new model mechanism). Parallelism is the weak case for coding agents (Cognition/Anthropic), so disjoint ownership + contract-first is the load-bearing safety rule — slices sharing a core file stay serial. Interplay with review mode: `required` slices keep per-slice review; `batch` slices' reviews run once at end-of-issue; fan-out and commit rules unchanged.
-_Avoid_: blanket parallelization, treating the mode as a licence to fan out overlapping slices, spawning implementer leaves that themselves spawn leaves
+**Graph-Driven Execution**:
+The post-0007 execution model: shape reads the slice graph after slicing —
+waves (topological levels), rivers (zero-dependency clusters), fresh-context
+size fit — and asks one execution question with numbers (river split or
+parallel waves). Go runs waves with background implementer leaves for
+disjoint frontier slices; overlapping slices serialize; the parent owns all
+dispatch. No `mode:` or `review:` frontmatter exists; legacy packages that
+carry them are ignored. Re-cutting that bends the requirement goes back to
+grill.
+_Avoid_: asking serial-or-parallel before the graph exists, merging rivers
+into one slice to dodge the split question, blanket parallelization of
+overlapping slices
 
 **Self-Fix Loop**:
 A check/verify pattern (from Trellis) where the verifying model finds a problem and fixes it directly, then reruns checks, looping until green. Not used at issue-level verify in Rope, because verify must not edit code (cross-role separation of implement vs accept).
@@ -69,10 +91,19 @@ A shape-time, user-facing projection of the issue's Behavior Contract: 3–5 one
 _Avoid_: a second contract that can drift from the PRD, asking the user to read the full PRD by default, treating the note as an acceptance artifact
 
 **Minimal Leaf Brief**:
-The hard budget for implementer/reviewer briefs: a content allowlist (slice Public behavior one sentence; Behavior Contract 6 fields at their thinnest; Constraint Bundle path + slice Constraint IDs + short global invariant list; test seam + one prior-art path) plus a required operational contract (relevant artifact paths for by-reference
+The hard budget for implementer/reviewer briefs: a content allowlist (slice Public behavior one sentence; Behavior Contract 6 fields at their thinnest; Constraint Bundle path + slice Constraint IDs + short global invariant list; test seam + one prior-art path) plus a required operational contract (relevant artifact paths for by-reference — including the investigation map path
 reads, TDD red/green commands + red signal, expected return shape, no-nested-spawn
 and commit rules). Everything else loads by reference; brief body ≤ 60 lines (paths and command blocks excluded). More enforceable than “be concise” because it can be checked before dispatch.
 _Avoid_: full inline PRD paragraphs, inline bundle detail, speculative file-by-file plans, dropping TDD commands or return shape to save tokens
+
+**Investigation Map**:
+`<issue>/map.md` — one fact per line, each with a file path and a date.
+Seeded at shape from exploration; implementers update the lines their work
+falsifies before committing and add lines the next leaf will need. Readers
+orient by the map, then verify against code; entries that stop earning their
+line are deleted.
+_Avoid_: dumping transcripts into the map, uncommented stale facts, inlining
+the map into briefs
 
 **Quick Fix Path**:
 The lightweight solo entry (`rope-quick`) for small fixes whose investigation is already done (typically a prepared briefing in a worktree): one model clarifies the remaining direction (a few questions), fixes red→green at the nearest seam, commits locally, and syncs `.rope/` docs inline. No issue package, no leaf dispatch, no issue-level verify; the human is the accept gate, assisted by the closing report's risk-focus section. Four stop lines (new architecture decision, fix failed twice, scope sprawl, schema/destructive/production) abort to the full pipeline with `status: stopped` in `quick.md` — the solo-session replacement for "leaf conflict returns to the parent".

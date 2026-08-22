@@ -1,5 +1,9 @@
 # 0003 Dynamic Workflow Mode
 
+> **Status: superseded by [0007](0007-graph-driven-go-single-review.md)** —
+> graph-driven execution replaced the opt-in mode; disjoint-ownership and
+> no-nested-spawn invariants carry over.
+
 Rope adds an **opt-in, per-issue dynamic workflow mode** decided at `rope-shape`
 time. When enabled it produces a **contract-first, disjoint file-ownership**
 slice set and, at `rope-go`, concurrently spawns cheap implementer leaves for the
