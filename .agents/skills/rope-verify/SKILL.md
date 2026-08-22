@@ -29,11 +29,10 @@ BLOCKED for the user.
 
 ## Workflow
 
-1. Load the issue package + completion claims.
-2. Optionally dispatch `rope-verify-inspector` for mechanical checks
-   (matrix-row evidence mapping, E2E status sweep); judgment stays local.
-3. Write/append `verify.md`: PASS | CHANGES_REQUESTED | BLOCKED.
-4. PASS → rope-finish. CHANGES_REQUESTED → fix brief (≤2 rounds, then Human
+1. Load the issue package + completion claims; check the five items above
+   directly (paperwork is one screen, no leaves needed).
+2. Write/append `verify.md`: PASS | CHANGES_REQUESTED | BLOCKED.
+3. PASS → rope-finish. CHANGES_REQUESTED → fix brief (≤2 rounds, then Human
    Escalation Stop). BLOCKED → user.
 
 ## Guardrails

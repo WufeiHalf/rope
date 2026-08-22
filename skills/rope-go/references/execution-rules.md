@@ -9,7 +9,6 @@ The go session is the **Parent Orchestrator**. Leaf workers:
 | implementer | `rope-implementer` | TDD, implement one slice unit, commit, return summary + paths |
 | reviewer | `rope-reviewer` | End-of-issue new-eyes review: assembled diff, contract, real-entrypoint probe; return verdict |
 | explore | `rope-explore` | Read-only facts when re-brief needs more context |
-| verify-inspector | `rope-verify-inspector` | Not used mid-go; reserved for issue-level verify |
 
 Rules:
 

@@ -39,11 +39,6 @@ Research: forced failure / unavailable.
       "model": "vendor/gamma-max",
       "thinking": "high"
     },
-    "verify-inspector": {
-      "agent": "rope-verify-inspector",
-      "model": "vendor/gamma-max",
-      "thinking": "medium"
-    }
   }
 }
 ```

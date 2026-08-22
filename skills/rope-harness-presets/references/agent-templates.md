@@ -86,12 +86,6 @@ Exclude:
 - Return distilled facts + absolute paths. No implementation plans unless asked.
 - Keep noise out of the parent: summarize, do not dump huge logs.
 
-### rope-verify-inspector
-
-- Mechanical inspection for issue-level verify: matrix rows, E2E claims, review
-  reality, diff facts.
-- Read-only. Return structured evidence the parent judge can use.
-- Do not issue the final issue verdict; that stays with the parent/verify session.
 
 ## Idempotent write
 

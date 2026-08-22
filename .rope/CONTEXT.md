@@ -8,7 +8,7 @@ _Avoid_: main session (ambiguous), god agent, multi-agent swarm, pure router, pa
 _Historical alias_: Planner Window / Window A (optional deployment mode, not the architecture)
 
 **Leaf Worker**:
-A subagent (or equivalent host worker) that receives a self-contained brief, does one job, and returns a summary plus artifact paths. Implementer, reviewer, explore, and verify-inspector are leaf roles. Leaves also execute course-correction work after the parent rewrites the brief. A leaf worker must not spawn other workers.
+A subagent (or equivalent host worker) that receives a self-contained brief, does one job, and returns a summary plus artifact paths. Implementer, reviewer, and explore are leaf roles. Leaves also execute course-correction work after the parent rewrites the brief. A leaf worker must not spawn other workers.
 _Avoid_: nested subagent, child orchestrator
 _Historical alias_: Implementer Window / Window B when the host cannot spawn code-writing workers (degraded top-level session)
 
@@ -17,7 +17,7 @@ When leaf fix loops fail twice on the same problem, or the parent judges the fai
 _Avoid_: infinite fix loop, silent retry, bury the design conflict in more patches
 
 **Harness Profile / Role Preset**:
-A binding of Rope leaf roles (implementer, reviewer, explore, verify-inspector) onto **harness-native** subagent/agent preset templates. Default write target is the host's **user-level** agents directory (machine-local model churn). Plus a thin **user-global** Rope manifest (not project `.rope/`) that maps role → preset name/model and generation metadata. Refresh is **manual only** (no TTL/stale timer). The host preset is the source of spawn configuration; Rope does not keep a second full prompt/tool database as primary.
+A binding of Rope leaf roles (implementer, reviewer, explore) onto **harness-native** subagent/agent preset templates. Default write target is the host's **user-level** agents directory (machine-local model churn). Plus a thin **user-global** Rope manifest (not project `.rope/`) that maps role → preset name/model and generation metadata. Refresh is **manual only** (no TTL/stale timer). The host preset is the source of spawn configuration; Rope does not keep a second full prompt/tool database as primary.
 _Avoid_: hard-coded model list in skills, provider lock-in, Rope-only shadow agent runtime, default project-committed model ids, project-committed private model catalogs, automatic preset refresh
 
 **Issue-Level Verify**:
@@ -63,7 +63,7 @@ A check/verify pattern (from Trellis) where the verifying model finds a problem 
 _Avoid_: auto-fix, retry (too generic)
 
 **Escalation**:
-The act of the verify model deciding on its own that a finding needs deeper inspection — either by reading more itself or by dispatching a read-only leaf (prefer `verify-inspector` / `explore`). Driven by the model's judgment, not by mechanical trigger rules.
+The act of the verify model deciding on its own that a finding needs deeper inspection — either by reading more itself or by dispatching a read-only leaf (`explore`). Driven by the model's judgment, not by mechanical trigger rules.
 _Avoid_: upgrade, promote (mechanical connotation)
 
 **Upstream Harvest**:

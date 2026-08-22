@@ -43,12 +43,6 @@ Not project `.rope/`. Not skill-local settings. Not a second prompt database.
       "thinking": "low",
       "path": "~/.pi/agent/agents/rope-explore.md"
     },
-    "verify-inspector": {
-      "agent": "rope-verify-inspector",
-      "model": "provider/modelId",
-      "thinking": "medium",
-      "path": "~/.pi/agent/agents/rope-verify-inspector.md"
-    }
   }
 }
 ```

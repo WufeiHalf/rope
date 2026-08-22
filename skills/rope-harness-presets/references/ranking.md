@@ -37,7 +37,7 @@ assignment. Set `confidence: low` and include `"offline heuristics"` in
 | --- | --- |
 | `flash`, `mini`, `haiku`, `lite`, `small`, `fast`, `nano`, `luna` | `explore` first; then cheap `implementer` if nothing else |
 | `sonnet`, `pro` (non-max), mid tier without max/opus | `implementer` |
-| `opus`, `max`, `ultrathink`, `sol`, `terra`, `o1`, `o3`, `gpt-5` high tiers, `reason` | `reviewer` / strong `verify-inspector` |
+| `opus`, `max`, `ultrathink`, `sol`, `terra`, `o1`, `o3`, `gpt-5` high tiers, `reason` | `reviewer` |
 | `codex`, `code`, `composer`, `coder`, `devstral`, `qwen-coder` | `implementer` |
 | `deepseek` + `pro` | strong mid: implementer or reviewer |
 | `deepseek` + `flash` | explore / cheap implementer |
@@ -53,7 +53,6 @@ default provider when tied).
    `low`.
 2. **reviewer** — pick the strongest judgment signal remaining. Default
    thinking `high`.
-3. **verify-inspector** — pick a strong-but-not-necessarily-top model remaining
    (second-strongest, or same as reviewer if only one strong model). Default
    thinking `medium`.
 4. **implementer** — pick the best remaining coding-capable mid/strong model.
@@ -101,6 +100,5 @@ Expected offline sketch:
 | explore | `vendor/alpha-flash` | `low` |
 | implementer | `vendor/beta-pro` | `medium` |
 | reviewer | `vendor/gamma-max` | `high` |
-| verify-inspector | `vendor/gamma-max` or `vendor/beta-pro` | `medium` |
 
 confidence: `low`, sources include offline heuristics.

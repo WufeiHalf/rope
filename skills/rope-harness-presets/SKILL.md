@@ -64,7 +64,7 @@ Follow [ranking.md](references/ranking.md):
    tools are available.
 2. If research fails or is unavailable, use local name/capability heuristics.
 3. Assign one model + default thinking/effort to each role:
-   `implementer`, `reviewer`, `explore`, `verify-inspector`.
+   `implementer`, `reviewer`, `explore`.
 4. Record sources and confidence (`high` | `medium` | `low`). Offline /
    research-fail always still ranks; set `confidence: low`.
 
@@ -72,7 +72,7 @@ Parent may override model or thinking at spawn time; presets only supply
 defaults. Do not hardcode a permanent global winner list in this skill body.
 
 Completion:
-- [ ] All four roles have model + thinking
+- [ ] All three roles have model + thinking
 - [ ] Sources + confidence recorded
 - [ ] Offline path still produced a full ranking when research failed
 
@@ -87,7 +87,6 @@ and the role contracts in [role-schema.md](references/role-schema.md):
 | implementer | `rope-implementer.md` |
 | reviewer | `rope-reviewer.md` |
 | explore | `rope-explore.md` |
-| verify-inspector | `rope-verify-inspector.md` |
 
 Rules:
 
@@ -98,7 +97,7 @@ Rules:
 - Re-run is idempotent: same paths, clean overwrite.
 
 Completion:
-- [ ] Four `rope-*.md` files exist and are readable
+- [ ] Three `rope-*.md` files exist and are readable
 - [ ] Each forbids nested spawn
 - [ ] No non-`rope-*` agents modified
 
@@ -109,7 +108,7 @@ Write `~/.config/rope/harness/pi.json` per
 needed. Overwrite a corrupt/partial prior manifest with a valid full one.
 
 Completion:
-- [ ] Manifest maps all four roles → agent name, model, thinking/effort,
+- [ ] Manifest maps all three roles → agent name, model, thinking/effort,
       sources, confidence
 - [ ] `host`, `generated_at`, and skill identity present
 
