@@ -1,60 +1,43 @@
 ---
 name: rope-verify
-description: Verifies assembled issue completion against PRD, matrix, E2E, and architecture continuity after rope-go. Use when go finishes and before rope-finish.
+description: Checks the paperwork of a finished .rope issue — review recorded, E2E terminal, tree clean — after rope-go's end-of-issue review. Use when go finishes and before rope-finish.
 ---
 
 # Rope Verify
 
-Parent Orchestrator issue-level gate between `rope-go` and `rope-finish`.
-**Read-only on code.** Judgment-primary; prefer assembled **behavior acceptance**
-over replaying unit tests go already proved green.
+Thin paperwork gate between `rope-go` and `rope-finish`. Product truth and
+assembled-diff judgment already happened in go's **end-of-issue review**;
+verify never re-judges code. Read-only on everything.
 
 Verdict rules and `verify.md` format: [references/verify-rules.md](references/verify-rules.md).
-Architecture continuity fields: [../rope-shape/references/architecture-continuity.md](../rope-shape/references/architecture-continuity.md).
 
-## Scope
+## Checks (these five, nothing more)
 
-- Issue-level — does not redo per-slice review; checks review actually happened.
-- Code findings → **fix brief** for implementer leaf (parent spawns). Metadata
-  fixes in issue docs only; record under Document Fixes Applied.
+1. The end-of-issue review really ran: one verdict line with run/agent
+   identity + fix rounds recorded; `review_degraded` carries its reason.
+2. Every E2E item has a terminal status. Hunt drift: `agent_failed` /
+   `pending` items that silently became completed — re-run or block, never
+   absorb.
+3. Per-slice commits present; no unrelated dirty files.
+4. Architecture Impact: every entry has a terminal documentation outcome or
+   a confirmed `pending-finish` routed to finish.
+5. Matrix rows point at recorded evidence (spot-check pointers, never re-run).
+
+Paperwork gaps verify fixes directly in issue docs (recorded under Document
+Fixes Applied). Anything that is not paperwork → back to go's fix loop, or
+BLOCKED for the user.
 
 ## Workflow
 
-1. Load issue package + claimed completion (slices, reviews, E2E, commits).
-2. Dispatch verify-inspector/explore for mechanical checks; give each leaf the
-   global Constraint Bundle plus the relevant decision IDs and evidence mapping;
-   keep architecture judgment local.
-3. At minimum check:
-   - required reviews real (not silent `review_degraded`); batch-slice
-     verdicts real and auditable (same check extended — see
-     [execution-rules](../rope-go/references/execution-rules.md) "Batch
-     Review Execution"): a `batch` marking with no parent-spawned batch
-     reviewer verdict (run/agent identity, per-slice coverage) is a finding,
-     and `batch` treated as self-check is a must-fix
-   - matrix/Contract hold for **integrated** change (spot-check units only if
-     red/green evidence missing)
-   - **E2E drift** (primary integration net)
-   - PRD contract / non-goals
-   - high-risk boundaries (go Review Risk Gate list)
-   - Architecture Impact has a disposition for every relevant decision, or an
-     explicit `not-applicable`/New decision candidate outcome
-   - inherited invariants have evidence; exceptions have bounded scope,
-     documentation, and tests/evidence
-   - public behavior and dependency direction preserve the recorded invariants;
-     no second state, persistence, permission, or error owner appeared silently
-   - unresolved conflicts and unconfirmed architecture changes are visible
-4. Fix stale issue-doc metadata; classify findings must-fix / nice-to-fix. A
-   confirmed documentation update marked `pending-finish` is not a code finding;
-   finish completes it.
-5. Write/append `verify.md`; verdict PASS | CHANGES_REQUESTED | BLOCKED.
-6. PASS → handoff rope-finish. CHANGES_REQUESTED → implementer leaf in-session
-   (≤2 fix rounds). BLOCKED → user.
+1. Load the issue package + completion claims.
+2. Optionally dispatch `rope-verify-inspector` for mechanical checks
+   (matrix-row evidence mapping, E2E status sweep); judgment stays local.
+3. Write/append `verify.md`: PASS | CHANGES_REQUESTED | BLOCKED.
+4. PASS → rope-finish. CHANGES_REQUESTED → fix brief (≤2 rounds, then Human
+   Escalation Stop). BLOCKED → user.
 
 ## Guardrails
 
-- Do not trust tasks/e2e or Architecture Impact claims alone; do not invent PASS.
-- Do not turn verify into a second full TDD pass.
-- Do not require a particular function, class, or internal implementation shape;
-  verify behavior, invariants, and dependency direction.
-- Do not edit code; do not recommend finish without PASS.
-- Append verify rounds; Human Escalation Stop after two failed fix rounds.
+- Do not read the diff to judge code quality — that was the reviewer's job.
+- Do not invent PASS; a missing verdict line is a finding, not a formality.
+- Do not re-run green E2E items; check recorded evidence instead.
