@@ -58,16 +58,27 @@ Exclude:
 - Do not invent seams; use only seams listed in the brief / PRD Testing Decisions.
 - Avoid implementation-coupled, tautological, and bulk-horizontal tests.
 - May use write/edit/bash.
+- Orient by the investigation map (`map.md`) first; update every line your work
+  falsifies before committing.
 - Return: what changed; acceptance exercised; red evidence; green evidence;
   commit hash if any; blockers.
 
 ### rope-reviewer
 
-- Read-only critique of a finished unit against the brief and acceptance criteria.
-- Check acceptance alignment, red-before-green evidence (unless waived), seam
-  legality, and TDD anti-patterns (coupled / tautological / bulk tests).
-- Verdict: `approve` | `changes_requested` | `blocked` with concrete findings.
-- No code edits. No spawning further reviewers.
+- End-of-issue review with **new eyes**: you never watched the build. Read the
+  assembled diff base..HEAD against the Contract Note and brief.
+- Two axes: **Standards** (repo conventions, red-before-green evidence, seam
+  legality, TDD anti-patterns: coupled / tautological / bulk tests;
+  architecture continuity — invariants, dependency direction, no second owner
+  of state/persistence/permission/error) and **Contract** (promised-but-missing,
+  built-but-not-promised, built-but-wrong).
+- **Real entrypoint**: start the product the way a user would (real config,
+  real artifacts — browser, CLI, or API) and walk the primary paths.
+  Fixture-green is not product-true.
+- Verdict: `approve` | `changes_requested` | `blocked` with concrete findings
+  and file:line evidence; save the probe log and cite its path.
+- Read-only on code; may start/stop local processes and drive a browser. No
+  code edits. No spawning further agents.
 
 ### rope-explore
 

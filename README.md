@@ -78,15 +78,17 @@ windows as the architecture.
    `e2e.md`. The final confirmation is the **Contract Note** — 3–5 observable
    outcomes projected from the Behavior Contract — not a full-PRD read
    (ADR 0005). Default: continue in the same session.
-4. Use `rope-go` as parent orchestrator: for each slice, spawn implementer leaf,
-   then review per the slice's `Review: required | batch | self-check` marking;
-   `batch` slices defer to one end-of-issue batch review leaf, and `rope-verify`
-   remains the final gate. Max two automated fix rounds per problem, then Human
-   Escalation Stop.
-5. Use `rope-verify` in the same parent session to verify issue completion against
-   PRD/E2E. If `CHANGES_REQUESTED`, parent spawns an implementer leaf with the
-   fix brief and re-verifies. (Hosts that cannot spawn workers may use a
-   top-level implement session as a degraded handoff.)
+4. Use `rope-go` as parent orchestrator: run the slice graph wave by wave —
+   frontier slices with disjoint owned files spawn concurrent background
+   implementer leaves (ADR 0007). After all slices, one **end-of-issue review**
+   leaf with new eyes reads the assembled diff on two axes and probes the real
+   entrypoint. Max two automated fix rounds per problem, then Human Escalation
+   Stop.
+5. Use `rope-verify` in the same parent session as a thin paperwork gate
+   (review recorded, E2E terminal, tree clean). If `CHANGES_REQUESTED`, parent
+   spawns an implementer leaf with the fix brief and re-verifies. (Hosts that
+   cannot spawn workers may use a top-level implement session as a degraded
+   handoff.)
 6. Use `rope-summary` when the implementation revealed reusable contracts or
    architecture facts that should be preserved.
 7. Use `rope-finish` to close the issue.
@@ -95,15 +97,13 @@ Optional: run `rope-harness-presets` once per machine/model-catalog change so
 go/verify can prefer `rope-implementer` / `rope-reviewer` / `rope-explore` /
 `rope-verify-inspector`. Missing presets soft-degrade; they are not a hard block.
 
-**Dynamic workflow mode (optional):** at `rope-shape` time you may opt into a
-dynamic-mode issue. Shape then enforces a contract-first, disjoint file-ownership
-slice set (contract slice first, implementation slices that each own disjoint
-files, a per-slice size cap, a trailing integration slice) and records
-`mode: dynamic` in `prd.md`. `rope-go` then fans out the disjoint implementation
-slices to concurrent cheap implementer leaves, keeps per-slice review gates and
-issue-level verify, and serializes any overlapping slices. Serial behavior is
-unchanged when the mode is off or absent. See
-`.rope/adr/0003-dynamic-workflow-mode.md`.
+**Graph-driven execution (ADR 0007):** `rope-shape` reads the slice graph
+after slicing — waves, rivers, fresh-context size fit — and asks one execution
+question with numbers. Rivers may split into separate issues. `rope-go` runs
+waves with concurrent implementer leaves for disjoint frontier slices and ends
+with **one end-of-issue review**: new eyes over the assembled diff, the Contract
+Note, and a real-entrypoint probe of the primary paths. `rope-verify` is a thin
+paperwork gate. See `.rope/adr/0007-graph-driven-go-single-review.md`.
 
 **Quick fixes (ADR 0006):** for a small fix whose investigation is already done,
 skip the pipeline and invoke `rope-quick` (typically in a worktree with a

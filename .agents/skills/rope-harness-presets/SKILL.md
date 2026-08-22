@@ -123,10 +123,10 @@ Return a short report only:
 - any degrade notes (`research_offline`, migrate hint if old
   `rope-verify/settings.json` found on disk)
 
-## Dynamic workflow mode (concurrent multi-spawn)
+## Graph-driven concurrency (waves)
 
-When an issue runs with `mode: dynamic`, `rope-go` may spawn **multiple
-`rope-implementer` leaves concurrently** for disjoint frontier slices, all from
+`rope-go` runs the slice graph wave by wave: frontier slices with disjoint
+owned files spawn **multiple concurrent `rope-implementer` leaves**, all from
 the existing role presets written above.
 
 - The manifest and agent naming already support concurrent multi-spawn: one
