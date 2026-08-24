@@ -56,7 +56,7 @@ Not project `.rope/`. Not skill-local settings. Not a second prompt database.
 | `skill` | yes | Always `rope-harness-presets` |
 | `confidence` | yes | `high` \| `medium` \| `low` |
 | `sources` | yes | Non-empty string array describing how ranking was produced |
-| `roles` | yes | Must include all four role keys |
+| `roles` | yes | Must include all three role keys |
 | `roles.*.agent` | yes | Exact rope agent name |
 | `roles.*.model` | yes | Host model id as written into agent frontmatter |
 | `roles.*.thinking` | yes | Host thinking/effort level |

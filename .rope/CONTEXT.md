@@ -31,19 +31,36 @@ _Avoid_: second code review, replaying green tests, trusting verdict claims
 without identity
 
 **End-of-Issue Review**:
-The single review gate after all slices (ADR 0007): one parent-spawned
-reviewer leaf with **new eyes** — it never watched the build. It reads the
-assembled diff base..HEAD on two axes: Standards (repo conventions, TDD
-anti-patterns, architecture continuity: invariants, dependency direction, no
-second owner of state/persistence/permission/error) and Contract (Contract
-Note bullets: promised-but-missing, built-but-not-promised, built-but-wrong);
-it also probes the **real entrypoint** — starting the product the way a user
-would and walking the primary paths. Read-only on code; may run processes and
-drive a browser. Findings route to one fix brief (≤2 rounds, then Human
-Escalation Stop). Per-slice review no longer exists; high-risk boundaries are
-the reviewer's deepest-look list, not a separate gate.
+The single review gate after all slices (ADR 0007, mechanics refined by
+0010): **two parallel read-only leaves with new eyes**, spawned in one
+message. The **Standards scanner** (explore-class preset, cheap model)
+runs lint/typecheck first, then judgement-call-scans the assembled diff
+for repo conventions, TDD anti-patterns, the smell baseline, and inline
+global invariants — never runs the product. The **Behavior reviewer**
+(`rope-reviewer`, strong model) starts the product first, reads the diff
+while it boots, then walks the Behavior Matrix at the **real entrypoint**
+the way a user would, runs e2e items, and gives high-risk boundaries the
+deepest look; it is the only leaf that may run the product. Aggregation
+is mechanical — verdict = worst of axis verdicts, no rerank. Findings are
+`blocking | note` with path:line + one-sentence fix; only blocking enters
+the one fix brief (≤2 rounds, then Human Escalation Stop); post-fix
+re-review is delta-only. Per-slice review no longer exists.
 _Avoid_: review (wrong level), per-slice verdict bookkeeping, silent
-self-check degradation, fixture-only acceptance
+self-check degradation, fixture-only acceptance, parent re-ranking axes,
+scanner running the product
+
+**Standards Scanner**:
+The cheap read-only leaf of the end-of-issue review (ADR 0010): runs the
+briefed lint/typecheck/build commands first (skips what tooling enforces),
+then fast-scans the assembled diff against repo standards, TDD
+anti-patterns, the fixed Fowler smell baseline, and the inline global
+invariants — every hit a judgement call, never a violation, with
+repo-documented standards overriding the baseline. Spawned from the
+explore preset with the baseline pasted in the brief; returns `clean` or
+≤200 words of `{severity, path:line, issue, fix}` findings. Never starts
+the product; ports and processes belong to the Behavior reviewer.
+_Avoid_: deep judgment in the scanner, hard-violation framing, moving
+architecture-continuity judgment out of the Behavior reviewer
 
 **Graph-Driven Execution**:
 The post-0007/0008/0009 execution model. Shape slices tracer-bullet style

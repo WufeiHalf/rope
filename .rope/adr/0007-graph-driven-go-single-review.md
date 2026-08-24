@@ -2,8 +2,11 @@
 
 **Status:** active, execution loop refined by [0008](0008-slice-ready-worktree-execution.md)
 — waves remain the shared-mode fallback; worktree mode schedules
-slice-ready. Supersedes the opt-in gate of ADR 0003 and the review modes
-of ADR 0004; extends ADR 0005's minimal brief with a map pointer.
+slice-ready. Review mechanics refined by
+[0010](0010-parallel-two-leaf-end-of-issue-review.md) (two parallel
+read-only leaves, one gate). Supersedes the opt-in gate of ADR 0003 and
+the review modes of ADR 0004; extends ADR 0005's minimal brief with a map
+pointer.
 
 Date: 2026-08-22
 

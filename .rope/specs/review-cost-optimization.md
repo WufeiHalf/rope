@@ -1,79 +1,60 @@
 # Review-Cost Optimization — Spec
 
-Contract for the opt-in `review: per-slice | batch` issue flow and lean leaf
-briefs. Source of truth: `.rope/adr/0004-risk-tiered-review-mode-and-lean-briefs.md`.
+Cost contract for the end-of-issue review. Source of truth:
+`.rope/adr/0010-parallel-two-leaf-end-of-issue-review.md` (gate semantics:
+ADR 0007; Matrix-as-spec: ADR 0009). Supersedes the ADR 0004 `review:`
+frontmatter regime, which no longer exists.
 
-## `review` field
+## Shape (two parallel leaves, one gate)
 
-- Location: `prd.md` frontmatter.
-- Values: `per-slice` (default) | `batch`.
-- Absent or `per-slice` ⇒ current per-slice behavior unchanged. `batch` ⇒ the
-  execution below.
-- Chosen at shape time by asking the user — a **manual opt-in**, same pattern
-  as `mode: dynamic`. Never auto-detected from issue content, never a go-time
-  flag.
+- Scanner leaf (`rope-explore` + Standards brief) and Behavior reviewer
+  (`rope-reviewer`) are spawned **in one message**; first response =
+  max(leaf times), not their sum.
+- Only the Behavior reviewer may start/stop processes or drive a browser.
+- Aggregation is mechanical: verdict = worst of axis verdicts
+  (`approve` < `changes_requested` < `blocked`); no rerank, no merge, no
+  parent re-judgment.
 
-## Slice review marking
+## Scanner budget
 
-Three-valued in batch mode; binary `required | self-check` in per-slice mode:
+- Brief: diff command (excludes applied) + commit list + standards-source
+  paths + inline global invariants + pasted smell baseline (~35 lines).
+- Runs lint/typecheck/build first; skips what tooling enforces.
+- Returns `clean` or ≤200 words of `{severity, path:line, issue, fix}`.
 
-- `required` — slice hits the **Review Risk Gate** (public interface,
-  external/adapter, auth/secret, persistence/schema, routing/runtime wiring,
-  multi-layer, E2E-critical path). Gets its own per-slice reviewer leaf.
-- `batch` — other code slices; **valid only when the package is
-  `review: batch`**. Deferred to the end-of-issue batch review.
-- `self-check` — docs/fixture only.
+## Reviewer budget
 
-`batch` is never silent self-check and never implementer self-review.
+- Brief: diff command (same excludes) + commit list + Matrix rows + e2e
+  path + entrypoint start hint + inline invariants. No map; bundle path
+  only on suspected conflict.
+- Starts the product first; reads the diff while it boots.
 
-## Batch review execution (go, after all slices)
+## Diff hygiene
 
-- If ≥1 slice is marked `batch`, the parent spawns **one** `rope-reviewer`
-  leaf over the **cumulative diff** of all batch slices (many batch slices ⇒
-  still one leaf).
-- Brief carries the **Behavior Contract + constraint IDs by reference**
-  (path + IDs + short global invariant list) — fresh, clean context (diff +
-  criteria only).
-- Verdict is recorded **per covered slice** in `tasks.md`, with run/agent
-  identity.
-- Findings route to fix rounds like any review finding: ≤2 fix rounds, then
-  **Human Escalation Stop**.
-- Zero `batch` slices ⇒ no batch leaf (nothing deferred).
+```md
+git diff <base>...HEAD -- . ':(exclude)*lock*' ':(exclude)*.snap' ':(exclude)dist/'
+```
 
-## go handoff checklist (replaces parent overall review)
+Extended per repo (vendor/, build output, generated files). Lockfile and
+snapshot noise is 20–50 % of a web project's assembled diff — both leaves
+pay for every included line.
 
-No parent overall-review pass after slices (ADR 0001: `rope-verify` stays the
-sole parent-level assembled judgment). go ends with a light handoff checklist:
+## Fix protocol
 
-- per-slice commits present
-- review verdicts recorded (incl. batch)
-- E2E statuses recorded
-- no unrelated dirty files
-
-## Briefs by reference
-
-- Implementer/reviewer briefs carry: bundle **path + slice Constraint IDs +
-  the short global invariant list** inline.
-- The leaf reads bundle detail itself and returns **per-ID confirmation +
-  conflicts**.
-- No full inline bundle copy; no bare "follow the ADR".
-- Full minimal-brief allowlist + line cap: see
-  `plan-artifact-reader-layering.md` (ADR 0005).
-
-## Lean parent load
-
-go startup reads: prd frontmatter, Behavior Contract, Testing Decisions,
-Architecture Impact, bundle index (IDs + paths), slice statuses. Bundle
-entries and references are deep-read on demand when dispatching the slice
-that needs them.
+- Severity is binary: `blocking | note`. Notes are recorded in
+  `tasks.md`, never fixed by a round.
+- Every finding: `path:line` + one-sentence fix. The fix brief transcribes
+  blocking findings verbatim — zero exploration.
+- ≤2 automated rounds, then Human Escalation Stop (ADR 0007).
+- Post-fix re-review is delta-only: scanner on the fix-commit diff;
+  reviewer re-probes affected paths only. Full re-review never repeats.
 
 ## Forbidden shortcuts
 
-- `batch` treated as silent self-check.
-- Implementer self-review of `batch` slices.
-- Nested spawn from any leaf.
-- Removing the go overall review without moving its judgment items to the
-  batch brief + verify.
-- Verify becoming a second full TDD pass.
-- Bare "follow the ADR" briefs.
-- Auto-detecting review mode.
+- Scanner running the product (port/process exclusivity lives with the
+  Behavior reviewer).
+- Parent re-ranking or merging axis findings (second-reviewer emergence).
+- `note` findings entering a fix brief.
+- Full re-review after a fix round.
+- Map path or upfront bundle deep-read in the reviewer brief.
+- Per-slice review in any form (ADR 0007).

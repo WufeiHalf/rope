@@ -6,7 +6,7 @@ Stable implementation contracts and project coding rules.
 
 - `guides/` - general thinking and verification guides, including `architecture-continuity.md` for issue decision handoff and evidence.
 - `<area>/` - area-specific implementation contracts.
-- `review-cost-optimization.md` - review-mode contract (ADR 0004): `review: per-slice | batch` field, three-valued slice marking, batch review execution, briefs by reference, lean parent load.
+- `review-cost-optimization.md` - end-of-issue review cost contract (ADR 0010): two parallel read-only leaves, scanner/reviewer brief budgets, diff hygiene, blocking-only fix protocol with delta re-review.
 - `plan-artifact-reader-layering.md` - reader layering contract (ADR 0005): Contract Note, Minimal Leaf Brief allowlist + line cap, unresolved-question policy.
 
 ## Usage

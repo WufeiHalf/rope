@@ -29,7 +29,7 @@ Research is best-effort. Time-box it; do not block the skill on perfect data.
 ### 2. Offline / research-fail heuristics
 
 If research is unavailable or fails, rank by **name and known class signals**
-in the model id (case-insensitive). Still produce a complete four-role
+in the model id (case-insensitive). Still produce a complete three-role
 assignment. Set `confidence: low` and include `"offline heuristics"` in
 `sources`.
 
@@ -53,15 +53,14 @@ default provider when tied).
    `low`.
 2. **reviewer** — pick the strongest judgment signal remaining. Default
    thinking `high`.
-   (second-strongest, or same as reviewer if only one strong model). Default
-   thinking `medium`.
-4. **implementer** — pick the best remaining coding-capable mid/strong model.
-   Default thinking `medium`.
+3. **implementer** — pick the best remaining coding-capable mid/strong model
+   (second-strongest overall, or the same as reviewer when only one strong
+   model exists). Default thinking `medium`.
 
-If the pool has fewer than four models, **reuse** is allowed: the same model
+If the pool has fewer than three models, **reuse** is allowed: the same model
 may cover multiple roles. Prefer distinct models when possible.
 
-If the pool has exactly one model, assign it to all four roles with role-default
+If the pool has exactly one model, assign it to all three roles with role-default
 thinking levels.
 
 ### 4. Confidence

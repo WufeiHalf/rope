@@ -7,7 +7,7 @@ Shared across harness writers. Parent/session role is **not** a preset row.
 | Role key | Agent name | Job | Default tools (pi) | Default thinking |
 | --- | --- | --- | --- | --- |
 | `implementer` | `rope-implementer` | Write, test, commit one unit of work from a self-contained brief | full write set: read, bash, edit, write, grep, find, ls (+ host equivalents) | `medium` |
-| `reviewer` | `rope-reviewer` | Read-only critique of a finished unit; verdict only | read-only: read, bash, grep, find, ls | `high` |
+| `reviewer` | `rope-reviewer` | End-of-issue behavior acceptance: Matrix walk at the real entrypoint + probe; verdict owner. The Standards axis is a separate scanner leaf (below) | read-only: read, bash, grep, find, ls | `high` |
 | `explore` | `rope-explore` | Read-only fact gathering / codebase navigation | read-only: read, bash, grep, find, ls | `low` |
 
 ## Shared leaf rules
@@ -32,6 +32,10 @@ Harness-native agent type names are exactly:
 - `rope-implementer`
 - `rope-reviewer`
 - `rope-explore`
+
+The end-of-issue **scanner leaf** (ADR 0010) is the `rope-explore` agent
+spawned with the Standards brief — no separate agent file, no manifest
+role; its model/thinking ride the explore preset.
 
 Spawn example (pi / pi-subagents):
 

@@ -49,10 +49,11 @@ One issue, one parent session, five moves:
    with disjoint owned files. Leaves orient by a shared investigation
    **map** and commit slice by slice. TDD discipline lives here, at agreed
    seams.
-4. **Review (once)** — after all slices, one reviewer leaf that never
-   watched the build reads the assembled diff on two axes — Standards and
-   Contract — then probes the real entrypoint. Findings route to one fix
-   brief, max two rounds, then it stops and asks you.
+4. **Review (once)** — after all slices, two parallel read-only leaves
+   that never watched the build: a cheap scanner fast-scans the diff for
+   standards and smells while the reviewer starts the product and walks
+   the behavior Matrix at the real entrypoint. Blocking findings route to
+   one fix brief, max two rounds, then it stops and asks you.
 5. **Verify & finish** — verify is a thin paperwork gate (review recorded,
    E2E terminal, tree clean); finish closes the issue and routes
    architecture-doc updates home.

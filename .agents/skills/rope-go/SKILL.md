@@ -56,24 +56,29 @@ Shared mode: implementers update falsified lines before committing.
 Worktree mode: leaves report them in summaries; the parent writes after
 each merge.
 
-## After all slices: one review, new eyes (BDD acceptance)
+## After all slices: one review, two parallel leaves (BDD acceptance)
 
 1. Matrix rows are the **issue's behavior spec** (Given/When/Then); tickets
    already proved their units by TDD — the reviewer does not replay them.
-2. Spawn **one reviewer leaf with new eyes** — it never watched the build:
-   - **Standards axis** — conventions, TDD anti-patterns, architecture
-     continuity: invariants, dependency direction, no second owner of
-     state/persistence/permission/error.
-   - **Behavior acceptance** — walk the Matrix behaviors against the
-     **real entrypoint** (real config, real artifacts; browser/CLI/API):
-     the primary paths as a user would. Fixture-green is not product-true.
-   - e2e.md items (real-environment behaviors) run here or by the parent
-     before the verdict.
-   - High-risk boundaries (auth, persistence, schema, entrypoints,
-     adapters, concurrency) get the deepest look.
-3. Findings → one fix brief → implementer leaf; ≤2 rounds then Human
-   Escalation Stop. Zero findings → record verdict with evidence.
-4. Hand off same-session **rope-verify** (thin paperwork). Finish only
+2. Spawn **two read-only leaves in one message**, both new eyes — they
+   never watched the build (ADR 0010):
+   - **Scanner leaf** (explore preset) — run lint/typecheck first, skip
+     what tooling enforces; then scan the diff: repo conventions, TDD
+     anti-patterns, smell baseline, inline global invariants. Judgement
+     calls; never runs the product.
+   - **Reviewer leaf** (`rope-reviewer`) — start the product first, read
+     the diff while it boots; walk the Matrix behaviors against the
+     **real entrypoint** (real config, real artifacts; browser/CLI/API)
+     as a user would; run e2e items; high-risk boundaries get the deepest
+     look. Fixture-green is not product-true.
+3. Aggregate mechanically: verdict = worst of axis verdicts; no rerank,
+   no merge. Only the reviewer leaf may run the product.
+4. Findings → one fix brief (**blocking only**; each finding `path:line` +
+   one-sentence fix — a transcription, not an exploration) → implementer
+   leaf; ≤2 rounds then Human Escalation Stop; re-review the **delta
+   only** (fix diff + affected probe paths). Zero findings → record
+   verdict with evidence.
+5. Hand off same-session **rope-verify** (thin paperwork). Finish only
    after verify PASS.
 
 ## Stop / report

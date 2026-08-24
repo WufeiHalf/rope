@@ -45,7 +45,7 @@ Research: forced failure / unavailable.
 
 ## Pass criteria
 
-- Complete four-role assignment still produced
+- Complete three-role assignment still produced
 - `confidence` is `low`
 - `sources` includes offline heuristics
 - Skill does not hard-fail solely due to missing web research

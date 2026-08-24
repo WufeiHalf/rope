@@ -56,7 +56,7 @@ Completion:
 - [ ] Model list captured (or explicit failure)
 - [ ] No mutation of `settings.json` / `enabledModels`
 
-### 3. Rank models into four roles
+### 3. Rank models into three roles
 
 Follow [ranking.md](references/ranking.md):
 

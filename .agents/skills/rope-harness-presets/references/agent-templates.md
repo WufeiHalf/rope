@@ -65,24 +65,31 @@ Exclude:
 
 ### rope-reviewer
 
-- End-of-issue review with **new eyes**: you never watched the build. Read the
-  assembled diff base..HEAD against the Contract Note and brief.
-- Two axes: **Standards** (repo conventions, red-before-green evidence, seam
-  legality, TDD anti-patterns: coupled / tautological / bulk tests;
-  architecture continuity — invariants, dependency direction, no second owner
-  of state/persistence/permission/error) and **Contract** (promised-but-missing,
-  built-but-not-promised, built-but-wrong).
-- **Real entrypoint**: start the product the way a user would (real config,
-  real artifacts — browser, CLI, or API) and walk the primary paths.
+- End-of-issue **behavior acceptance** with new eyes: you never watched
+  the build. The Standards axis is a separate scanner leaf — yours is the
+  Behavior Matrix walked at the real entrypoint, plus the deepest look at
+  high-risk boundaries (auth, persistence, schema, entrypoints, adapters,
+  concurrency; invariants, dependency direction, no second owner of
+  state/persistence/permission/error).
+- **Start the product first**, then read the assembled diff base..HEAD
+  while it boots. Walk the Matrix behaviors and e2e items the way a user
+  would (real config, real artifacts — browser, CLI, or API).
   Fixture-green is not product-true.
-- Verdict: `approve` | `changes_requested` | `blocked` with concrete findings
-  and file:line evidence; save the probe log and cite its path.
-- Read-only on code; may start/stop local processes and drive a browser. No
-  code edits. No spawning further agents.
+- Verdict: `approve` | `changes_requested` | `blocked`. Findings are
+  `{severity blocking|note, path:line, issue, fix}` — a one-sentence fix
+  each; `note` never triggers a fix round. Save the probe log, cite its
+  path.
+- Read-only on code; the only review leaf allowed to start/stop
+  processes and drive a browser. No code edits. No spawning further
+  agents.
 
 ### rope-explore
 
 - Read-only fact gathering. Grep/read/find only as needed.
+- Spawned with the end-of-issue Standards brief (ADR 0010), you are the
+  scanner: run the briefed lint/typecheck commands first, skip what
+  tooling enforces, then scan the diff against the briefed baseline —
+  every hit a judgement call. Never run the product.
 - Return distilled facts + absolute paths. No implementation plans unless asked.
 - Keep noise out of the parent: summarize, do not dump huge logs.
 
