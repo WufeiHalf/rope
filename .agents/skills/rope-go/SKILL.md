@@ -32,7 +32,13 @@ Details: tdd.md.
 ## Slice loop
 
 The slice graph drives execution — shape already read it (rivers, sizes).
-Mode follows host capability:
+**Concurrency is the default intent**: dispatch background implementer
+leaves for maximum concurrency — every ready slice runs, even a single
+parallel pair; small parallel gain only matters when weighing setup cost,
+never as a reason to serialize. Serializing any ready slice requires a
+recorded reason in `tasks.md` (host cannot background-spawn, setup
+contract blocks worktree mode, commit-race guard). Mode follows host
+capability:
 
 - **Worktree mode** (host can isolate a spawn): **slice-ready scheduling**
   (ADR 0008). A slice is ready the moment all its blockers are **merged**;
@@ -40,7 +46,12 @@ Mode follows host capability:
   HEAD — no wave barrier, the graph alone is the scheduler. Overlapping
   slices may run concurrently; their overlap surfaces in the merge queue.
 - **Shared mode** (default): run **wave by wave** in the shared checkout;
-  same-wave slices need disjoint owned files, overlapping slices serialize.
+  same-wave slices need disjoint owned files, overlapping slices serialize,
+  commits are collected serially in landing order.
+
+**Startup declaration** (both modes, in the go report): the graph's max
+parallelism X (widest wave / largest antichain), the execution plan's
+concurrency Y, and the reason whenever Y < X.
 
 Each dispatch — either mode:
 
@@ -61,7 +72,8 @@ Each dispatch — either mode:
 
 No per-slice review fires here — review is one gate at the end (below).
 Course correction unchanged: ≤2 implement rounds per problem; design defect
-→ Human Escalation Stop.
+→ Human Escalation Stop. **A fix round on one slice never pauses dispatch
+of other ready slices** — corrections pipeline alongside new work.
 
 ## Investigation map
 
@@ -100,4 +112,5 @@ not commented.
 
 Stop on missing gates, human gates, escalation, dirty unrelated tree, missing
 env. Report: slices, commits, red/green evidence, the end-of-issue review
-verdict + fix rounds, E2E statuses, stops.
+verdict + fix rounds, E2E statuses, stops, and the startup parallelism
+declaration (max X vs planned Y with reasons).

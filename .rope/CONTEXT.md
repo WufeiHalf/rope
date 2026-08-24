@@ -48,7 +48,10 @@ self-check degradation, fixture-only acceptance
 **Graph-Driven Execution**:
 The post-0007/0008 execution model. Shape reads the slice graph after
 slicing — rivers, fresh-context size fit — and asks one execution question
-with numbers. Go picks a mode from host capability: **worktree mode**
+with numbers. Go's default intent is maximum concurrency in either mode (every ready
+slice gets a background leaf; serialization needs a recorded reason;
+startup declares planned vs max parallelism). It picks a mode from host
+capability: **worktree mode**
 (slice-ready scheduling, ADR 0008 — ready = blockers merged, one worktree
 per leaf, serial merge queue, repo-declared `worktree-setup:` contract in
 `routes.md`, parent owns `map.md` updates) or **shared mode** (waves,

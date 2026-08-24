@@ -30,6 +30,15 @@ Date: 2026-08-23
    forbidding parallelism up front. Owned-files disjointness stays the
    safety rule of **shared mode**, which remains the default fallback for
    hosts without isolation.
+6. **Concurrency is the default intent in both modes** (field refinement,
+   2026-08-24: the first real run serialized its only parallel pair on
+   friction reasoning). Every ready slice gets a background leaf; a single
+   parallel pair still runs in parallel; small gain only factors into
+   setup-cost weighing, never alone justifies serializing; any
+   serialization needs a recorded reason. A fix round on one slice never
+   pauses dispatch of other ready slices. Startup report declares max
+   parallelism X (widest wave / largest antichain) vs planned Y, with
+   reasons when Y < X.
 
 ## Context
 
