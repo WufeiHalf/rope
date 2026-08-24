@@ -111,19 +111,19 @@
 ```md
 # <Issue Title> Tasks
 
-## Behavior Matrix
+## Behavior Matrix (issue behavior spec — BDD)
 
-| Row | Applies? | Verification |
+| Behavior (Given/When/Then where it helps) | Applies? | Verified at |
 | --- | --- | --- |
-| Primary path | yes/no | <test/smoke/slice> |
-| Alternate input or entrypoint | yes/no | <test/smoke/slice> |
-| Empty or missing input | yes/no | <test/smoke/slice> |
-| Invalid or malformed input | yes/no | <test/smoke/slice> |
-| Unavailable or not-ready dependency | yes/no | <test/smoke/slice> |
-| Duplicate or idempotent case | yes/no | <test/smoke/slice> |
-| Boundary or limit case | yes/no | <test/smoke/slice> |
-| Existing behavior compatibility | yes/no | <test/smoke/slice> |
-| Real entrypoint or integration path | yes/no | <test/smoke/slice> |
+| Primary path | yes/no | ticket TDD / end-of-issue review |
+| Alternate input or entrypoint | yes/no | ticket TDD / review |
+| Empty or missing input | yes/no | ticket TDD |
+| Invalid or malformed input | yes/no | ticket TDD |
+| Unavailable or not-ready dependency | yes/no | ticket TDD |
+| Duplicate or idempotent case | yes/no | ticket TDD |
+| Boundary or limit case | yes/no | ticket TDD |
+| Existing behavior compatibility | yes/no | review |
+| Real-entrypoint behavior (real API/env semantics) | yes/no | e2e.md + review probe |
 
 ## Slice 1: <Title>
 

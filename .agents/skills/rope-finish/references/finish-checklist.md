@@ -9,7 +9,6 @@
 - Review findings are resolved or explicitly waived.
 - E2E entries have terminal statuses:
   - `agent_passed`
-  - `covered_by_slice`
   - `user_confirmed`
   - `waived`
   - `blocked_on_gate`

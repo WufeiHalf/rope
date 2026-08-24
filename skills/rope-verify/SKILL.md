@@ -15,9 +15,9 @@ Verdict rules and `verify.md` format: [references/verify-rules.md](references/ve
 
 1. The end-of-issue review really ran: one verdict line with run/agent
    identity + fix rounds recorded; `review_degraded` carries its reason.
-2. Every E2E item has a terminal status. Hunt drift: `agent_failed` /
-   `pending` items that silently became completed — re-run or block, never
-   absorb.
+2. Every E2E item (real-environment behaviors) has a terminal status.
+   Hunt drift: `agent_failed` / `pending` items that silently became
+   completed — re-run or block, never absorb.
 3. Per-slice commits present; no unrelated dirty files.
 4. Architecture Impact: every entry has a terminal documentation outcome or
    a confirmed `pending-finish` routed to finish.

@@ -8,7 +8,7 @@
 - `user`: visual/business judgment, 2FA, private session, unreachable env.
 - `not-run`: out of scope; reason + user-accepted waiver.
 
-E2E Command should not duplicate validation that slice-level runs already cover. When a would-be E2E command is fully covered by slice runs, mark the item `covered_by_slice` (cite slice id + evidence) instead of re-running the full suite at go/verify/finish time.
+E2E items carry **real-environment behaviors only** (real APIs, real entrypoints, real data). Ticket-level unit validation lives in TDD evidence and never appears as an E2E item — no `covered_by_slice` bookkeeping: if it would be `covered_by_slice`, it does not belong in e2e.md at all.
 
 ## Gate Approval Rules
 
@@ -26,10 +26,11 @@ E2E Command should not duplicate validation that slice-level runs already cover.
 | **Slice** | Vertical unit in `tasks.md` |
 | **Spec** | `.rope/specs/**` architecture contracts — **not** the PRD |
 | **ADR** | Hard-to-reverse architecture decisions |
-| **covered_by_slice** | E2E result meaning the validation is fully covered by recorded slice-level runs (cited in `e2e.md`); terminal, no re-run |
 | **River** | Zero-dependency slice cluster — a second journey inside the graph |
 | **Wave** | Topological level of the slice graph; frontier slices run concurrently |
 | **Map** | `<issue>/map.md` — one fact per line with path + date; shared orientation for leaves |
+| **Component slice** | A slice serving part of one user story; brief cites the story row + its own completion criteria; legal under tracer-bullet slicing |
+| **Prefactor** | A structural-enabling slice that makes later slices easy ("make the change easy, then make the easy change"); often the first source of wide parallelism |
 
 Upstream “spec/ticket” is kernel only; keep Rope names in artifacts we write.
 

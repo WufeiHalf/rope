@@ -58,8 +58,12 @@ Default handoff: same-session `rope-go`.
     If re-cutting a slice to fit would bend the requirement, stop: take the
     specific misalignment **back to grill** — early grill is cheaper than late
     rework.
-10. `e2e.md` every item classified; include architecture evidence and resolve
-    non-agent gates at shape time.
+10. `e2e.md` carries **real-environment behaviors only** — real external
+    systems, real entrypoints, real data the mocks cannot prove (a behavior
+    unit-tested against fakes that depends on a real API's semantics
+    belongs here). Never list ticket-level test reruns; TDD evidence
+    already covers them. Classify executors; resolve non-agent gates at
+    shape time.
 11. **Contract Note gate:** output the `## Contract Note` from `prd.md` (3–5
     one-sentence bullets: “when this issue is done, what can you observe?” +
     failure visibility where relevant). The user confirms the note **instead of

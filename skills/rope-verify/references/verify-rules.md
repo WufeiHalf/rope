@@ -26,8 +26,8 @@ Applied with file + change + reason. Never touch code.
 
 The failure mode verify exists to catch: an `agent_failed` or `pending` E2E
 item drifting into a completed slice with no re-verification. Hunt drift on
-every such item. `agent_passed` / `covered_by_slice` items are
-evidence-checked (recorded command + cited slice runs), never re-run.
+every such item. `agent_passed` items are evidence-checked (recorded command), never
+re-run.
 
 ## `verify.md` format
 

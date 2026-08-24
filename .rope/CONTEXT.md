@@ -46,7 +46,9 @@ _Avoid_: review (wrong level), per-slice verdict bookkeeping, silent
 self-check degradation, fixture-only acceptance
 
 **Graph-Driven Execution**:
-The post-0007/0008 execution model. Shape reads the slice graph after
+The post-0007/0008/0009 execution model. Shape slices tracer-bullet style
+(blocking edges + fresh-context fit are the hard rules; component and
+prefactor slices legal; vertical path-per-slice is a habit, not a rule). Shape reads the slice graph after
 slicing — rivers, fresh-context size fit — and asks one execution question
 with numbers. Go's default intent is maximum concurrency in either mode (every ready
 slice gets a background leaf; serialization needs a recorded reason;
@@ -75,7 +77,7 @@ A maintenance workflow for this Rope repository that compares pinned external in
 _Avoid_: sync (ambiguous with file copy), submodule update (mechanism only), one-time migration bridge (retired)
 
 **Acceptance Behavior**:
-The user- or caller-visible outcome a slice or issue must make true (Public behavior, Behavior Matrix row, or E2E item). In go, each acceptance drives a red→green automated spec at a shape-confirmed seam; issue-level E2E/verify accept the **assembled** behavior and do not replace slice TDD with a second full unit-test ritual.
+The user- or caller-visible outcome a ticket or issue must make true. Layered (ADR 0009): **ticket-TDD** — each ticket's units proved by red→green at a shape-confirmed seam; **issue-BDD** — the Behavior Matrix is the issue's behavior spec (no slice pointers), walked at the real entrypoint by the end-of-issue reviewer; e2e.md carries real-environment behaviors only (`covered_by_slice` is deleted — anything that would earn it does not belong in e2e.md).
 _Avoid_: TDD as “write many unit tests then code”, acceptance test as synonym for issue-level verify only, re-running every green unit test at verify by default
 
 **Architecture Impact**:

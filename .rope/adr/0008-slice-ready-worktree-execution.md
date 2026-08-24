@@ -1,7 +1,7 @@
 # 0008 Slice-Ready Worktree Execution
 
-**Status:** active — refines ADR 0007's wave loop; supersedes its
-river-level worktree section.
+**Status:** active — refines ADR 0007's wave loop; slicing philosophy
+further refined by [0009](0009-ticket-tdd-issue-bdd-layering.md).
 
 Date: 2026-08-23
 
