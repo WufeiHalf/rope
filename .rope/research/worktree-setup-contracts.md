@@ -19,7 +19,13 @@ cost multiplies by concurrency.
   time. Example: agent-workbench's herdr script symlinks dependencies into
   every new worktree. Fastest; couples the repo to that host (on other
   machines/hosts the repo degrades to tier 3 unless a command also
-  exists).
+  exists). **Scope caveat (field finding, 2026-08-24)**: herdr's hook
+  fires only for worktrees *herdr itself creates* — a rope-spawned
+  isolation worktree gets no symlinks. Partial host coverage is really
+  tier 2 in disguise: declare the host script invoked manually
+  (`bash data/local-runtime/herdr-setup.sh <path>`) so worktree mode stays
+  available; and check manual applicability before accepting any
+  "setup friction" reason to fall back to shared mode.
 - **Declared command**: portable; runs inside the leaf, only when needed
   (condition step — repos whose tests pass without setup pay nothing).
 

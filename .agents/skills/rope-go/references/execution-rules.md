@@ -30,7 +30,9 @@ capability, decided at go startup:
   worktree cut from the latest merged HEAD. No wave barrier.
 - **Shared mode** (default, any host) — waves in the shared checkout;
   same-wave parallelism needs disjoint owned files; overlapping slices
-  serialize.
+  serialize. Parallel leaves must not commit simultaneously in the shared
+  checkout (index contention): the parent collects commits serially in
+  landing order, or leaves stop at green + diff and the parent commits.
 
 Both modes: background implementer leaves, parent owns all dispatch, no
 nested spawn, per-slice commits. Worktree mode additionally requires the
@@ -51,7 +53,11 @@ Tiers:
 
 1. **`host-managed`** — the host prepares worktrees (e.g. a creation hook
    symlinks dependencies). Leaves run the green command directly; passing
-   it is the verification.
+   it is the verification. **Scope matters**: state what the hook covers.
+   If the hook fires only for host-created worktrees (e.g. a tmux/worktree
+   manager's own worktrees), rope-spawned isolation worktrees are **not**
+   covered — declare tier 2 instead, with the host setup script invoked
+   manually as the declared command.
 2. **Declared command** — go puts it into every worktree leaf's brief as a
    **condition step**:
    ```md
@@ -59,6 +65,10 @@ Tiers:
    environment): <command>. Retry the green command once after. Still
    failing → report blocker; do not spend fix rounds on environment setup.
    ```
+   Before deciding a shared-mode fallback on "setup friction", check
+   whether the host setup script can be applied manually to a rope worktree
+   (it usually can — `bash <host-setup.sh> <worktree-path>`); if so this
+   tier keeps worktree mode available.
 3. **Undeclared** — leaf tries green first; environment failure is a
    blocker, not a fix-round problem. The parent falls back to shared mode
    for the remaining slices and records the reason.
