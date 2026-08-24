@@ -38,8 +38,9 @@ One issue, one parent session, five moves:
    architecture *before* planning. Decisions land in `.rope/` docs
    immediately; chat is treated as volatile.
 2. **Shape** — requirements become an issue package: PRD with a
-   **Contract Note** (3–5 observable outcomes), vertical slices sized to a
-   fresh context window, and a behavior matrix. Then shape **reads the slice
+   **Contract Note** (3–5 observable outcomes), tracer-bullet slices sized
+   to a fresh context window (component and prefactor slices legal), and a
+   behavior matrix as the issue's BDD spec. Then shape **reads the slice
    graph** — rivers, sizes, numbers — and asks you exactly one execution
    question.
 3. **Go** — two modes by host capability. **Worktree mode** (host can

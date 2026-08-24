@@ -36,7 +36,9 @@ Upstream “spec/ticket” is kernel only; keep Rope names in artifacts we write
 
 ## Wide refactor (expand–contract)
 
-One mechanical change with huge blast radius: do not fake vertical slices.
+One mechanical change with huge blast radius: do not slice it into fake
+independent pieces (tracer bullets still apply — but along the
+expand → migrate → contract chain, not across it).
 Sequence expand → migrate batch(es) → contract; `Kind: wide-refactor-*`;
 Blocked by along the chain; prefer green batches.
 

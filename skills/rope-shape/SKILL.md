@@ -40,11 +40,18 @@ Default handoff: same-session `rope-go`.
 6. Write `prd.md` (problem/solution, goals/non-goals, **Contract Note**, Behavior Contract, public
    behavior, **Testing Decisions**, Architecture Impact, full Constraint Bundle,
    refs, gates).
-7. Behavior Matrix in prd or tasks; N/A rows need a reason.
-8. `tasks.md` vertical **slices**: complete path each; matrix rows; `Blocked by`;
-   **Public behavior** one user sentence; constraint IDs and evidence; tests.
-   Every slice fits a **fresh context window** (default ~400 diff lines / ~4 owned
-   files; exceeded ⇒ re-cut on the spot, and keep re-cutting until it fits).
+7. Behavior Matrix = the **issue's behavior spec** (BDD): one row per
+   observable behavior (Given/When/Then phrasing where it helps); rows do
+   not point at slices — ticket TDD proves units, the end-of-issue review
+   walks these behaviors at the real entrypoint. N/A rows need a reason.
+8. `tasks.md` **tracer-bullet slices** (to-ticket style): each cuts a complete
+   path when it can, but the hard rules are only — declare `Blocked by` edges,
+   fit a **fresh context window** (default ~400 diff lines / ~4 owned files;
+   exceeded ⇒ re-cut on the spot), and no two same-wave slices sharing core
+   files in shared mode. Component slices (parts of one user story) are legal:
+   briefs cite the story row + their own completion criteria. Look for a
+   **prefactor** opportunity first — "make the change easy, then make the easy
+   change" — a structural-enabling slice that unblocks wide parallel work.
    Wide refactor → expand–contract (gates-and-vocab.md).
 9. **Read the graph, then ask one question.** From `Blocked by` edges derive
     **waves** (topological levels) and **rivers** (slice clusters with no edge,
