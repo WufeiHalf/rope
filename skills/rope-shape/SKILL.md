@@ -23,6 +23,11 @@ Default handoff: same-session `rope-go`.
    Seed `<issue>/map.md` from what exploration learned — one fact per line, each
    with a file path and a date. Later leaves read the map for orientation and
    update the lines they falsify.
+   **Worktree-setup check (incremental):** if `routes.md` has no
+   `Worktree setup:` line, ask the user how a fresh worktree becomes
+   testable (a setup command, or `host-managed`), and record the answer in
+   `routes.md`. Existing repos join the worktree mode here without
+   re-running `rope-init`.
 3. Run the conditional Architecture Impact trigger check. Record `required`, or
    `not-applicable` with the lightweight check. For `required`, list each source,
    status, disposition, invariant, forbidden shortcut, evidence, scope, and conflict.

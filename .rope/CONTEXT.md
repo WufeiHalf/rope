@@ -46,17 +46,18 @@ _Avoid_: review (wrong level), per-slice verdict bookkeeping, silent
 self-check degradation, fixture-only acceptance
 
 **Graph-Driven Execution**:
-The post-0007 execution model: shape reads the slice graph after slicing —
-waves (topological levels), rivers (zero-dependency clusters), fresh-context
-size fit — and asks one execution question with numbers (river split or
-parallel waves). Go runs waves with background implementer leaves for
-disjoint frontier slices; overlapping slices serialize; the parent owns all
-dispatch. No `mode:` or `review:` frontmatter exists; legacy packages that
-carry them are ignored. Re-cutting that bends the requirement goes back to
-grill.
-_Avoid_: asking serial-or-parallel before the graph exists, merging rivers
-into one slice to dodge the split question, blanket parallelization of
-overlapping slices
+The post-0007/0008 execution model. Shape reads the slice graph after
+slicing — rivers, fresh-context size fit — and asks one execution question
+with numbers. Go picks a mode from host capability: **worktree mode**
+(slice-ready scheduling, ADR 0008 — ready = blockers merged, one worktree
+per leaf, serial merge queue, repo-declared `worktree-setup:` contract in
+`routes.md`, parent owns `map.md` updates) or **shared mode** (waves,
+disjoint owned files per wave, leaves maintain the map). No `mode:` or
+`review:` frontmatter; legacy packages that carry them are ignored.
+Re-cutting that bends the requirement goes back to grill.
+_Avoid_: wave barriers in worktree mode, asking serial-or-parallel before
+the graph exists, merging in parallel, per-merge test rituals, leaves
+writing the shared map concurrently
 
 **Self-Fix Loop**:
 A check/verify pattern (from Trellis) where the verifying model finds a problem and fixes it directly, then reruns checks, looping until green. Not used at issue-level verify in Rope, because verify must not edit code (cross-role separation of implement vs accept).
@@ -98,10 +99,11 @@ _Avoid_: full inline PRD paragraphs, inline bundle detail, speculative file-by-f
 
 **Investigation Map**:
 `<issue>/map.md` — one fact per line, each with a file path and a date.
-Seeded at shape from exploration; implementers update the lines their work
-falsifies before committing and add lines the next leaf will need. Readers
-orient by the map, then verify against code; entries that stop earning their
-line are deleted.
+Seeded at shape from exploration. Shared mode: implementers update the
+lines their work falsifies before committing. Worktree mode: leaves report
+falsified / needed lines in their summaries; the parent writes them after
+each merge — concurrent leaves never share the file. Entries that stop
+earning their line are deleted.
 _Avoid_: dumping transcripts into the map, uncommented stale facts, inlining
 the map into briefs
 

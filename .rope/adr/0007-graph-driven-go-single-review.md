@@ -1,7 +1,9 @@
 # 0007 Graph-Driven Go and Single End-of-Issue Review
 
-**Status:** active — supersedes the opt-in gate of ADR 0003 and the review
-modes of ADR 0004; extends ADR 0005's minimal brief with a map pointer.
+**Status:** active, execution loop refined by [0008](0008-slice-ready-worktree-execution.md)
+— waves remain the shared-mode fallback; worktree mode schedules
+slice-ready. Supersedes the opt-in gate of ADR 0003 and the review modes
+of ADR 0004; extends ADR 0005's minimal brief with a map pointer.
 
 Date: 2026-08-22
 

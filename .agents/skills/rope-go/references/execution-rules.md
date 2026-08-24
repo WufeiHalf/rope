@@ -18,43 +18,69 @@ Rules:
 - Correction = rewrite brief + re-spawn implementer (or explore then re-brief). Max **2** automated fix rounds per problem → **Human Escalation Stop**.
 - Design / requirements / contract defect → immediate Human Escalation Stop (no thrash).
 
-## Graph-driven execution (waves)
+## Execution modes (graph-driven)
 
-No mode flag — shape already read the slice graph; go runs it:
+Shape already read the slice graph (rivers, sizes). Mode follows host
+capability, decided at go startup:
 
-- **Frontier** = slices with no unresolved blockers.
-- **Fan-out**: frontier slices whose `Scope` / `owned_files` do not overlap
-  are spawned as **background implementer leaves** — one per slice, results
-  collected as they land. Overlapping frontier slices serialize (a core file
-  owned by multiple slices is a shape defect; go works around it, shape
-  should have caught it).
-- **Waves**: wave N+1 starts when wave N clears. Rivers — zero-dependency
-  clusters — run concurrently throughout.
-- **No nested spawn**: an implementer leaf must not spawn another leaf; the
-  parent owns all dispatch.
-- **Degradation**: if the host cannot spawn background workers, run the wave
-  foreground one slice at a time and record the reason in `tasks.md`.
+- **Worktree mode** — the host can isolate a spawn in a git worktree (pi
+  subagents: `isolation: "worktree"`; Claude Code: agent `--worktree`;
+  otherwise a worktree prepared by hand works too). Slice-ready
+  scheduling: ready = all blockers **merged**; dispatch into a fresh
+  worktree cut from the latest merged HEAD. No wave barrier.
+- **Shared mode** (default, any host) — waves in the shared checkout;
+  same-wave parallelism needs disjoint owned files; overlapping slices
+  serialize.
 
-## Worktree-parallel rivers (optional host capability)
+Both modes: background implementer leaves, parent owns all dispatch, no
+nested spawn, per-slice commits. Worktree mode additionally requires the
+issue package committed first (a worktree is cut from HEAD and cannot see
+uncommitted briefs or maps).
 
-When the host can isolate a spawned leaf in a git worktree (pi subagents:
-`isolation: "worktree"`; Claude Code: agent `--worktree`; otherwise prepare
-a worktree by hand and brief the leaf to work inside it), river-level
-parallelism may run each river in its own worktree instead of relying on
-disjoint owned files:
+## Worktree readiness (repo contract)
 
-- Precondition: commit the issue package first — a worktree is cut from
-  HEAD and cannot see uncommitted briefs or maps.
-- Dispatch each river's implementer chain inside its own worktree.
-- Merge serially when rivers finish, in river order; a conflict re-dispatches
-  one implementer leaf with both sides named.
-- Verify isolation from artifacts, not flags: a worktree result names its
-  branch, or the leaf reports a copy toplevel. A result that does not means
-  the host downgraded the request to a shared-checkout run — record the
-  downgrade and hold disjoint-owned-files discipline for the rest of the
-  issue.
-- No worktree capability: unchanged behavior — waves run in the shared
-  checkout; disjoint owned files are the safety rule.
+A fresh worktree carries no untracked files — dependencies
+(`node_modules`, venvs) do not travel. One declarative line in `routes.md`
+("Build/test commands" section) makes a worktree testable:
+
+```md
+- Worktree setup: `./scripts/worktree-setup.sh`   # or: host-managed | npm ci | uv sync | …
+```
+
+Tiers:
+
+1. **`host-managed`** — the host prepares worktrees (e.g. a creation hook
+   symlinks dependencies). Leaves run the green command directly; passing
+   it is the verification.
+2. **Declared command** — go puts it into every worktree leaf's brief as a
+   **condition step**:
+   ```md
+   Worktree setup (only if the green command fails on a missing
+   environment): <command>. Retry the green command once after. Still
+   failing → report blocker; do not spend fix rounds on environment setup.
+   ```
+3. **Undeclared** — leaf tries green first; environment failure is a
+   blocker, not a fix-round problem. The parent falls back to shared mode
+   for the remaining slices and records the reason.
+
+Verify isolation from artifacts, not flags: a worktree result names its
+branch, or the leaf reports a copy toplevel. A result that does not means
+the host downgraded the request to a shared-checkout run — record the
+downgrade and hold shared-mode discipline for the rest of the issue.
+
+## Merge queue (worktree mode)
+
+Landed branches merge **serially, one at a time**, in landing order:
+
+1. Merge one branch into the integration HEAD.
+2. Conflict → re-dispatch **one** implementer leaf with both branch names
+   and the conflicting paths; its fix lands as a new branch and rejoins
+   the queue.
+3. After each merge: update `map.md` from landed summaries, then re-check
+   the ready set and dispatch newly-ready slices.
+4. No per-merge test ritual — leaves ran TDD inside their worktrees,
+   downstream worktrees cut from merged HEAD exercise upstream changes,
+   and assembled truth belongs to the end-of-issue review (ADR 0007).
 
 ## Harness Leaf Presets
 
@@ -101,7 +127,11 @@ an allowlist plus a line cap. The parent checks the budget before dispatch.
   blockers
 - Relevant artifact paths (prd/tasks/e2e, bundle, map, specs, files) — the
   locators that make by-reference reads possible
-- Investigation map path — orient by it, update falsified lines before commit
+- Investigation map path — orient by it; update falsified lines before
+  commit (shared mode) or report them in the summary (worktree mode — the
+  parent writes them)
+- Worktree mode: the worktree-setup condition step (see "Worktree
+  readiness") when the repo declares one
 - No nested spawn; commit rules; Blocked by / Scope
 - Anti-pattern pointer to `references/tdd.md` is enough
 

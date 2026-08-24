@@ -40,11 +40,15 @@ One issue, one parent session, five moves:
 2. **Shape** — requirements become an issue package: PRD with a
    **Contract Note** (3–5 observable outcomes), vertical slices sized to a
    fresh context window, and a behavior matrix. Then shape **reads the slice
-   graph** — waves, rivers, numbers — and asks you exactly one execution
+   graph** — rivers, sizes, numbers — and asks you exactly one execution
    question.
-3. **Go** — waves run with concurrent background implementer leaves for
-   disjoint slices; leaves orient by a shared investigation **map** and
-   commit slice by slice. TDD discipline lives here, at agreed seams.
+3. **Go** — two modes by host capability. **Worktree mode** (host can
+   isolate a spawn): slice-ready scheduling — a slice starts in its own
+   worktree the moment its blockers merge, no wave barrier; a serial merge
+   queue lands branches one at a time. **Shared mode** (any host): waves
+   with disjoint owned files. Leaves orient by a shared investigation
+   **map** and commit slice by slice. TDD discipline lives here, at agreed
+   seams.
 4. **Review (once)** — after all slices, one reviewer leaf that never
    watched the build reads the assembled diff on two axes — Standards and
    Contract — then probes the real entrypoint. Findings route to one fix
@@ -62,6 +66,7 @@ stop lines back to the full pipeline.
 | Idea | What it buys you |
 | --- | --- |
 | **The graph answers, not vibes** | Serial-vs-parallel is decided *after* slicing, from `Blocked by` edges, with numbers. Zero-dependency "rivers" get offered as splits. |
+| **Slice-ready worktrees** | With host isolation, a slice runs the moment its blockers merge — the graph itself is the scheduler, waves never existed. One `worktree-setup:` line makes each fresh copy testable. |
 | **Contract Note** | You confirm 3–5 observable bullets instead of reading a PRD. The note *is* the contract's human projection — never a second contract. |
 | **Fresh-context iron rule** | Every slice fits one clean context window. Oversized slices are re-cut at shape; a re-cut that bends the requirement goes back to grill. |
 | **One review, new eyes** | Per-slice reviews see per-slice problems. The failure classes that kill issues — cross-slice conflicts, spec-observable gaps, fixture-vs-product drift — only show at the assembled diff. The budget goes there. |

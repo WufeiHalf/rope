@@ -31,21 +31,33 @@ Details: tdd.md.
 
 ## Slice loop
 
-The slice graph drives execution — shape already read it (waves, rivers,
-sizes). Run **wave by wave**. Rivers may run in worktrees when the host
-offers them (see execution-rules "Worktree-parallel rivers"):
+The slice graph drives execution — shape already read it (rivers, sizes).
+Mode follows host capability:
 
-1. Collect the frontier: slices whose blockers are all done.
-2. Spawn each frontier slice whose owned files don't overlap as a
-   **background implementer leaf** — one leaf per slice, self-contained
-   minimal brief (ADR 0005 allowlist + ≤60-line cap; execution-rules)
-   including **TDD hard fields** and the map path. Overlapping frontier
-   slices serialize: pick them off one at a time.
-3. Collect results as they land — summaries + diffs, not full traces. Check
+- **Worktree mode** (host can isolate a spawn): **slice-ready scheduling**
+  (ADR 0008). A slice is ready the moment all its blockers are **merged**;
+  dispatch it immediately into its own worktree cut from the latest merged
+  HEAD — no wave barrier, the graph alone is the scheduler. Overlapping
+  slices may run concurrently; their overlap surfaces in the merge queue.
+- **Shared mode** (default): run **wave by wave** in the shared checkout;
+  same-wave slices need disjoint owned files, overlapping slices serialize.
+
+Each dispatch — either mode:
+
+1. Ready check (per mode above); spawn a **background implementer leaf** —
+   one leaf per slice, self-contained minimal brief (ADR 0005 allowlist +
+   ≤60-line cap; execution-rules) including **TDD hard fields**, the map
+   path, and (worktree mode) the worktree-setup condition step.
+2. Collect results as they land — summaries + diffs, not full traces. Check
    each: acceptance alignment, **red evidence** (or waiver), green, seam
-   legal, commit present, constraint evidence. A leaf-reported disposition
-   conflict returns to the parent for re-brief; it is not silently absorbed.
-4. Next wave. Repeat until the graph is done.
+   legal, commit present, constraint evidence, worktree artifact (worktree
+   mode: result names its branch). A leaf-reported disposition conflict
+   returns to the parent for re-brief; it is not silently absorbed.
+3. Worktree mode: merge landed branches **serially, one at a time**
+   (execution-rules "Merge queue"); after each merge re-check the ready set.
+   Conflict → re-dispatch one implementer leaf with both branch names.
+   Shared mode: next wave.
+4. Repeat until the graph is done.
 
 No per-slice review fires here — review is one gate at the end (below).
 Course correction unchanged: ≤2 implement rounds per problem; design defect
@@ -54,10 +66,13 @@ Course correction unchanged: ≤2 implement rounds per problem; design defect
 ## Investigation map
 
 `<issue>/map.md` — one fact per line, each with a file path and a date.
-Seeded at shape; every implementer updates the lines its work falsifies
-before committing, and adds lines for facts the next leaf will need.
-Readers orient by the map, then verify against code. An entry that no longer
-earns its line is deleted, not commented.
+Seeded at shape. In **shared mode**, every implementer updates the lines
+its work falsifies before committing, and adds lines for facts the next
+leaf will need. In **worktree mode**, leaves report falsified / needed
+lines in their summaries and the **parent writes them after each merge** —
+concurrent leaves never share the file. Readers orient by the map, then
+verify against code. An entry that no longer earns its line is deleted,
+not commented.
 
 ## After all slices: one review, new eyes
 

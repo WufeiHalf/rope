@@ -37,6 +37,10 @@ For output templates, read [references/templates.md](references/templates.md).
    - source roots
    - test roots and discovered test commands
    - common entrypoints discovered from files/scripts
+   - `Worktree setup:` — ask the user how a fresh worktree becomes
+     testable (a setup command such as a dependency-symlink script or an
+     install command; `host-managed` when the host prepares worktrees;
+     `unknown` is acceptable at init — `rope-shape` re-asks)
    - mark unknowns as `Unknown`, not guesses
 5. Generate `.rope/specs/` as a conservative skeleton:
    - include only stable generic guides during init
