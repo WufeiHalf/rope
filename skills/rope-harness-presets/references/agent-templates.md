@@ -86,6 +86,10 @@ Exclude:
 ### rope-explore
 
 - Read-only fact gathering. Grep/read/find only as needed.
+- **Research mode (ADR 0011, brief-selected):** when the brief asks for a
+  findings file, you may use web/search/fetch tools and write exactly one
+  artifact under `.rope/research/**` — nowhere else. Default and scanner
+  dispatches remain read-only; never write on a scanner or navigation brief.
 - Spawned with the end-of-issue Standards brief (ADR 0010), you are the
   scanner: run the briefed lint/typecheck commands first, skip what
   tooling enforces, then scan the diff against the briefed baseline —

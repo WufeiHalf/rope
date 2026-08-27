@@ -7,7 +7,7 @@
 - ADR 0007：end-of-issue review 是唯一评审门，per-slice review 不存在——机械返回门必须定位为证据核对（evidence reconciliation），禁止变成第二评审点。(2026-08-27)
 - ADR 0008：slice-ready 调度 + 串行合并队列 + overlap 票合法；本 issue 扩展其就绪判定语义，不动合并队列。(2026-08-27)
 - `skills/rope-quick/SKILL.md` = ADR 0006 Quick Fix Path（单 session 小修）——shape 下限规则"整体一窗装得下不切票"路由到这里。(2026-08-27)
-- `skills/rope-harness-presets/`：offline ranking 主链在 SKILL.md（research 失败降级仍可排序）；references/ 有 role-schema.md、agent-templates.md 等；research 变体与 bounce-rate 协议放 references/ 新文件。(2026-08-27)
+- `skills/rope-harness-presets/`：offline ranking 主链在 SKILL.md（research 失败降级仍可排序）；references/ 有 role-schema.md、agent-templates.md 等；explore research 模式（ADR 0011；2026-08-27 用户决策并入 rope-explore，不设第四角色）与 bounce-rate 协议放 references/。(2026-08-27, falsified & updated)
 - `.rope/upstream/mattpocock-skills/` 为 human-gated harvest 区（pin 6654f6b6）；本 issue 即 gate 批准的采纳产物，正文引用需标注上游来源。(2026-08-27)
 - 证据文件：`.rope/research/session-01a03d5d-dispatch-metrics.md`（本会话实证）、`.rope/research/mattpocock-skills-slicing-and-parallelism.md`（上游对齐）。(2026-08-27)
 - CONTEXT.md 词条体例：粗体术语 + 定义段 + `_Avoid_:` 行；新词条照此。(2026-08-27)

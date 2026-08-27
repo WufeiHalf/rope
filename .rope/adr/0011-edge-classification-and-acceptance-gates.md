@@ -42,10 +42,13 @@ Date: 2026-08-27
 7. **Human Gate Panel.** Multiple pending gates render as one batched panel
    (affected slices / authorization / blast radius) with explicit
    continue-or-hold status of other lanes.
-8. **Declared dispatch deviation.** Spawning with a type/model differing from
-   the preset requires a one-line reason in the dispatch record; a
-   `research` preset variant (web + write scoped to `.rope/research/`) is the
-   legal carrier for external research with disk output.
+8. **Research mode & declared dispatch deviation.** External research with
+   disk output is a brief-selected **mode of `rope-explore`**: a research
+   brief unlocks web/search and write scoped to `.rope/research/**` (one
+   findings artifact); default and scanner dispatches stay read-only. No
+   fourth agent name; ranking/manifest schema unchanged. Spawning with a
+   type/model differing from the preset requires a one-line reason in the
+   dispatch record.
 9. **Bounce-rate replay protocol.** `rope-harness-presets` carries an offline
    replay evaluation (issue package + leaf-return summaries in, per-planner
    bounce judgments out) for planner-window model selection.

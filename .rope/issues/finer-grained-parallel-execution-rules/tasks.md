@@ -14,7 +14,7 @@
 | B8 Given correction brief 试图引入矩阵外验收行，When go 审查，Then 拒绝并要求回 shape 重切或显式降级为非阻塞 note | yes | ticket TDD(S3) + review |
 | B9 Given 多个挂起 Human Gate，When go 呈现，Then 一次批量面板列出（受影响切片/授权内容/影响面） | yes | ticket TDD(S3) + review |
 | B10 Given shape 执行持久化归属追踪，When tasks.md 定稿，Then 跨票热文件在图上标注且迁移归属唯一化 | yes | ticket TDD(S2) + review |
-| B11 Given 需要外部调研并落盘的任务，When 派发，Then 存在合法 research 预设变体，且 type≠preset 的派发记录含一行声明 | yes | ticket TDD(S4) + review |
+| B11 Given 需要外部调研并落盘的任务，When 派发，Then explore 的 research 模式（web + 仅写 `.rope/research/**`）是合法承载，且 type≠preset 的派发记录含一行声明 | yes | ticket TDD(S4) + review |
 | B12 Given 待选型规划窗模型候选集，When 运行 bounce-rate 回放协议，Then 产出可对比的离线判定报告 | yes | ticket TDD(S4) + review |
 | B13 Given 修订后的技能包，When `node bin/rope.js add` 安装，Then 安装成功且目标目录结构符合既有格式 | yes | ticket TDD(各切片) |
 | Real-entrypoint behavior | yes | e2e.md E1–E4 + review probe |
@@ -104,11 +104,14 @@
 
 - Status: done (2026-08-27, solo mode per user waiver; commit log S1–S4)
 - Kind: vertical
-- Goal: 需要 web+write 的调研任务有合法预设承载；偏离声明与 planner 选型
-  协议可执行
+- Goal: 需要 web+write 的调研任务由 explore 的 research 模式合法承载
+  （用户决策 2026-08-27：并入 rope-explore，不设第四角色）；偏离声明与
+  planner 选型协议可执行
 - Blocked by: Slice 1
-- Scope: `skills/rope-harness-presets/SKILL.md`、`references/role-schema.md`
-  或新增 `references/research-variant.md`、`references/bounce-rate-replay.md`
+- Scope: `skills/rope-harness-presets/SKILL.md`、`references/role-schema.md`、
+  `references/agent-templates.md`（explore 模板强化）、
+  `references/explore-research-mode.md`（原 research-variant.md，git mv）、
+  `references/bounce-rate-replay.md`
 - Owned files: `skills/rope-harness-presets/**`（独占）
 - Size cap: ~400 diff lines
 - Matrix rows: B11、B12
@@ -130,3 +133,8 @@
 - Return Gate: n/a（solo 模式无叶子返回；e2e 判定 artifact 即证据映射）。
 - E2E: E1–E4 全部 pass（见 e2e.md Result）。
 - Defense Budget self-check: 实现期间未新增矩阵外验收行（B1–B13 即矩阵全集）。
+
+- S4 correction (2026-08-27): 用户决策将 research 承载从独立 rope-research 变体
+  并入 rope-explore（brief 选择的 research 模式，写权限仅限
+  `.rope/research/**`；ADR 0011 §8 同步改写）。ADR 0010 双叶"read-only"保证
+  改由 brief 纪律 + 路径限域承载（research 写入在文档区，不在被审产品代码内）。

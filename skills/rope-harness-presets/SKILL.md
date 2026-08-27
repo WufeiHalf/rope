@@ -136,13 +136,14 @@ the existing role presets written above.
 - Each concurrent leaf is still an ordinary `rope-implementer` leaf: no nested
   spawn, same tool bounds, same output format.
 
-## Research variant & declared dispatch deviation (ADR 0011)
+## Explore research mode & declared dispatch deviation (ADR 0011)
 
-- **`rope-research`** is a legal leaf variant for tasks that need external
-  research with disk output: web/search tools + write scoped to
-  `.rope/research/` only (never product code). See
-  [references/research-variant.md](references/research-variant.md). It does
-  not change the three core roles or the ranking flow.
+- **Research is a mode of `rope-explore`**, selected by the brief: a research
+  brief unlocks web/search + write scoped to `.rope/research/**` (findings
+  artifact only); default and scanner dispatches stay read-only. See
+  [references/explore-research-mode.md](references/explore-research-mode.md).
+  No fourth agent name; the three core roles and the ranking flow are
+  unchanged.
 - **Declared deviation:** spawning with a `type` or `model` that differs from
   the preset row requires a one-line reason in the dispatch record (what host
   capability the preset lacks). Undeclared deviation is a dispatch defect.
