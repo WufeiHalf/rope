@@ -26,7 +26,7 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - 不修改历史 issue 包原件；不运行任何 agent-workbench 代码
 Result:
-- pending
+- pass (2026-08-27) — artifact: e2e/case-a/E1-recut-verdict.md（两段式/重切/demo-path 全过）
 
 ## E2 案例A回放——软边判定独立性检查
 
@@ -46,7 +46,7 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - 同 E1
 Result:
-- pending
+- pass (2026-08-27) — artifact: e2e/case-a/E2-edge-classification.md（软边独立判定一致）
 
 ## E3 案例A回放——evidence 投影缺口检测
 
@@ -66,7 +66,7 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - 同 E1
 Result:
-- pending
+- pass (2026-08-27) — artifact: e2e/case-a/E3-projection-check.md（检出 R4 缺口）
 
 ## E4 案例B回放——下限规则触发"不切票"
 
@@ -86,4 +86,4 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - 不修改 jenkins-admin-cross-owner 原件
 Result:
-- pending
+- pass (2026-08-27) — artifact: e2e/case-b/E4-lower-bound.md（不切票建议，上限无误报）

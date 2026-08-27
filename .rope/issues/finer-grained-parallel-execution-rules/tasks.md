@@ -36,7 +36,7 @@
 
 ## Slice 1: 定义层——CONTEXT 术语与 ADR 0011
 
-- Status: pending
+- Status: done (2026-08-27, solo mode per user waiver; commit log S1–S4)
 - Kind: contract
 - Goal: 后续三张规则票引用的术语与决策先于实现存在并可独立评审
 - Blocked by: none
@@ -56,7 +56,7 @@
 
 ## Slice 2: shape 侧粒度与图规则
 
-- Status: pending
+- Status: done (2026-08-27, solo mode per user waiver; commit log S1–S4)
 - Kind: vertical
 - Goal: 用新规则跑一次 shape，能在产出 artifact 中观察到 demo-path、
   上下限判定、边分类、两段式契约票与 evidence 投影
@@ -79,7 +79,7 @@
 
 ## Slice 3: go 侧派发、返回门与预算规则
 
-- Status: pending
+- Status: done (2026-08-27, solo mode per user waiver; commit log S1–S4)
 - Kind: vertical
 - Goal: 用新规则跑一次 go，能在派发判定、join 输出与 correction 审查中
   观察到软边降级、机械返回门与 Defense Budget 的机械行为
@@ -102,7 +102,7 @@
 
 ## Slice 4: harness presets——调研变体、声明式派发与选型协议
 
-- Status: pending
+- Status: done (2026-08-27, solo mode per user waiver; commit log S1–S4)
 - Kind: vertical
 - Goal: 需要 web+write 的调研任务有合法预设承载；偏离声明与 planner 选型
   协议可执行
@@ -121,3 +121,12 @@
 - Implementation notes: offline ranking 主链（rank/manifest/degrade）不动
 - Verification: 结构校验 + 样例走查
 - Stop conditions: 若需要改 offline ranking 行为 → 停（Non-goal）
+
+## Review record
+
+- Mode: solo（用户指令"提交，进go，不派生子代理单独处理"，declared deviation）；
+  ADR 0010 双叶 end-of-issue review 由用户免除，human 为验收门。
+- Per-slice commits: S1 bd70feb, S2 61d3a7c, S3 3e3d8e6, S4 09a0a6a。
+- Return Gate: n/a（solo 模式无叶子返回；e2e 判定 artifact 即证据映射）。
+- E2E: E1–E4 全部 pass（见 e2e.md Result）。
+- Defense Budget self-check: 实现期间未新增矩阵外验收行（B1–B13 即矩阵全集）。
