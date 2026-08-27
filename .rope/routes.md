@@ -22,6 +22,9 @@ evidence-based.
   - `README.md`
   - `.rope/CONTEXT.md`
   - `.rope/adr/`
+- Worktree setup: host-managed — 纯 Markdown 规则仓，无需构建。叶子在 fresh
+  worktree 的验证 = `python3 quick_validate.py skills/<skill>`（外部脚本，可得时）
+  否则结构检查（frontmatter/目录/锚点）+ 人工通读；无测试套件可跑。
 
 ## Common Work Routes
 
