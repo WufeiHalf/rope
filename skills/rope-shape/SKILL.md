@@ -45,19 +45,36 @@ Default handoff: same-session `rope-go`.
    not point at slices — ticket TDD proves units, the end-of-issue review
    walks these behaviors at the real entrypoint. N/A rows need a reason.
 8. `tasks.md` **tracer-bullet slices** (to-ticket style): each cuts a complete
-   path when it can, but the hard rules are only — declare `Blocked by` edges,
-   fit a **fresh context window** (default ~400 diff lines / ~4 owned files;
+   path when it can, but the hard rules are only — declare `Blocked by` edges
+   **with an Edge Classification label** (file-overlap | seam-required |
+   methodology-order; ADR 0011 — only the first two block dispatch), fit a
+   **fresh context window** (default ~400 diff lines / ~4 owned files;
    exceeded ⇒ re-cut on the spot), and no two same-wave slices sharing core
-   files in shared mode. Component slices (parts of one user story) are legal:
-   briefs cite the story row + their own completion criteria. Look for a
-   **prefactor** opportunity first — "make the change easy, then make the easy
-   change" — a structural-enabling slice that unblocks wide parallel work.
-   Wide refactor → expand–contract (gates-and-vocab.md).
-9. **Read the graph, then ask one question.** From `Blocked by` edges derive
-    **waves** (topological levels) and **rivers** (slice clusters with no edge,
-    direct or transitive, between them). Show the graph with numbers: serial
-    total vs longest river, wave count, size violations already re-cut. Then
-    exactly one execution question:
+   files in shared mode. **Lower bound:** a change that fits one fresh context
+   window does not become a multi-slice issue — recommend `rope-quick`
+   (ADR 0006) instead. **Two-stage contract slices:** a `Kind: contract` slice
+   carrying deep durability/concurrency/protocol semantics is cut as
+   thin-interface + hardening (ADR 0011) — consumers block only on the
+   thin-interface slice; migration/schema files have exactly one owning
+   slice. **Evidence projection:** every slice's Required evidence entries
+   cite the matrix rows they prove; a matrix row with no slice evidence is a
+   shape defect — fix it here, not at go. Every slice carries a **Demo path**
+   field: the behavior you can demo when it lands — never a layer name.
+   Component slices (parts of one user story) are legal: briefs cite the story
+   row + their own completion criteria. Look for a **prefactor** opportunity
+   first — "make the change easy, then make the easy change" — a
+   structural-enabling slice that unblocks wide parallel work.
+   Wide refactor → expand–contract (gates-and-vocab.md). Anti-pattern catalog:
+   gates-and-vocab.md.
+9. **Read the graph, then quiz granularity, then ask one question.** From
+   `Blocked by` edges derive **waves** (topological levels) and **rivers**
+   (slice clusters with no edge, direct or transitive, between them). Show the
+   graph with numbers: serial total vs longest river, wave count, size
+   violations already re-cut, startup width (max antichain). **Granularity
+   quiz** (same message, not a new round): any slice too coarse (won't fit a
+   window) or too fine (trivial grouping lost)? Are the blocking edges real
+   per their Edge Classification? Merge or split? **Then** exactly one
+   execution question:
     - two or more rivers ⇒ offer the **split** — each river its own issue, its
       own pipeline, deliverable alone — or one issue with the rivers running in
       parallel;

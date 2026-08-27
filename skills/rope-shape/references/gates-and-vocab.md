@@ -34,6 +34,38 @@ E2E items carry **real-environment behaviors only** (real APIs, real entrypoints
 
 Upstream “spec/ticket” is kernel only; keep Rope names in artifacts we write.
 
+## Edge Classification (ADR 0011)
+
+Every `Blocked by` edge gets exactly one label at shape; only the first two
+block dispatch:
+
+| Label | Test | Effect |
+| --- | --- | --- |
+| **file-overlap** | the downstream slice reads/writes files the upstream owns (verify against owned-files, not intuition) | blocks dispatch |
+| **seam-required** | the downstream consumes a public seam the upstream must first create | blocks dispatch |
+| **methodology-order** | no overlap, no seam — only "reads better if done first" (e.g. instrumentation before refactor) | merge-order preference only; go dispatches across it |
+
+A missing label is a shape defect. "Feels safer sequential" is not a label —
+it is a merge-order preference at best.
+
+## Slice granularity hard rules & anti-patterns (ADR 0011)
+
+- **Demo path (mandatory per slice):** the answer to "what can I demo when
+  this slice lands?" — a behavior, never a layer name ("schema done" fails).
+- **Lower bound:** the whole change fits one fresh context window ⇒ do not
+  make a multi-slice issue; recommend `rope-quick` (ADR 0006).
+- **Upper bound:** one slice ≈ one fresh context window; exceeded ⇒ re-cut on
+  the spot (existing rule).
+- **Two-stage contract slices:** deep durability/concurrency/protocol work in
+  a contract slice is thin-interface + hardening; consumers block only on the
+  thin-interface half.
+- **Anti-patterns** (field evidence: mattpocock/skills pin 6654f6b6 —
+  horizontal slicing produced 26 tickets × ~20 agent runs each, 3/4 rework):
+  horizontal (per-layer) slicing; over-decomposition (trivial grouping lost);
+  acceptance criteria that are already true on the base commit, satisfiable
+  only by another ticket's work, or restatements of the request instead of
+  artifact-derived checks.
+
 ## Wide refactor (expand–contract)
 
 One mechanical change with huge blast radius: do not slice it into fake

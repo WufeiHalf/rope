@@ -130,13 +130,14 @@
 - Status: pending
 - Kind: vertical | contract | wide-refactor-expand | wide-refactor-migrate | wide-refactor-contract
 - Goal: <user-perspective end-to-end result this slice makes true — not a layer list>
-- Blocked by: none | Slice N, …
+- Demo path: <the behavior you can demo when this slice lands — never a layer name>
+- Blocked by: none | Slice N, … (<each edge labeled: file-overlap | seam-required | methodology-order>)
 - Scope: <path/area bounds; disjoint from sibling slices when parallel/dynamic>
 - Owned files: <explicit files this slice owns; no file owned by more than one implementation slice>
 - Size cap: <default ~400 diff lines or ~4 owned files; exceeded ⇒ split>
 - Matrix rows:
 - Constraint IDs: <decision/invariant IDs owned by this slice>
-- Required evidence: <evidence for those IDs>
+- Required evidence: <evidence for those IDs — each entry cites the matrix row(s) it proves; a matrix row with no slice evidence is a shape defect>
 - Public behavior: <one user-visible sentence of what works when this slice is done>
 - Tests:
 - Implementation notes:
