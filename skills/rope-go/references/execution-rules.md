@@ -41,6 +41,9 @@ Landed branches merge **serially, one at a time**, in landing order:
 
 1. Merge one branch; conflict → re-dispatch **one** implementer leaf with
    both branch names and conflicting paths; its fix rejoins the queue.
+   When tasks.md records methodology-order preferences (ADR 0011), order
+   the queue by them when convenient — they never gate dispatch, only
+   landing order.
 2. After each merge: update `map.md` from leaf summaries, re-check the
    ready set, dispatch newly-ready slices.
 3. No per-merge test ritual — leaves ran TDD; downstream worktrees cut from
@@ -97,7 +100,9 @@ command blocks excluded). The parent checks the budget before dispatch.
   name in worktree mode), acceptance text exercised, red evidence
   (command + failure) unless waived, green evidence, constraint IDs
   checked + disposition conflicts, falsified/needed map lines (worktree
-  mode), blockers
+  mode), blockers — **plus the Return Gate payload:** every slice
+  Required-evidence item mapped to pasted command output or an artifact
+  path, keyed by evidence id (ADR 0011)
 - Relevant artifact paths (prd/tasks/e2e, bundle, map, specs, files)
 - Map path — orient by it; update falsified lines before commit (shared
   mode) or report them in the summary (worktree mode)
@@ -110,6 +115,45 @@ standards-source paths + inline global invariants + pasted smell baseline
 path + entrypoint start hint + inline global invariants (bundle path on
 suspected conflict only; no map). Axes and high-risk list live in the
 reviewer preset body, not the brief. Same allowlist and line cap.
+
+## Return Gate reconciliation & Defense Budget (ADR 0011)
+
+On each landing, reconcile mechanically — a table check, not a review:
+
+```md
+| Evidence item (id) | Required by (matrix row) | Returned output/path | verdict |
+| --- | --- | --- | --- |
+| S2-E1 crash-after-rename | B4 | pasted pytest output | ok |
+| S2-E2 concurrent get-or-create | B5 | (missing) | BOUNCE |
+```
+
+- Any `BOUNCE` row → re-dispatch the leaf with exactly the missing item
+  ids; nothing else reopens.
+- The gate never re-reads implementations, never reruns tests, never
+  issues verdicts — the end-of-issue review stays the only review gate
+  (ADR 0007).
+- **Defense Budget:** a correction brief contains **zero** acceptance
+  requirements absent from the Behavior Matrix. A gap discovered
+  mid-execution goes back to shape as a re-cut (new slice) or is demoted
+  to a recorded non-blocking note in tasks.md. Design-constraint drift
+  across rounds ("fix2 replaces what fix1 built") is a Defense Budget
+  violation — stop and re-cut instead.
+
+## Human Gate Panel (ADR 0011)
+
+Multiple pending gates render once, batched:
+
+```md
+## Human Gate Panel (2 pending)
+1. [S5] authorize fail-open → fail-closed switch — blast radius: summary
+   gate path; lanes S2/S3 continue, S4 holds.
+2. [S8] approve destructive worktree cleanup — blast radius: none unmerged;
+   all lanes continue.
+```
+
+Each entry: affected slices / exact authorization requested / blast radius /
+other lanes' continue-or-hold status. Never present gates one-at-a-time while
+other lanes sit idle without an explicit hold statement.
 
 ## End-of-Issue Review Execution (parent-owned)
 
