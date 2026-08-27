@@ -136,3 +136,61 @@ _Avoid_: treating quick as a replacement for the full pipeline on any issue, sil
 **Plan Artifact Reader Layering**:
 The rule that plan artifacts name their reader: humans read the grill recap (3–6 bullets) and the Contract Note (3–5 bullets); machines read the Behavior Contract, Behavior Matrix, Constraint Bundle, and tasks records by reference. Unresolved questions are resolved at the grill gate before shape; a conflict discovered by a leaf during go is re-briefed back to the parent for disposition, never silently absorbed. This replaces the older “concise plan + list unresolved questions at the end” rule.
 _Avoid_: one artifact trying to serve both readers with one format, unresolved questions shipped to execution, silent absorption of leaf conflicts
+
+**Edge Classification**:
+The shape-time labeling of every `Blocked by` edge as `file-overlap`,
+`seam-required`, or `methodology-order`. Only the first two block dispatch;
+a methodology-order edge (no owned-file overlap, no seam consumption — pure
+"reads better if done first") is demoted to a merge-order preference, never a
+dispatch blocker. This refines ADR 0008's ready-set definition.
+_Avoid_: treating "feels safer sequential" as a dependency, wave thinking
+reintroduced through unclassified edges, edge labels without owned-files facts
+
+**Two-stage Contract Slice**:
+The required shape of any `Kind: contract` slice that carries deep durability,
+concurrency, or protocol semantics: a **thin-interface** slice (public seam +
+minimal working operations; consumers may block on it) plus a separate
+**hardening** slice (crash-recovery, concurrency protocols, sanitization depth;
+consumers must NOT block on it). Persistence/schema migration ownership is
+unique — exactly one slice owns a migration file.
+_Avoid_: one storage state-machine ticket packing interface and hardening,
+hardening rework sitting on the consumer critical path, two slices owning one
+migration file
+
+**Mechanical Return Gate**:
+The join-time reconciliation between a leaf's return summary and its slice's
+Required evidence: every evidence item must map to pasted command output or an
+artifact path; a missing item bounces the leaf back to exactly those items. It
+is **evidence reconciliation, not code review** (ADR 0007 boundary): no
+implementation re-read, no test reruns, no second review point — the
+end-of-issue review stays the only review gate.
+_Avoid_: parent re-reading implementations at join, rerunning leaf tests,
+using the gate to inject new acceptance requirements
+
+**Defense Budget**:
+The rule that a correction brief may not introduce acceptance requirements
+absent from the issue's Behavior Matrix — new acceptance lines = 0. A genuine
+gap found during execution goes back to shape (re-cut as a new slice) or is
+demoted to a recorded non-blocking note. Acceptance scope is fixed at shape;
+fix rounds converge instead of escalating.
+_Avoid_: mid-execution acceptance inflation, defensive requirements appearing
+only in fix rounds, design constraints drifting between correction rounds
+
+**Granularity Quiz**:
+The shape-time challenge of slice granularity after the graph exists, folded
+into the graph-confirmation step: is any slice too coarse (fits-no-window) or
+too fine (trivial grouping lost)? Are the blocking edges real? Merge or split?
+The user approves granularity, not just wave order. Backed by two hard rules:
+every slice has a **demo path** (a demoable behavior, never a layer name), and
+a change that fits one fresh context window should not become a multi-slice
+issue at all (route `rope-quick`).
+_Avoid_: quiz as a new serial Q&A round, demo path answered with a layer name,
+splitting a one-window change to look rigorous
+
+**Human Gate Panel**:
+The batched presentation of multiple pending Human Escalation Stops / gate
+approvals in one panel — each entry naming the affected slices, the exact
+authorization requested, and the blast radius — instead of one-at-a-time
+blocking. Non-gated lanes' continue-or-hold status is stated explicitly.
+_Avoid_: sequential gate blocking idle lanes, vague gate descriptions that
+require a follow-up question to understand
