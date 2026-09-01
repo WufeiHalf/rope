@@ -10,6 +10,7 @@ Parent Orchestrator: turn a clarified requirement into an **issue package**
 doc — keep **issue / PRD / slice** vocabulary.
 
 Templates: [references/issue-package.md](references/issue-package.md).
+Seam placement vocabulary: [references/seam-design.md](references/seam-design.md).
 Architecture impact and Constraint Bundle: [references/architecture-continuity.md](references/architecture-continuity.md).
 E2E classes, gates, vocab, wide-refactor: [references/gates-and-vocab.md](references/gates-and-vocab.md).
 

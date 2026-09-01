@@ -34,8 +34,18 @@ replace that.
 - Test **only** at seams listed in the issue `prd.md` **Testing Decisions**
   (and slice brief). Prefer existing public boundaries; fewer is better.
 - **No new seam** during go without plan adjustment + human/shape confirmation.
-- Tests observe through the seam’s public interface — not private methods or
+- Tests observe through the seam's public interface — not private methods or
   internal collaborators.
+- When the *shape* of the seam's interface is itself in question — how deep
+  the module is, where the boundary belongs, what it exposes — that is a
+  design question, not a test question: consult the shared vocabulary in
+  [../../rope-shape/references/seam-design.md](../../rope-shape/references/seam-design.md),
+  and take it back to the parent as a plan adjustment rather than improvising
+  a second seam.
+- **UI seams bind the accessibility contract, not the DOM.** Locate elements
+  by role / accessible name / label, `data-testid` as fallback — never by CSS
+  selector, class name, or DOM structure. A style or markup refactor with
+  unchanged behavior must break zero tests.
 
 ## Rules of the loop
 
@@ -58,7 +68,8 @@ replace that.
 
 | Anti-pattern | Tell |
 | --- | --- |
-| **Implementation-coupled** | Mocks internal modules, private APIs, call-order asserts; breaks on refactor with same behavior |
+| **Implementation-coupled** | Mocks internal modules, private APIs, call-order asserts; locates UI by CSS selector / class / DOM structure; breaks on refactor with same behavior |
+| **Aesthetic-coupled** | Asserts computed styles or pixel values; breaks on a design change though every behavior holds |
 | **Tautological** | Expected value computed the same way as production (`expect(f(x)).toBe(sameAlgorithm(x))`) |
 | **Horizontal bulk tests** | All tests written before any green for this slice’s behaviors |
 | **Wrong seam** | Tests internals or a seam not on the shape-confirmed list |
@@ -76,11 +87,24 @@ Mock **system boundaries** only:
 Do **not** mock internal collaborators you control. Prefer exercising the real
 seam; at boundaries prefer narrow SDK-style ports that are easy to fake.
 
-## Docs-only / no production code
+## Waived slices (no red required)
 
-If the slice is documentation-only (skill text, `.rope` docs, no runtime
-behavior), the brief sets `TDD: waived (docs-only)`. No red required; still
-state how the slice is verified (read-through, structural checklist).
+Red→green needs an independent source of truth to assert against. Two
+change families lack one and are waived instead — the brief sets
+`TDD: waived (<kind>)` plus how the slice is verified:
+
+- **docs-only** (skill text, `.rope` docs, no runtime behavior): verified by
+  read-through / structural checklist.
+- **style-only UI change** (colors, spacing, layout, visual polish — no
+  Behavior Matrix row, interaction, data, or state claim changes): verified
+  by a screenshot artifact (before/after) or human look. Style has no
+  expected value a test can hold without becoming tautological or
+  aesthetic-coupled.
+
+A change that touches any Matrix row, interaction, data, or state is
+behavior-bearing however small — it goes through red→green. When in doubt,
+the slice's Public behavior sentence decides: if it still held before the
+change, the change is style-only.
 
 ## Parent / reviewer evidence
 
@@ -93,4 +117,4 @@ Implementer summary should include:
 - paths of tests and production code
 
 Missing red evidence on a code-bearing slice → treat as implementation miss
-(re-brief), not as optional style.
+(re-brief), not as optional polish.

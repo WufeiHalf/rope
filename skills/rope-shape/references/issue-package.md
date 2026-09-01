@@ -42,7 +42,7 @@
 ## Testing Decisions
 
 - Good test: observe external behavior at agreed seams — not implementation details
-- Seams under test: <list confirmed with user during shape>
+- Seams under test: <list confirmed with user during shape; when placement is contested, argue it with [seam-design.md](seam-design.md)>
 - Prior art (optional): <paths or patterns of similar tests in-repo>
 
 ## Behavior Contract
