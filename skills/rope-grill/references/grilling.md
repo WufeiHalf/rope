@@ -3,10 +3,12 @@
 ## Fact vs decision
 
 - **Facts** (code, tests, docs, primary sources, mature libraries): look up.
-  Prefer explore leaf when wide. Never turn answerable facts into user quizzes.
-- **Decisions** (product tradeoffs, risk, gates, which option wins): one question
-  at a time with a recommended answer. Never write contested choices into
-  `.rope/` as settled.
+  Prefer a background explore leaf when wide — a running exploration delays
+  only the questions downstream of it, never the current round. Never turn
+  answerable facts into user quizzes.
+- **Decisions** (product tradeoffs, risk, gates, which option wins): put to
+  the user in frontier rounds, each with a recommended answer. Never write
+  contested choices into `.rope/` as settled.
 
 ## Domain discipline
 
@@ -31,9 +33,11 @@ Rope reasoning.
   - Failure visibility -> “where the user sees the error”
   - Forbidden shortcut -> “a lazy implementation that could still pass tests”
   - Human gate -> “this needs your explicit approval before we touch it”
-- Ask one plain-language question at a time for blockers. Independent decisions
-  may be grouped into one structured batch; each item still has its own plain
-  question, recommendation, concrete example, and tradeoff.
+- Ask the frontier in **rounds**: independent decisions share one numbered
+  round (structured question tool preferred); each item still has its own plain
+  question, recommendation, concrete example, and tradeoff. A decision that
+  depends on an answer still open belongs to a later round — never guess at an
+  answer not yet heard. A stalled branch never pauses the rest of the round.
 - Pair the recommended answer with a concrete example: user scenario, click,
   command, screen result, file, or message.
 - State the tradeoff of the other option when it affects product behavior.
@@ -43,10 +47,19 @@ Rope reasoning.
 Completion criterion: the recommendation is understandable on first read, and
 the user can choose without learning Rope vocabulary.
 
-## Decision tree
+## Design tree + frontier rounds
 
-Resolve blockers first. Do not open a sibling branch that depends on an
-unresolved choice. Optionally label “本问题阻塞：&lt;topic&gt;”.
+- Map the decisions as a tree: every decision branches into the decisions
+  that hang off it.
+- The **frontier** is every decision whose prerequisites are already settled —
+  the questions askable **now** without guessing at answers not yet heard. Ask
+  the whole frontier in one numbered round; a question whose answer depends on
+  another question still open in this round belongs to a **later** round.
+- Each answered round reshapes the tree: settled decisions push the frontier
+  outward and unblock what depended on them. Recompute the frontier, then ask
+  the next round.
+- Done when the frontier is empty: every branch visited, nothing silently
+  assumed. The Ready-for-shape checklist below still gates shape.
 
 ## External libraries
 
