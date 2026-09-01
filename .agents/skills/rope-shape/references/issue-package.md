@@ -42,7 +42,7 @@
 ## Testing Decisions
 
 - Good test: observe external behavior at agreed seams — not implementation details
-- Seams under test: <list confirmed with user during shape>
+- Seams under test: <list confirmed with user during shape; when placement is contested, argue it with [seam-design.md](seam-design.md)>
 - Prior art (optional): <paths or patterns of similar tests in-repo>
 
 ## Behavior Contract
@@ -111,6 +111,8 @@
 ```md
 # <Issue Title> Tasks
 
+Execution mode: worktree | shared   # probed at shape (ADR 0012); go consumes, may degrade with recorded reason
+
 ## Behavior Matrix (issue behavior spec — BDD)
 
 | Behavior (Given/When/Then where it helps) | Applies? | Verified at |
@@ -130,13 +132,14 @@
 - Status: pending
 - Kind: vertical | contract | wide-refactor-expand | wide-refactor-migrate | wide-refactor-contract
 - Goal: <user-perspective end-to-end result this slice makes true — not a layer list>
-- Blocked by: none | Slice N, …
+- Demo path: <the behavior you can demo when this slice lands — never a layer name>
+- Blocked by: none | Slice N, … (<each edge labeled: file-overlap | seam-required | methodology-order>)
 - Scope: <path/area bounds; disjoint from sibling slices when parallel/dynamic>
-- Owned files: <explicit files this slice owns; no file owned by more than one implementation slice>
+- Owned files: <explicit files this slice owns; unique within a shared-mode wave — in recorded worktree mode overlap is legal and expressed by a file-overlap edge (ADR 0012)>
 - Size cap: <default ~400 diff lines or ~4 owned files; exceeded ⇒ split>
 - Matrix rows:
 - Constraint IDs: <decision/invariant IDs owned by this slice>
-- Required evidence: <evidence for those IDs>
+- Required evidence: <evidence for those IDs — each entry cites the matrix row(s) it proves; a matrix row with no slice evidence is a shape defect>
 - Public behavior: <one user-visible sentence of what works when this slice is done>
 - Tests:
 - Implementation notes:

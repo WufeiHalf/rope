@@ -6,8 +6,8 @@
 - Default branch: `main`
 - Pin mode: machine-local clone + last-reviewed SHA (not a git submodule)
 - Local clone (default): `~/.cache/rope-upstream/mattpocock-skills`
-- Last reviewed SHA: `9603c1cc8118d08bc1b3bf34cf714f62178dea3b`
-- Last reviewed at: `2026-07-20T11:03:27+08:00`
+- Last reviewed SHA: `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76`
+- Last reviewed at: `2026-09-01T11:56:51+08:00`
 
 ## Policy
 

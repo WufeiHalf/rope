@@ -13,7 +13,7 @@ Rows marked `watch` are recorded for optional named scans; `out` is ignored.
 | `to-prd` | `skills/rope-shape` | out | Renamed upstream → `to-spec` (baseline 9603c1c) |
 | `to-issues` | `skills/rope-shape` | out | Renamed upstream → `to-tickets` (baseline 9603c1c) |
 | `setup-matt-pocock-skills` | `skills/rope-init` | high | Per-repo scaffold conventions; migrate stays separate |
-| `tdd` | `skills/rope-go` | high | TDD discipline inside go slice loop (not a standalone Rope skill) |
+| `tdd` | `skills/rope-go` | high | TDD discipline inside go slice loop (not a standalone Rope skill). Seam-design vocabulary absorbed via `skills/rope-shape/references/seam-design.md` (2026-09-01) |
 | `triage` | _(none yet)_ | watch | Tracker intake state machine; not Rope's default path |
 | `prototype` | _(none yet)_ | watch | Throwaway code to answer design questions; optional grill detour |
 | `diagnosing-bugs` / `diagnose` | _(none yet)_ | watch | Debug loop; may inspire a future skill |

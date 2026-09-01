@@ -48,7 +48,9 @@ When present: `.rope/CONTEXT.md`, `routes.md`, relevant `adr/`, `research/`,
 ## Workflow
 
 1. Restate target and suspected ambiguity.
-2. Resolve **facts** (code/docs/libs) before questions; see grilling.md.
+2. Resolve **facts** (code/docs/libs) before asking the user — dispatch a
+   background explore leaf for wide lookups; a running exploration delays only
+   the questions downstream of it, never the round. See grilling.md.
 3. Apply **domain discipline** (glossary, fuzzy terms, code contradictions).
 4. Resolve **Behavior Contract** six fields (grilling.md).
 5. Run a conditional architecture-impact check. Use targeted lookup through
@@ -56,8 +58,10 @@ When present: `.rope/CONTEXT.md`, `routes.md`, relevant `adr/`, `research/`,
    `not-applicable` with the lightweight trigger check. If a trigger is present,
    resolve each decision's disposition before shape.
 6. Ask **product/design-first** decisions with a recommendation, plain language,
-   and a concrete example. Resolve blockers first; independent decisions may be
-   grouped into one structured batch, while dependent decisions stay ordered.
+   and a concrete example, in **frontier rounds** (grilling.md): one numbered
+   round for every decision whose prerequisites are settled; a decision that
+   depends on an answer still open goes to a later round. Recompute the
+   frontier after each round of answers.
 7. When the host exposes `ask_user_question` or an equivalent structured tool,
    prefer it for batches and choices. If unavailable, use the same plain-text
    questions with recommendation, concrete scenario, and tradeoff; do not block.

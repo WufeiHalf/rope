@@ -47,10 +47,13 @@ full pipeline. Never absorb a new decision silently.
 ## Fix loop
 
 1. Bug fixes are **red→green mandatory**: write a failing test reproducing
-   the reported symptom at the nearest seam; run the focused command and
-   confirm red before fixing.
+   the reported symptom at the nearest seam (UI seams bind role / accessible
+   name / label, `data-testid` as fallback — never CSS selectors or DOM
+   structure); run the focused command and confirm red before fixing.
 2. Minimal fix to green; rerun the focused suite. Config/docs-only changes
-   waive red with a stated reason.
+   waive red with a stated reason. **Style-only UI changes** (colors,
+   spacing, layout — no behavior claim touched) also waive red: verify with
+   a screenshot artifact or human look instead, and state the waiver reason.
 3. Commit per the repo's discipline (Conventional Commit when the repo uses
    it); keep commits inside the agreed scope.
 

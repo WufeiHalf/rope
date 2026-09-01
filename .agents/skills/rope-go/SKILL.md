@@ -21,8 +21,11 @@ Red→green playbook: [references/tdd.md](references/tdd.md).
 2. Clean git; baseline check (tests green at start — cheap, catches a
    broken starting point early). Issue package committed first if worktree
    mode (a worktree is cut from HEAD).
-3. Decide mode from host capability + the repo's `worktree-setup:` line in
-   `routes.md` (tiers and manual-setup check: execution-rules).
+3. Consume the `Execution mode:` recorded at shape in `tasks.md` (ADR
+   0012); re-verify host capability — a mismatch degrades to shared with a
+   recorded reason. No record (legacy package): decide as before from host
+   capability + the repo's `worktree-setup:` line in `routes.md` (tiers
+   and manual-setup check: execution-rules).
 4. **Declare parallelism in the report**: max X (widest wave / antichain)
    vs planned Y; reasons when Y < X. Concurrency is the default intent —
    small gain only weighs against setup cost, never alone justifies
@@ -30,10 +33,17 @@ Red→green playbook: [references/tdd.md](references/tdd.md).
 
 ## Slice loop — dispatch on readiness
 
+- **Edge-aware ready set (ADR 0011/0012):** `seam-required` blockers gate
+  dispatch in both modes. `file-overlap` gates only in shared mode; under
+  recorded worktree mode it is a merge-order preference — the two slices
+  dispatch concurrently and the merge queue orders landing. A
+  `methodology-order` edge never blocks dispatch — it is a merge-order
+  preference recorded in tasks.md; serialize merges by it when convenient,
+  never serialize dispatch.
 - **Worktree mode** (host can isolate a spawn): a slice is ready the moment
-  its blockers are **merged**; dispatch immediately into its own worktree
-  from the latest merged HEAD. No wave barrier — the graph is the
-  scheduler.
+  its **seam-required** blockers are **merged**; dispatch immediately into
+  its own worktree from the latest merged HEAD. No wave barrier — the graph
+  is the scheduler.
 - **Shared mode** (any host): waves; same-wave parallelism needs disjoint
   owned files; the parent collects commits serially in landing order.
 
@@ -41,12 +51,22 @@ Dispatch → background implementer leaf per slice with a **minimal brief**
 (allowlist + ≤60 lines; execution-rules): TDD hard fields, map path,
 constraint IDs, worktree-setup condition step. Collect results as they
 land: acceptance, red evidence, green, seam legal, commit, constraint
-evidence. Fix rounds (≤2) on one slice never pause dispatch of other
-ready slices. Design defect → Human Escalation Stop.
+evidence. **Mechanical Return Gate (ADR 0011):** reconcile each return
+against the slice's Required evidence — every item maps to pasted command
+output or an artifact path; missing items bounce the leaf to exactly those
+items. The gate is evidence reconciliation: no implementation re-read, no
+test reruns, no verdict (ADR 0007 — the end-of-issue review stays the only
+review gate). Fix rounds (≤2) on one slice never pause dispatch of other
+ready slices; a fix round may not add acceptance requirements absent from
+the Behavior Matrix (**Defense Budget**): a genuine gap goes back to shape
+as a re-cut, or is demoted to a recorded non-blocking note. Design defect
+→ Human Escalation Stop.
 
 Worktree mode: merge landed branches serially, one at a time
 ("Merge queue"); after each merge, update `map.md` from leaf summaries and
-re-check the ready set. Conflict → one re-dispatch with both branch names.
+re-check the ready set. Conflict → one re-dispatch with both branch names,
+resolving **on the unmerged branch** (its brief + commits are the primary
+intent sources — ADR 0012).
 Shared mode: next wave.
 
 ## Investigation map
