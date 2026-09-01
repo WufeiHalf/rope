@@ -21,8 +21,11 @@ Red→green playbook: [references/tdd.md](references/tdd.md).
 2. Clean git; baseline check (tests green at start — cheap, catches a
    broken starting point early). Issue package committed first if worktree
    mode (a worktree is cut from HEAD).
-3. Decide mode from host capability + the repo's `worktree-setup:` line in
-   `routes.md` (tiers and manual-setup check: execution-rules).
+3. Consume the `Execution mode:` recorded at shape in `tasks.md` (ADR
+   0012); re-verify host capability — a mismatch degrades to shared with a
+   recorded reason. No record (legacy package): decide as before from host
+   capability + the repo's `worktree-setup:` line in `routes.md` (tiers
+   and manual-setup check: execution-rules).
 4. **Declare parallelism in the report**: max X (widest wave / antichain)
    vs planned Y; reasons when Y < X. Concurrency is the default intent —
    small gain only weighs against setup cost, never alone justifies
@@ -30,15 +33,17 @@ Red→green playbook: [references/tdd.md](references/tdd.md).
 
 ## Slice loop — dispatch on readiness
 
-- **Edge-aware ready set (ADR 0011):** a slice is ready when its unresolved
-  blockers are `file-overlap` or `seam-required` edges only. A
+- **Edge-aware ready set (ADR 0011/0012):** `seam-required` blockers gate
+  dispatch in both modes. `file-overlap` gates only in shared mode; under
+  recorded worktree mode it is a merge-order preference — the two slices
+  dispatch concurrently and the merge queue orders landing. A
   `methodology-order` edge never blocks dispatch — it is a merge-order
   preference recorded in tasks.md; serialize merges by it when convenient,
   never serialize dispatch.
 - **Worktree mode** (host can isolate a spawn): a slice is ready the moment
-  its classified blockers are **merged**; dispatch immediately into its own
-  worktree from the latest merged HEAD. No wave barrier — the graph is the
-  scheduler.
+  its **seam-required** blockers are **merged**; dispatch immediately into
+  its own worktree from the latest merged HEAD. No wave barrier — the graph
+  is the scheduler.
 - **Shared mode** (any host): waves; same-wave parallelism needs disjoint
   owned files; the parent collects commits serially in landing order.
 
@@ -59,7 +64,9 @@ as a re-cut, or is demoted to a recorded non-blocking note. Design defect
 
 Worktree mode: merge landed branches serially, one at a time
 ("Merge queue"); after each merge, update `map.md` from leaf summaries and
-re-check the ready set. Conflict → one re-dispatch with both branch names.
+re-check the ready set. Conflict → one re-dispatch with both branch names,
+resolving **on the unmerged branch** (its brief + commits are the primary
+intent sources — ADR 0012).
 Shared mode: next wave.
 
 ## Investigation map

@@ -58,6 +58,9 @@ Exclude:
 - Do not invent seams; use only seams listed in the brief / PRD Testing Decisions.
 - Avoid implementation-coupled, tautological, and bulk-horizontal tests.
 - May use write/edit/bash.
+- Fresh worktree (isolation spawn): run the brief's worktree-setup step 0
+  first — check-first script, fast no-op when already testable. Environment
+  failures are blockers, never fix-round material.
 - Orient by the investigation map (`map.md`) first; update every line your work
   falsifies before committing.
 - Return: what changed; acceptance exercised; red evidence; green evidence;

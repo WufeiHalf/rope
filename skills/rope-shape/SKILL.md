@@ -26,9 +26,15 @@ Default handoff: same-session `rope-go`.
    update the lines they falsify.
    **Worktree-setup check (incremental):** if `routes.md` has no
    `Worktree setup:` line, ask the user how a fresh worktree becomes
-   testable (a setup command, or `host-managed`), and record the answer in
-   `routes.md`. Existing repos join the worktree mode here without
-   re-running `rope-init`.
+   testable — prefer a **check-first idempotent script** (cheap no-op when
+   already testable; read-only symlinks / shared caches over reinstalling),
+   or `host-managed` — and record the answer in `routes.md`. Existing
+   repos join the worktree mode here without re-running `rope-init`.
+   **Execution-mode probe (ADR 0012):** verify whether this harness can
+   spawn an isolated (worktree) subagent, and record the result in the
+   `tasks.md` header as `Execution mode: worktree` | `shared` (one line on
+   how verified). Go consumes it; a capability mismatch at go degrades to
+   shared with a recorded reason.
 3. Run the conditional Architecture Impact trigger check. Record `required`, or
    `not-applicable` with the lightweight check. For `required`, list each source,
    status, disposition, invariant, forbidden shortcut, evidence, scope, and conflict.

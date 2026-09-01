@@ -34,15 +34,15 @@ E2E items carry **real-environment behaviors only** (real APIs, real entrypoints
 
 Upstream “spec/ticket” is kernel only; keep Rope names in artifacts we write.
 
-## Edge Classification (ADR 0011)
+## Edge Classification (ADR 0011, refined by 0012)
 
-Every `Blocked by` edge gets exactly one label at shape; only the first two
-block dispatch:
+Every `Blocked by` edge gets exactly one label at shape; `seam-required`
+always blocks dispatch, `file-overlap` is mode-dependent:
 
 | Label | Test | Effect |
 | --- | --- | --- |
-| **file-overlap** | the downstream slice reads/writes files the upstream owns (verify against owned-files, not intuition) | blocks dispatch |
-| **seam-required** | the downstream consumes a public seam the upstream must first create | blocks dispatch |
+| **file-overlap** | the downstream slice reads/writes files the upstream owns (verify against owned-files, not intuition) | shared mode: blocks dispatch. Recorded worktree mode (ADR 0012): **merge-order preference** — both dispatch concurrently, merge queue orders landing, conflict = one re-dispatch |
+| **seam-required** | the downstream consumes a public seam the upstream must first create | blocks dispatch in both modes |
 | **methodology-order** | no overlap, no seam — only "reads better if done first" (e.g. instrumentation before refactor) | merge-order preference only; go dispatches across it |
 
 A missing label is a shape defect. "Feels safer sequential" is not a label —

@@ -71,7 +71,8 @@ with numbers. Go's default intent is maximum concurrency in either mode (every r
 slice gets a background leaf; serialization needs a recorded reason;
 startup declares planned vs max parallelism). It picks a mode from host
 capability: **worktree mode**
-(slice-ready scheduling, ADR 0008 — ready = blockers merged, one worktree
+(slice-ready scheduling, ADR 0008/0012 — ready = seam-required blockers
+merged (file-overlap edges are merge-order preferences under this mode), one worktree
 per leaf, serial merge queue, repo-declared `worktree-setup:` contract in
 `routes.md`, parent owns `map.md` updates) or **shared mode** (waves,
 disjoint owned files per wave, leaves maintain the map). No `mode:` or
@@ -139,12 +140,18 @@ _Avoid_: one artifact trying to serve both readers with one format, unresolved q
 
 **Edge Classification**:
 The shape-time labeling of every `Blocked by` edge as `file-overlap`,
-`seam-required`, or `methodology-order`. Only the first two block dispatch;
-a methodology-order edge (no owned-file overlap, no seam consumption — pure
-"reads better if done first") is demoted to a merge-order preference, never a
-dispatch blocker. This refines ADR 0008's ready-set definition.
+`seam-required`, or `methodology-order`. `seam-required` always blocks
+dispatch; `file-overlap` blocks in shared mode and, under shape-verified
+`Execution mode: worktree` (ADR 0012), is demoted to a merge-order
+preference — concurrent dispatch from the same merged base, serial merge
+queue orders landing, one conflict re-dispatch resolved on the unmerged
+branch. `methodology-order` (no owned-file overlap, no seam consumption —
+pure "reads better if done first") never blocks dispatch. This refines
+ADR 0008's ready-set definition.
 _Avoid_: treating "feels safer sequential" as a dependency, wave thinking
-reintroduced through unclassified edges, edge labels without owned-files facts
+reintroduced through unclassified edges, edge labels without owned-files
+facts, demoting a seam-required edge (a seam that does not exist yet is
+unavailability, not conflict)
 
 **Two-stage Contract Slice**:
 The required shape of any `Kind: contract` slice that carries deep durability,
