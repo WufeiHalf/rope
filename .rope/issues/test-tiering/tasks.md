@@ -18,7 +18,7 @@ Execution mode: shared (solo)   # 用户指令 2026-09-02：不派生子代理�
 
 ## Slice 1: ADR 0013 + go 启动 baseline 阶梯
 
-- Status: pending
+- Status: merged（4bf13b3；ADR 五要点成文、阶梯细节 co-locate 至 execution-rules、SKILL.md 剪 no-op 对冲后 107 行）
 - Kind: vertical
 - Goal: 测试成本分层的决策成文，go 启动从"cheap 断言"变为可执行的三级阶梯
 - Demo path: 打开 rope-go SKILL.md，Startup 步 2 呈现阶梯与写文件解析纪律；.rope/adr/0013 存在且被 0009/0011 回指
@@ -37,7 +37,7 @@ Execution mode: shared (solo)   # 用户指令 2026-09-02：不派生子代理�
 
 ## Slice 2: execution-rules 纪律包
 
-- Status: pending
+- Status: merged（ae3eedc；契约节+B2/B5/B6/B7 四处措辞闭合，残留扫描零矛盾）
 - Kind: vertical
 - Goal: Test tiers 契约单一事实源 + brief green 缺省 + flake 纪律 + Return Gate bounce
 - Demo path: execution-rules 有 Test tiers 契约节（格式+降级+派生标准）；brief 行与 gate 节措辞闭合
@@ -56,7 +56,7 @@ Execution mode: shared (solo)   # 用户指令 2026-09-02：不派生子代理�
 
 ## Slice 3: shape 粒度契约 + Test tiers 检查
 
-- Status: pending
+- Status: merged（d499ecf + review-fix 3ca701f；粒度段+检查步，派生标准零复制）
 - Kind: vertical
 - Goal: Verification 粒度契约入模板；shape 步 2 增 Test-tiers 检查（缺失→按 S2 契约自动派生）
 - Demo path: issue-package.md 的 Verification 字段带粒度说明；shape SKILL.md 步 2 有 Test-tiers 检查且指向 execution-rules 契约
@@ -75,7 +75,7 @@ Execution mode: shared (solo)   # 用户指令 2026-09-02：不派生子代理�
 
 ## Slice 4: 安装副本 resync + routes 收尾
 
-- Status: pending
+- Status: merged（a84abcc；diff -r 干净、仅当前目录 .agents/skills、routes 加 0013）
 - Kind: vertical
 - Goal: .agents/skills 与 skills/ 一致；routes.md 阅读清单加 ADR 0013
 - Demo path: `diff -r skills/rope-go .agents/skills/rope-go` 等干净；routes 清单含 0013
@@ -91,3 +91,12 @@ Execution mode: shared (solo)   # 用户指令 2026-09-02：不派生子代理�
 - Implementation notes: 仅装当前目录 .agents/skills（用户指令）；不触碰用户级目录
 - Verification: e2e E1
 - Stop conditions: 无
+
+## End-of-issue review（solo 降级）
+
+- `review_degraded: solo-by-user-directive`（用户指令不派生子代理；对照故障手册
+  Cannot-spawn 路径自查，非静默跳过）
+- Matrix 逐行核对 B1–B9：全过（grep/结构清单 + E1 安装器四项 grep 全中）
+- 残留措辞扫描（full-suite/全量）：仅 SKILL.md 阶梯摘要行一处，与契约一致
+- 发现 1 note 级（60s 数字重复）→ 已修 3ca701f，delta 复查通过
+- **最终 verdict：approve（fix rounds = 1，note 修复）**

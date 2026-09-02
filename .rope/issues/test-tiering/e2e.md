@@ -18,4 +18,4 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - installing to user-level or any other project skill directory
 Result:
-- pending
+- agent_passed（2026-09-02）：installer exit 0，装出副本四项 grep 全中（baseline ladder / Test tiers ×2 / Test-tiers check / never a full-suite run）；S4 后 diff -r 双 skill 干净；review-fix 后重同步复检干净
