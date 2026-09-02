@@ -50,7 +50,9 @@ Landed branches merge **serially, one at a time**, in landing order:
    ready set, dispatch newly-ready slices.
 3. No per-merge test ritual — leaves ran TDD; downstream worktrees cut from
    merged HEAD exercise upstream changes; assembled truth is the
-   end-of-issue review.
+   end-of-issue review. **Flake discipline (ADR 0013):** a failure under
+   parallel load → rerun only the failing tests to classify the flake; a
+   full clean rerun needs a recorded reason.
 
 ## Worktree setup (repo contract, in `routes.md`)
 
@@ -87,6 +89,33 @@ Landed branches merge **serially, one at a time**, in landing order:
   back, check whether the host setup script applies manually — it usually
   can, keeping worktree mode available.
 
+## Test tiers & baseline ladder (repo contract, ADR 0013)
+
+`routes.md` declares:
+
+```md
+- Test tiers: quick: `<cmd>` (~Ns, measured)   # guards + entrypoint smoke + pure units
+               full:  `<cmd>`
+```
+
+- **Baseline ladder** (go startup), cheapest rung first: ① same-HEAD
+  green evidence (CI or a recorded run ≤24h) — reuse, don't run; ② the
+  declared `quick` tier; ③ the full suite, once, as fallback. Any
+  baseline run writes output to a file and parses the file — rerunning
+  to re-parse is forbidden.
+- `quick` answers "is the repo broken at the start?"; `full` stays the
+  issue-level gate (baseline fallback, end-of-issue assembly). Green-
+  quick ≠ green-full — the accepted failure mode is late discovery,
+  never wrong conclusions.
+- **Undeclared is legal**: the ladder skips the rung. When shape finds
+  the line missing, shape derives it (explore leaf or in-session scan —
+  never a human step, never mid-flight invention at go): guards +
+  entrypoint smoke mandatory, pure unit tests optional, fixture-heavy
+  integration / benchmark / network tests excluded; time the candidate
+  and write it back **only if ≤60s**, with date, criteria, and measured
+  time. These criteria live here only — shape references, never
+  duplicates.
+
 ## Leaf Brief Contract (hard budget)
 
 Per ADR 0005: **minimal brief** — allowlist + ≤60-line cap (paths and
@@ -108,8 +137,9 @@ command blocks excluded). The parent checks the budget before dispatch.
 
 - TDD mode: `required` (default for code) | `waived (docs-only)` + reason;
   when required — red command(s) + what counts as red, green command(s)
-  after minimal implementation; focused/incremental, may cite prior
-  full-suite evidence
+  after minimal implementation — focused seam commands by default; a
+  full-suite run is issue-level evidence (ADR 0013), never a brief
+  requirement
 - Expected return shape: summary, paths changed, commit hash (or branch
   name in worktree mode), acceptance text exercised, red evidence
   (command + failure) unless waived, green evidence, constraint IDs
@@ -147,7 +177,8 @@ On each landing, reconcile mechanically — a table check, not a review:
   ids; nothing else reopens.
 - The gate never re-reads implementations, never reruns tests, never
   issues verdicts — the end-of-issue review stays the only review gate
-  (ADR 0007).
+  (ADR 0007). A missing evidence item bounces the **leaf**; the parent
+  never runs tests to back-fill a leaf's evidence (ADR 0013).
 - **Defense Budget:** a correction brief contains **zero** acceptance
   requirements absent from the Behavior Matrix. A gap discovered
   mid-execution goes back to shape as a re-cut (new slice) or is demoted

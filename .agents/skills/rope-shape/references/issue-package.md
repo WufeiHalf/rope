@@ -143,12 +143,20 @@ Execution mode: worktree | shared   # probed at shape (ADR 0012); go consumes, m
 - Public behavior: <one user-visible sentence of what works when this slice is done>
 - Tests:
 - Implementation notes:
-- Verification:
+- Verification: <focused seam tests + guards this slice can affect — never a full-suite run (ADR 0013)>
 - Stop conditions:
 ```
 
 Size cap is universal (fresh-context fit); slices that cannot fit are re-cut
 at shape, never shipped oversized.
+
+`Verification` granularity (ADR 0013): default is **focused** — the seam
+tests and guards the slice can affect, seconds not minutes. The full
+suite is an **issue-level** gate (go baseline fallback, end-of-issue
+assembly); writing it into a slice makes every leaf pay for the whole
+issue. A behavior-preservation refactor that needs the full net records
+the reason in Testing Decisions and the net runs at issue level, not per
+slice.
 
 ## `e2e.md`
 
