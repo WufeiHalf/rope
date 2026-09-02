@@ -18,18 +18,16 @@ Red→green playbook: [references/tdd.md](references/tdd.md).
 
 1. Load lean: Behavior Contract, Testing Decisions, Architecture Impact,
    Constraint Bundle index, slice statuses, e2e. Deep-read on dispatch.
-2. Clean git; baseline check (tests green at start — cheap, catches a
-   broken starting point early). Issue package committed first if worktree
-   mode (a worktree is cut from HEAD).
+2. Clean git; baseline ladder (ADR 0013): same-HEAD green evidence →
+   declared quick tier → full suite once; rungs, budget, and the
+   write-to-file parsing rule live in execution-rules (Test tiers).
+   Issue package committed first if worktree mode (a worktree is cut
+   from HEAD).
 3. Consume the `Execution mode:` recorded at shape in `tasks.md` (ADR
    0012); re-verify host capability — a mismatch degrades to shared with a
-   recorded reason. No record (legacy package): decide as before from host
-   capability + the repo's `worktree-setup:` line in `routes.md` (tiers
-   and manual-setup check: execution-rules).
+   recorded reason. No record (legacy package): decide per execution-rules.
 4. **Declare parallelism in the report**: max X (widest wave / antichain)
-   vs planned Y; reasons when Y < X. Concurrency is the default intent —
-   small gain only weighs against setup cost, never alone justifies
-   serializing.
+   vs planned Y; reasons when Y < X.
 
 ## Slice loop — dispatch on readiness
 

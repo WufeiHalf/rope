@@ -3,7 +3,7 @@
 **Status:** active — extends [0008](0008-slice-ready-worktree-execution.md)
 scheduling semantics; bounded by [0007](0007-graph-driven-go-single-review.md)
 (the Mechanical Return Gate is evidence reconciliation, never a second review
-gate).
+gate). Gate bounce discipline refined by [0013](0013-test-cost-tiering.md).
 
 Date: 2026-08-27
 

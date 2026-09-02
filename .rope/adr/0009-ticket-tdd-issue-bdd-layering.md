@@ -2,6 +2,7 @@
 
 **Status:** active — refines ADR 0008's dispatch model (unchanged) and
 supersedes the vertical-slice iron rule and the e2e duplication regime.
+Test-cost tiering completed by [0013](0013-test-cost-tiering.md).
 
 Date: 2026-08-24
 
