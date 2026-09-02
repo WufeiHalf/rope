@@ -30,6 +30,10 @@ Default handoff: same-session `rope-go`.
    already testable; read-only symlinks / shared caches over reinstalling),
    or `host-managed` — and record the answer in `routes.md`. Existing
    repos join the worktree mode here without re-running `rope-init`.
+   **Test-tiers check (ADR 0013):** if `routes.md` has no `Test tiers:`
+   line, derive one now per the go execution-rules contract (fixed
+   criteria, timed, ≤60s budget) and write it back with the derivation
+   note — zero-human; existing repos join here like worktree-setup.
    **Execution-mode probe (ADR 0012):** verify whether this harness can
    spawn an isolated (worktree) subagent, and record the result in the
    `tasks.md` header as `Execution mode: worktree` | `shared` (one line on
