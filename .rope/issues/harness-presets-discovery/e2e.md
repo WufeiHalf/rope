@@ -22,7 +22,7 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - 修改 `~/.pi/**`；联系/操作同事环境；任何远程/生产资源；升级 codex 之外的环境变更
 Result:
-- **blocked（环境受阻 2026-09-08）**：codex 后端为本地网关 `127.0.0.1:37123`（provider `aio`），当前未运行，codex exec 反复 Reconnecting；且本机 codex 0.153.4 待用户更新。待网关启动/版本更新后重跑（skill 已装入 ~/.codex/skills/，/tmp/rope-codex-e2e 就绪，命令存档于会话记录）。
+- **pass（2026-09-08 实跑，网关恢复后）**：tmux 隔离 + /tmp/rope-codex-e2e 最小仓库 + 8118 代理。codex 0.153.4 正确识别宿主（用户指名+~/.codex 指纹），TOML 机制由现有 agent 文件验证，模型目录自 ~/.codex/models_cache.json + config.toml，web 排序引用官方文档（confidence high）。写入三个 rope-*.toml（model + model_reasoning_effort + developer_instructions，均含禁止嵌套 spawn）+ codex.json 合法。耗时约 5 分钟、77K tokens。备注：升0.153.4+版本后需复验（子代理设置继承行为变更风险）。
 
 ## E2 agy 泛化探针（无预置知识宿主）
 
