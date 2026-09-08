@@ -1,6 +1,9 @@
-# Pi Adapter
+# Pi Adapter (Worked Example)
 
-First (and currently only) implemented harness writer.
+A complete worked example of one discovery/write cycle, for pi. New hosts do
+**not** get a file like this — they are discovered at run time per
+[host-discovery.md](host-discovery.md). Use this file to see what a verified
+cycle looks like end to end.
 
 ## Discovery (read-only)
 
@@ -56,19 +59,16 @@ when spawned without parent override.
 
 | Class | When | Behavior |
 | --- | --- | --- |
-| `no_models_discovered` | empty/missing enabledModels | Stop; no writes |
-| `writer_not_implemented` | host ≠ pi | Stop; no pi path writes; no fake success |
+| `no_models_discovered` | empty/missing inventory | Stop; no writes |
+| `host_unidentified` / `no_agent_mechanism` | see host-discovery §1/§2 | Per host-discovery; no pi path writes involved |
 | `research_offline` | web/docs research failed | Continue with heuristics; `confidence: low` |
 | `partial_write` | agent or manifest write failed mid-run | Report paths attempted; do not claim full success |
 
-## Unsupported host simulation (checklist)
+## Non-pi hosts (pointer)
 
-When host is not pi (or user asks to simulate):
-
-1. State: `writer_not_implemented` for `<host>`.
-2. Do not create `~/.pi/agent/agents/rope-*.md` as a substitute.
-3. Do not write `~/.config/rope/harness/<host>.json` with fake agent paths.
-4. Point the user at this skill's host table (pi only in v1).
+When host is not pi, the run follows host-discovery.md §1–§7 on that host.
+This file's rules still apply defensively: never write pi paths from a
+non-pi run, and never fabricate agent paths for any host.
 
 ## Optional migrate hint
 

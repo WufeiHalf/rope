@@ -17,8 +17,8 @@ When leaf fix loops fail twice on the same problem, or the parent judges the fai
 _Avoid_: infinite fix loop, silent retry, bury the design conflict in more patches
 
 **Harness Profile / Role Preset**:
-A binding of Rope leaf roles (implementer, reviewer, explore) onto **harness-native** subagent/agent preset templates. Default write target is the host's **user-level** agents directory (machine-local model churn). Plus a thin **user-global** Rope manifest (not project `.rope/`) that maps role → preset name/model and generation metadata. Refresh is **manual only** (no TTL/stale timer). The host preset is the source of spawn configuration; Rope does not keep a second full prompt/tool database as primary.
-_Avoid_: hard-coded model list in skills, provider lock-in, Rope-only shadow agent runtime, default project-committed model ids, project-committed private model catalogs, automatic preset refresh
+A binding of Rope leaf roles (implementer, reviewer, explore) onto **harness-native** subagent/agent preset templates. Generated **discovery-based**: the running model identifies the host, probes its agent registry and model catalog at run time, and writes the host's native format (pi Markdown+frontmatter, codex TOML, …) — no hardcoded per-host adapter branches in the skill. Default write target is the host's **user-level** agents directory (machine-local model churn). Plus a thin **user-global** Rope manifest (not project `.rope/`) that maps role → preset name/model and generation metadata. Refresh is **manual only** (no TTL/stale timer). The host preset is the source of spawn configuration; Rope does not keep a second full prompt/tool database as primary.
+_Avoid_: hard-coded model list in skills, provider lock-in, Rope-only shadow agent runtime, default project-committed model ids, project-committed private model catalogs, automatic preset refresh, per-host adapter branches in skill text
 
 **Issue-Level Verify**:
 The thin paperwork gate between go and finish (ADR 0007): the end-of-issue

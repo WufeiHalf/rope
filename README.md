@@ -26,9 +26,10 @@ runs in fresh-context leaf workers, orchestrated by one lean parent. And
 nothing is called done until a reviewer with **new eyes** walks the **real
 entrypoint** — starting the product the way a user would.
 
-Works with any host that supports skills and subagents (pi, Claude Code, …);
-`rope-harness-presets` adapts leaf model routing to whatever catalog your
-machine has.
+Works with any host that supports skills and subagents (pi, Claude Code,
+codex, agy, …); `rope-harness-presets` discovers the active host's agent
+mechanism and model catalog at run time and writes leaf presets in that
+host's native format — no hardcoded adapters.
 
 ## How it works
 

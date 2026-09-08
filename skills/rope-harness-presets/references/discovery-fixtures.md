@@ -3,9 +3,9 @@
 Markdown-only skill: execute these checks when implementing or verifying the
 discovery path. No host mutation.
 
-## Fixture A — sample enabledModels parse
+## Fixture A — sample model inventory parse
 
-Input file shape (`~/.pi/agent/settings.json` excerpt):
+Input file shape (pi example, `~/.pi/agent/settings.json` excerpt):
 
 ```json
 {
@@ -28,6 +28,9 @@ models = [
 error = null
 ```
 
+(Non-pi hosts: same discipline against their native inventory source —
+e.g. codex `config.toml` + catalog `models[]`.)
+
 ## Fixture B — empty list → fail
 
 ```json
@@ -43,30 +46,45 @@ error = no_models_discovered
 writes = none
 ```
 
-Same outcome when `enabledModels` is missing or the JSON file is absent.
+Same outcome when the inventory is missing or unparsable.
 
-## Fixture C — host ≠ pi → not implemented
+## Fixture C — host has no discoverable agent mechanism → capability gap
 
-Preconditions: skill invoked with host `claude-code` (or any non-pi id), or
-the environment is known non-pi and the user did not request a pi write.
+Preconditions: host identified (e.g. `some-host`), but no custom-agent
+registry could be located or verified per host-discovery §2.
 
 Expected:
 
 ```text
-error = writer_not_implemented
-host = <that host>
+error = no_agent_mechanism
+host = some-host
+agent_writes = none
+capability_gap_recorded = yes
+manifest = absent, unless the user asked to persist the gap
+```
+
+Must not:
+
+- create another host's `rope-*` agents as a stand-in
+- write `~/.config/rope/harness/<host>.json` claiming agents were written
+- guess a format from a similar host
+
+## Fixture D — host unidentifiable → stop
+
+Preconditions: no self-report, no user-named host, no config fingerprint.
+
+Expected:
+
+```text
+error = host_unidentified
+candidates = <what was probed, with evidence>
 writes = none
 ```
 
-Must not create:
+## Agent-run checklist
 
-- `~/.pi/agent/agents/rope-*.md` as a stand-in
-- `~/.config/rope/harness/<host>.json` claiming agents were written
-
-## Agent-run checklist (Slice 2 / E4)
-
-- [ ] Read real `~/.pi/agent/settings.json` when host is pi; list enabled models
-- [ ] Simulate empty list mentally or against Fixture B wording; confirm skill
-      documents hard stop
-- [ ] Simulate host≠pi via Fixture C; confirm skill documents not-implemented
-- [ ] Confirm skill never instructs mutating `enabledModels`
+- [ ] Read the host's real model inventory when identified; list models
+- [ ] Simulate empty inventory via Fixture B; confirm hard stop
+- [ ] Simulate no-mechanism via Fixture C; confirm gap report, no writes
+- [ ] Simulate unidentified host via Fixture D; confirm stop with candidates
+- [ ] Confirm skill never instructs mutating any host's model/provider settings

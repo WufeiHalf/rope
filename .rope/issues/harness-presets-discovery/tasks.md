@@ -16,7 +16,7 @@ Execution mode: shared — parent self-runs all slices（用户指令 2026-09-08
 
 ## Slice 1: codex/agy 宿主机制调研
 
-- Status: pending
+- Status: done
 - Kind: vertical（research 模式，ADR 0011）
 - Goal: 摸清 codex 0.153+ 与 agy 1.1.23 的模型目录、agent/subagent 定义机制、用户级配置路径，产出发现流程可照抄的核对清单
 - Demo path: `.rope/research/host-agent-mechanisms.md` 每条事实带来源与版本号；照清单能在干净机器上定位两家的 agent 定义文件与模型 catalog
@@ -35,7 +35,7 @@ Execution mode: shared — parent self-runs all slices（用户指令 2026-09-08
 
 ## Slice 2: skill 主体发现式重构
 
-- Status: pending
+- Status: done
 - Kind: vertical
 - Goal: SKILL.md 主流程改为"识别宿主 → 探测生态 → 按角色契约写宿主原生模板 → `<host>.json` manifest → 报告"，Host support 表动态化，软降级契约扩展（D4）
 - Demo path: 在 pi 上重跑 skill，agent 文件与 manifest 与重构前等价；文本中不再存在"other: not implemented 硬拒"分支
@@ -54,7 +54,7 @@ Execution mode: shared — parent self-runs all slices（用户指令 2026-09-08
 
 ## Slice 3: pi 知识示例化 + 消费端与发布面同步
 
-- Status: pending
+- Status: done
 - Kind: vertical
 - Goal: `pi-adapter.md` 降级为"已工作示例"（worked example）；`discovery-fixtures.md` 对齐新流程；rope-go/verify/README 措辞宿主中立；CONTEXT 词条 Harness Profile / Role Preset 增"发现式生成"；bundled 副本 `skills/rope-harness-presets/` 同步
 - Demo path: 通读全套文本除"示例"标注外无 pi 硬编码残留；`node bin/rope.js add --target /tmp/rope-skills-smoke` 装出的副本与源一致
