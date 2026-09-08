@@ -20,14 +20,14 @@ Execution mode: shared — parent self-runs（延续用户 2026-09-08 指令；�
 
 - Status: pending
 - Kind: vertical
-- Goal: 确立"配置驱动执行形态"决策与机器可读契约：`~/.rope/config.toml`（`[execution] default`、`[execution.fans]` 预算上限）、模式解析顺序（issue prd frontmatter > 用户配置 > 默认 agent）、宿主探测软降级规则、fan 类型语义（research/panel/fix-storm/array）
+- Goal: 确立"配置驱动执行形态"决策与机器可读契约：ADR 0014 显式 supersede ADR 0003 的机制部分（**旧"模型驱动并行"语义废弃；`mode: dynamic` 重定义为脚本驱动确定性编排**）；`~/.rope/config.toml`（`[execution] default`、`[execution.fans]` 预算上限）、模式解析顺序（issue prd frontmatter > 用户配置 > 默认 agent）、宿主探测软降级规则、fan 类型语义（research/panel/fix-storm/array）
 - Demo path: 按 spec 在干净机器上写一份 `~/.rope/config.toml` 并口推三档解析结果（issue 覆盖/全局默认/降级）无歧义
 - Blocked by: none
 - Scope: 新 ADR 0014（执行形态与图解耦：图仍是真相源，workflow 是执行器；引用复跑实验三案例）；`.rope/specs/dynamic-workflow-mode.md` 重写为 workflow-execution-mode 契约（保留 `mode` 字段在 prd.md frontmatter 的既有约定；修订旧 non-goal"不配置化"）；`~/.rope/config.toml` 示例落 ADR 附录或 spec
 - Owned files: `.rope/adr/0014-workflow-execution-mode.md`、`.rope/specs/dynamic-workflow-mode.md`、`.rope/specs/index.md`（若需登记）
 - Size cap: ~300 行
 - Matrix rows: 行 1/2/3
-- Required evidence: ADR 决策记录含三证据案例指针；spec 含完整 config 示例与解析顺序伪码
+- Required evidence: ADR 决策记录含三证据案例指针 + 新旧 dynamic 语义对照（模型驱动 vs 脚本驱动）及"基建决定编排胆量"论据；spec 含完整 config 示例与解析顺序伪码
 - Stop conditions: 不改任何 SKILL.md（S2/S3 的事）；不写编译器
 
 ## Slice 2: shape 侧规则与模板

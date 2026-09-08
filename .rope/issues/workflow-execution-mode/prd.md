@@ -6,6 +6,8 @@ mode: agent
 
 ## Problem Statement
 
+历史背景：旧 `mode: dynamic`（ADR 0003 时代）语义是**模型驱动并行派发**——父 LLM 读图逐叶 spawn、自己收拢。无脚本 runner、无机械 gate、无 resume，宽度全靠父会话承担，因此 shape 只能保守拆、并行语义从未真正落地。**真 dynamic 是脚本驱动而非模型驱动**：确定性 JS 编排 + gate 结构化验证 + worktree 隔离 + 前缀缓存 resume，模型只存在于叶子与评审。本包确立新语义并显式废弃旧语义（shape 的胆量是基建的函数：模型驱动基建配不上扇形宽度，脚本驱动才配得上）。
+
 三类同构缺陷证明 rope 的执行层有两个结构性盲区：
 
 1. **组合根只验生命周期不验行为**：legal-finance-ai-employees E4（组合从未拼起，浏览器人工走查才发现 3+1 批）；dingtalk v1.6.2（`reply_queue` seam 迁移后 `dingtalk_stream_assembly` / `workbench_intake_facade` 两处残留旧接线，E1"真实 bootstrap"跑到连接初始化即停 + grep 的不变量选错，AttributeError 逃逸线上 6 天 82 次）。
@@ -41,7 +43,7 @@ mode: agent
 
 ## Architecture Impact
 
-- D1 added-new：ADR 0014 workflow-execution-mode（执行形态与票包图解耦：图仍是 tasks.md 真相源，workflow 只是执行器）
-- D2 updated-existing：`.rope/specs/dynamic-workflow-mode.md` 重写为 workflow-execution-mode 契约（含修订旧 non-goal"人工决定不配置化"）
+- D1 added-new：ADR 0014 workflow-execution-mode（**脚本驱动确定性编排取代 ADR 0003 模型驱动并行语义**：图仍是 tasks.md 真相源，workflow 脚本是执行器；shape 大胆度的解锁依据是基建而非判断力）
+- D2 updated-existing：`.rope/specs/dynamic-workflow-mode.md` 重写为 workflow-execution-mode 契约（`mode: dynamic` 字段位置沿用，**语义重定义为脚本驱动**；旧“模型驱动并行”语义显式废弃，含旧 non-goal"不配置化"的修订）
 - D3 updated-existing：`.agents/skills/rope-shape/SKILL.md`（组合根/fan/L3/清扫/mock 边界规则）
 - D4 updated-existing：`.agents/skills/rope-go/SKILL.md`（workflow 模式段 + gate 菜单）
