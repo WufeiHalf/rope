@@ -35,7 +35,7 @@ local example or current docs before writing):
 | --- | --- | --- | --- |
 | pi | `~/.pi/agent/agents/*.md` | Markdown + YAML frontmatter (`model`, `thinking`, `tools`, …) | existing agent files |
 | codex | `~/.codex/agents/*.toml` | TOML (`name`, `description`, `model`, `model_reasoning_effort`, `developer_instructions`) | existing agent files; docs: learn.chatgpt.com subagents; watch version drift |
-| agy | project `.agents/agents/*.md` (global equivalent per docs) | Markdown + YAML frontmatter | `agy agents` listing; docs: antigravity.google/docs/cli; known list-refresh bug — confirm registration |
+| agy | `~/.gemini/config/agents/*.md` (machine-global only — CLI does **not** discover project `.agents/agents/`) | Markdown + YAML frontmatter; `model` accepts **tier aliases only** (`pro`, `flash`, `flash_lite`, `inherit`) — specific model IDs fail validation; pin at invocation via `--model` | `agy agents` listing; model catalog via `agy models` (verified live 2026-09-08, E2) |
 
 Verification discipline:
 
@@ -57,7 +57,7 @@ Read-only, host-native:
 | --- | --- |
 | pi | `~/.pi/agent/settings.json` → `enabledModels` (enrich from `models.json`) |
 | codex | `~/.codex/config.toml` → `model`, `model_providers.*`, `review_model`; catalog JSON via `model_catalog_json` (`{models[]}`) |
-| agy | `--model`/config per docs; probe `~/.gemini/` equivalents |
+| agy | `agy models` command (catalog incl. tier variants); frontmatter `model` = tier alias only |
 
 - Empty / missing / unparsable → `no_models_discovered`; stop; no writes.
 - Never mutate any of these files. Enrichment failure is non-fatal.
@@ -80,7 +80,10 @@ capability gaps.
 
 - Host cannot spawn subagents with per-leaf model pinning (subagents inherit
   parent settings — codex newer-version behavior reported).
+- Agent template frontmatter rejects specific model IDs, accepting only tier
+  aliases (agy, verified 2026-09-08) — per-role pinning moves to spawn-time
+  flags.
+- Registry only reads machine-global paths; project-level agent dirs are
+  ignored by the CLI (agy, verified 2026-09-08).
 - File-based agents exist but never appear in the host's agent list (agy
-  list-refresh bug reported).
-- Agent registry exists but only inside a GUI, unreachable from the CLI a
-  rope parent would drive.
+  list-refresh bug reported — not reproduced; registration did work 2026-09-08).

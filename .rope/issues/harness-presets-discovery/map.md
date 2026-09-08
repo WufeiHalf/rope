@@ -9,3 +9,5 @@
 - 同事案例：codex 中调用本 skill，模型回复"pi 的维护规则不适用当前环境"（用户口述 2026-09-08，未本机复现）
 - `.rope/CONTEXT.md` 术语 Harness Profile / Role Preset：宿主原生模板 + 用户级 manifest + manual-only 刷新（2026-09-08）
 - 用户决策（grill 2026-09-08）：不做写死 adapter；skill 改发现式，LLM 在对应 harness 自找方案；验证 = 本机 agy + codex 实跑，tmux 隔离，最小仓库排 confounder
+- 【E2 实跑证伪/新知 2026-09-08】agy 注册点为机器级 `~/.gemini/config/agents/*.md`，项目级 `.agents/agents/` 不被 CLI 发现；frontmatter `model` 仅收 tier 别名（pro/flash/flash_lite/inherit）；模型目录可用 `agy models` 命令；三个 rope-* agent 注册成功、agy.json 合法
+- 【E1 受阻 2026-09-08】codex provider=aio 网关 127.0.0.1:37123 未运行，exec 反复 Reconnecting；待网关启动/版本更新重跑

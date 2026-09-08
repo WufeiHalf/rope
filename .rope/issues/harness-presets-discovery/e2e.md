@@ -22,7 +22,7 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - 修改 `~/.pi/**`；联系/操作同事环境；任何远程/生产资源；升级 codex 之外的环境变更
 Result:
-- pending
+- **blocked（环境受阻 2026-09-08）**：codex 后端为本地网关 `127.0.0.1:37123`（provider `aio`），当前未运行，codex exec 反复 Reconnecting；且本机 codex 0.153.4 待用户更新。待网关启动/版本更新后重跑（skill 已装入 ~/.codex/skills/，/tmp/rope-codex-e2e 就绪，命令存档于会话记录）。
 
 ## E2 agy 泛化探针（无预置知识宿主）
 
@@ -41,4 +41,4 @@ Failure Report:
 Forbidden Out-of-Scope Actions:
 - 同 E1
 Result:
-- pending
+- **pass（2026-09-08 实跑）**：agy 正确识别宿主（~/.gemini 指纹），发现全局注册点 `~/.gemini/config/agents/*.md`（本地示例+`agy agents` 实证），经 `agy models` 取目录，写入三个 rope-*.md 并在 `agy agents` 列表注册成功，manifest `agy.json` schema 合法（confidence: low，research_offline）。发现两个真实能力缺口（frontmatter 仅收 tier 别名不收具体模型 ID；项目级 .agents/agents 不被 CLI 发现），已回写 host-discovery.md 线索表。备注：headless 模式下网页抓取会卡死超时，仅本地探测模式一次通过——发现流程对 offline 路径鲁棒。
