@@ -31,4 +31,4 @@
 - Command or Steps: 按 tasks.md S2 Demo path 用钉钉 1.6.2 场景反推 shape 产出；按 S3 Demo path 口推 pi/codex 双路径
 - Pass Criteria: 用户确认反推产出必含组合根清单/清扫行/L3 行，且双路径 gate 不变量一致
 - Forbidden Out-of-Scope Actions: 不实际执行 workflow
-- Result: pending
+- Result: user_passed（2026-09-08，用户确认）：钉钉 1.6.2 反推成立——新 shape 规则产出 dingtalk_stream_assembly + workbench_intake_facade 双 L3 行 + S2 消费者清扫行；E1 教训落于 L3 行为断言与 mock 外边界铁则；pi/codex 双路径口推成立（同票同门异执行器）
