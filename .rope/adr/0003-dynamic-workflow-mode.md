@@ -1,6 +1,6 @@
 # 0003 Dynamic Workflow Mode
 
-> **Status: superseded by [0007](0007-graph-driven-go-single-review.md)** —
+> **Status: superseded by [0007](0007-graph-driven-go-single-review.md)** (graph and gates) and mechanism half by [0014](0014-workflow-execution-mode.md) (script-driven execution; the `mode:` field is retired) —
 > graph-driven execution replaced the opt-in mode; disjoint-ownership and
 > no-nested-spawn invariants carry over.
 
