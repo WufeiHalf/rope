@@ -6,9 +6,9 @@ Execution mode: shared — parent self-runs（延续用户 2026-09-08 指令；�
 
 | Behavior | Applies? | Verified at |
 | --- | --- | --- |
-| Given `~/.rope/config.toml` 存在 `execution.default = dynamic` When 无 issue 级覆盖 Then rope-go 以 workflow 形态执行 | yes | 结构校验（spec 契约文本）+ read-through |
-| Given issue prd.md frontmatter `mode: agent` When 全局默认 dynamic Then issue 级覆盖生效，走 Agent 派发 | yes | 结构校验 |
-| Given mode=dynamic When 宿主无 SubagentWorkflow Then 软降级 Agent 派发，票包不变、扇窄化，降级记录进 map.md | yes | 结构校验（spec + rope-go 段一致） |
+| Given `~/.rope/config.toml` 存在 `execution.default = dynamic` When rope-go 执行 Then 以 workflow 形态执行，票包内无任何执行形态字段 | yes | 结构校验（spec 契约文本）+ read-through |
+| Given 配置缺失或 `= agent` When rope-go 执行 Then 走 Agent 派发，与现状行为一致 | yes | 结构校验 |
+| Given 配置要求 dynamic When 宿主无 SubagentWorkflow Then 软降级 Agent 派发，票包不变、扇窄化，降级记录进 map.md | yes | 结构校验（spec + rope-go 段一致） |
 | Given 切片迁移共享 seam（owned files 含契约变更）When shape Then 票包含"消费者清扫"验收行（旧符号 grep/import 断言） | yes | 结构校验（shape 规则文本 + 模板） |
 | Given issue 触及 ≥1 组合根 When shape Then 生成 L3 验收行；harness 缺失才长成切片 | yes | 结构校验 + read-through |
 | Given 波级集成 gate When 执行 Then 断言"输入分支全 merged AND 聚焦测试绿"双条件（复跑实验 §4.3 教训） | yes | 结构校验（rope-go gate 菜单） |
@@ -20,7 +20,7 @@ Execution mode: shared — parent self-runs（延续用户 2026-09-08 指令；�
 
 - Status: pending
 - Kind: vertical
-- Goal: 确立"配置驱动执行形态"决策与机器可读契约：ADR 0014 显式 supersede ADR 0003 的机制部分（**旧"模型驱动并行"语义废弃；`mode: dynamic` 重定义为脚本驱动确定性编排**）；`~/.rope/config.toml`（`[execution] default`、`[execution.fans]` 预算上限）、模式解析顺序（issue prd frontmatter > 用户配置 > 默认 agent）、宿主探测软降级规则、fan 类型语义（research/panel/fix-storm/array）
+- Goal: 确立"配置驱动执行形态"决策与机器可读契约：ADR 0014 显式 supersede ADR 0003 的机制部分（**旧"模型驱动并行"语义与 prd frontmatter `mode:` 字段约定整体废弃、从 spec 移除；执行形态唯一来源为配置 + 宿主探测**）；`~/.rope/config.toml`（`[execution] default`、`[execution.fans]` 预算上限）、宿主探测软降级规则、fan 类型语义（research/panel/fix-storm/array，执行器侧概念不进票包）
 - Demo path: 按 spec 在干净机器上写一份 `~/.rope/config.toml` 并口推三档解析结果（issue 覆盖/全局默认/降级）无歧义
 - Blocked by: none
 - Scope: 新 ADR 0014（执行形态与图解耦：图仍是真相源，workflow 是执行器；引用复跑实验三案例）；`.rope/specs/dynamic-workflow-mode.md` 重写为 workflow-execution-mode 契约（保留 `mode` 字段在 prd.md frontmatter 的既有约定；修订旧 non-goal"不配置化"）；`~/.rope/config.toml` 示例落 ADR 附录或 spec
@@ -34,10 +34,10 @@ Execution mode: shared — parent self-runs（延续用户 2026-09-08 指令；�
 
 - Status: pending
 - Kind: vertical
-- Goal: rope-shape 能产出"dynamic-ready"票包：组合根枚举规则、L3 验收行生成、seam 迁移消费者清扫行、fan 声明（`fan:` 块）、共享账本 evidence 行返回规则、mock 边界规则
+- Goal: rope-shape 产出物补齐工作结构信息：组合根枚举规则、L3 验收行生成、seam 迁移消费者清扫行、共享账本 evidence 行返回规则、mock 边界规则。**不新增 fan/mode 声明块**（依赖图已描述并行可能性）
 - Demo path: 拿钉钉 1.6.2 场景反推——按新 shape 规则走一遍，产出物必含：组合根清单（dingtalk_stream_assembly + intake facade）、S2 清扫行（grep `channel.reply_queue`）、L3 行（假 transport 灌 `/clear` 断言回复投递）
 - Blocked by: Slice 1（fan/config 契约语义）
-- Scope: `.agents/skills/rope-shape/SKILL.md` 增量段落 + shape 模板（若有）加 `fan:` 块说明；规则以钉钉/legal 双案例为内嵌示例
+- Scope: `.agents/skills/rope-shape/SKILL.md` 增量段落 + shape 模板校对（移除若有 mode 相关残留）；规则以钉钉/legal 双案例为内嵌示例
 - Owned files: `.agents/skills/rope-shape/SKILL.md`、shape 相关模板文件
 - Size cap: ~250 行
 - Matrix rows: 行 4/5/7/8

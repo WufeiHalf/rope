@@ -1,7 +1,3 @@
----
-mode: agent
----
-
 # Workflow Execution Mode（配置驱动的 dynamic 执行形态）
 
 ## Problem Statement
@@ -18,10 +14,9 @@ mode: agent
 
 ## Goals
 
-- `~/.rope/config.toml` 用户级配置：`execution.default = dynamic | agent`，及 fan 预算上限
-- 模式解析顺序：**issue prd.md frontmatter `mode:` > ~/.rope/config.toml > 默认 agent**
-- 宿主探测软降级：mode=dynamic 但宿主无 SubagentWorkflow（如 codex）→ 软降级 Agent 派发，票包结构不变、扇窄化执行
-- 扇形 fan 声明进票包：`fan: research width≤N | panel ×N | fix-storm ×N`，仅 dynamic 模式全量开扇
+- `~/.rope/config.toml` 用户级配置：`execution.default = dynamic | agent`，及 fan 预算上限。**配置有则走 dynamic，没有则不走；无 issue 级声明字段**（mode 是执行器关切而非工作关切；小工作路由 rope-quick，不进 go；运行中临时改手动属 steering 一次性动作，不建持久字段）
+- 宿主探测软降级：配置要求 dynamic 但宿主无 SubagentWorkflow（如 codex）→ 软降级 Agent 派发，票包不变、扇窄化执行
+- 扇形 fan：票内依赖图本就描述波次/宽度/不重叠文件（并行可能性）；执行器按配置预算决定利用程度。**不在票包新增 fan 声明块**
 - L1/L2/L3 gate 菜单：L1 切片聚焦测试；L2 集成不变量（**分支全合 AND 测试绿**双断言）；L3 组合根冒烟（真装配 + 事件进/可观察行为出，mock 只许放外边界）
 - shape 规则：组合根枚举（触及 ≥1 个组合根 → 生成 L3 验收行，无 harness 才长成切片）；seam 迁移切片强制"消费者清扫"行（旧符号 grep/import 图断言）；共享账本（map.md 类）叶子返回 evidence 行、集成方统一追记
 - E4/人工走查从"发现层"降级为"终审抽检"
@@ -29,6 +24,7 @@ mode: agent
 ## Non-goals
 
 - graph2workflow 编译器（tasks.md 图 → .js 脚本，数据稳后另立 issue）
+- issue 级 mode 字段或任何票包内执行形态声明（旧 ADR 0003 的 prd frontmatter `mode:` 约定整体废弃并从 spec 移除，不重定义）
 - pi-custom-subagent 无头 stale-ctx 修复（用户明确只用有头模式）
 - codex/agy 原生 workflow runner 适配（靠软降级覆盖）
 - 修改 grill/shape 的判断回路（对话层保持父会话；只有执行层扇叶化）
@@ -44,6 +40,6 @@ mode: agent
 ## Architecture Impact
 
 - D1 added-new：ADR 0014 workflow-execution-mode（**脚本驱动确定性编排取代 ADR 0003 模型驱动并行语义**：图仍是 tasks.md 真相源，workflow 脚本是执行器；shape 大胆度的解锁依据是基建而非判断力）
-- D2 updated-existing：`.rope/specs/dynamic-workflow-mode.md` 重写为 workflow-execution-mode 契约（`mode: dynamic` 字段位置沿用，**语义重定义为脚本驱动**；旧“模型驱动并行”语义显式废弃，含旧 non-goal"不配置化"的修订）
+- D2 updated-existing：`.rope/specs/dynamic-workflow-mode.md` 重写为 workflow-execution-mode 契约（**移除 prd.md frontmatter `mode:` 字段约定**；执行形态唯一来源为 ~/.rope/config.toml + 宿主探测；旧"模型驱动并行"语义及旧 non-goal"不配置化"一并废弃）
 - D3 updated-existing：`.agents/skills/rope-shape/SKILL.md`（组合根/fan/L3/清扫/mock 边界规则）
 - D4 updated-existing：`.agents/skills/rope-go/SKILL.md`（workflow 模式段 + gate 菜单）
