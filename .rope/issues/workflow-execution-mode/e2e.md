@@ -9,7 +9,7 @@
 - Command or Steps: 校验 `.agents/skills/rope-shape/SKILL.md`、`rope-go/SKILL.md`、`.rope/specs/dynamic-workflow-mode.md`、ADR 0014 相互引用锚点可解析；`~/.rope/config.toml` 契约在 spec/ADR/rope-go 三处文本一致（同一路径、同一解析顺序）；bundled `skills/` 副本与 `.agents/` diff 为空
 - Pass Criteria: 零死链；三处 config 契约一致；双断言 gate 与 mock 边界规则在 shape/go 两侧表述一致
 - Forbidden Out-of-Scope Actions: 不实际改 `~/.rope/config.toml`（用户自己的决定）
-- Result: pending
+- Result: agent_passed（2026-09-08）：13 项一致性断言通过（2 项初判 FAIL 为换行断词伪影，人工核正）；bundled 双技能 diff 空
 
 ## E2 安装与入口冒烟
 
@@ -20,7 +20,7 @@
 - Command or Steps: `node bin/rope.js add --target /tmp/rope-wem-e2e && diff -r skills .agents`；`node bin/rope.js --help`
 - Pass Criteria: 安装成功、副本一致、help 正常
 - Forbidden Out-of-Scope Actions: 不碰用户级 `~/.rope/`、`~/.config/rope/`
-- Result: pending
+- Result: agent_passed（2026-09-08）：add --target /tmp/rope-wem-e2e 安装 OK，安装副本 rope-go 与源 diff 空；--help OK
 
 ## E3 双案例反推演练（read-through，人工确认）
 

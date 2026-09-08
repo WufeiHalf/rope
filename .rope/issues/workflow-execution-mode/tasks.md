@@ -18,7 +18,7 @@ Execution mode: shared — parent self-runs（延续用户 2026-09-08 指令；�
 
 ## Slice 1: ADR 0014 + spec 契约重写
 
-- Status: pending
+- Status: done（2026-09-08，3be8fcd + 0003 状态指针 c9f9602 系；ADR 0014 + spec 重写 + specs/index 登记）
 - Kind: vertical
 - Goal: 确立"配置驱动执行形态"决策与机器可读契约：ADR 0014 显式 supersede ADR 0003 的机制部分（**旧"模型驱动并行"语义与 prd frontmatter `mode:` 字段约定整体废弃、从 spec 移除；执行形态唯一来源为配置 + 宿主探测**）；`~/.rope/config.toml`（`[execution] default`、`[execution.fans]` 预算上限）、宿主探测软降级规则、fan 类型语义（research/panel/fix-storm/array，执行器侧概念不进票包）
 - Demo path: 按 spec 在干净机器上写一份 `~/.rope/config.toml` 并口推三档解析结果（issue 覆盖/全局默认/降级）无歧义
@@ -32,7 +32,7 @@ Execution mode: shared — parent self-runs（延续用户 2026-09-08 指令；�
 
 ## Slice 2: shape 侧规则与模板
 
-- Status: pending
+- Status: done（2026-09-08，3c3ebf3；SKILL.md 三规则 + 模板 Composition roots 块 + bundled 同步）
 - Kind: vertical
 - Goal: rope-shape 产出物补齐工作结构信息：组合根枚举规则、L3 验收行生成、seam 迁移消费者清扫行、共享账本 evidence 行返回规则、mock 边界规则。**不新增 fan/mode 声明块**（依赖图已描述并行可能性）
 - Demo path: 拿钉钉 1.6.2 场景反推——按新 shape 规则走一遍，产出物必含：组合根清单（dingtalk_stream_assembly + intake facade）、S2 清扫行（grep `channel.reply_queue`）、L3 行（假 transport 灌 `/clear` 断言回复投递）
@@ -46,7 +46,7 @@ Execution mode: shared — parent self-runs（延续用户 2026-09-08 指令；�
 
 ## Slice 3: go 侧 workflow 模式段与 gate 菜单
 
-- Status: pending
+- Status: done（2026-09-08，f676c21；workflow 执行段 + README/CONTEXT + 安装/入口冒烟 INSTALL-OK/HELP-OK）
 - Kind: vertical
 - Goal: rope-go 支持按解析后的 mode 执行：宿主探测（SubagentWorkflow 在且 mode=dynamic → workflow 形态；否则 Agent 派发软降级并记录）；L1/L2/L3 gate 菜单（L2 双断言模板；L3 引用票包 L3 行；gate 脚本落仓库文件免引号地狱）；修复风暴/评审面板为可选 fan 用法；跑后父按返回值补记 tasks.md/map.md/verify 记录；E4 定位降级为终审抽检的表述
 - Demo path: 口推：同一票包在 pi（workflow 形态，波级 L2+L3 gate）与 codex（软降级，逐叶派发，gate 不变量相同）两条路径行为一致、记录完整
