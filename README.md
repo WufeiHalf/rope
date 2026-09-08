@@ -60,7 +60,8 @@ One issue, one parent session, five moves:
    E2E terminal, tree clean); finish closes the issue and routes
    architecture-doc updates home.
 
-Small fix with the diagnosis already done? Skip all of it: `rope-quick` is
+Small task that fits one fresh context window — fix with the diagnosis done,
+or a small feature? Skip all of it: `rope-quick` is
 the solo path — red → green at the nearest seam, one page of record, four
 stop lines back to the full pipeline.
 
@@ -122,7 +123,7 @@ Missing presets never block — go/verify soft-degrade and record it.
 | `rope-verify` | Thin paperwork gate between go and finish |
 | `rope-finish` | Close the issue; route architecture-doc updates |
 | `rope-summary` | Preserve reusable contracts/learnings into `.rope/` after the fact |
-| `rope-quick` | Solo quick-fix path with four stop lines back to the pipeline |
+| `rope-quick` | Solo single-window path (fixes + small features): grill-lite, stop lines back to the pipeline |
 | `rope-harness-presets` | Bind leaf roles to harness-native presets for your host |
 
 ## `.rope/` layout
