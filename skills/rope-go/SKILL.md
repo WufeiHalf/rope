@@ -67,6 +67,44 @@ resolving **on the unmerged branch** (its brief + commits are the primary
 intent sources — ADR 0012).
 Shared mode: next wave.
 
+## Workflow execution (config-decided — ADR 0014)
+
+Before dispatching, resolve the execution form. Nothing in the issue
+package influences it:
+
+1. Read `~/.rope/config.toml` `[execution] default`. Absent or `agent` ⇒
+   parent dispatch as above (this file's default behavior, unchanged).
+2. `dynamic` + host provides a deterministic workflow runner (pi:
+   SubagentWorkflow tool) ⇒ **script-driven execution** per
+   the `dynamic-workflow-mode.md` spec in the rope repo's `.rope/specs/`:
+   - Compile waves from the dependency graph into a workflow script
+     (`.pi/workflows/<issue>.js`); the script owns dispatch, merges, gates,
+     fix rounds. The model lives only in leaves and review agents — never
+     as the orchestrator.
+   - Leaves: same harness presets as Agent dispatch (`rope-implementer`…),
+     worktree isolation, self-contained briefs (leaf reads its slice entry
+     itself). Briefs stay within the ≤60-line budget.
+   - **Gates per wave, scripts in repo files** (never inline shell in JS —
+     quoting layers corrupt it): **L1** leaf-focused tests (inside leaf);
+     **L2** integration dual assertion — *all input branches merged* AND
+     focused suite green (tests-green alone ships partial integrations);
+     **L3** composition-root smoke from the `tasks.md` composition-roots
+     block (real assembly, fake outer boundary, event in → observable out).
+   - Merge/integration is a dedicated mechanical agent per wave; its brief
+     says "resolve mechanical conflicts (append sections) or report and
+     continue" — never "stop on conflict". Shared ledgers: leaves return
+     evidence rows, the integrator appends once (never concurrent writes).
+   - Fix rounds: fresh agent with failure output (≤2, fail-fast).
+     **Never combine `resume` with `gate`.**
+   - Run under an **interactive host** (headless crashes today); monitor via
+     `/agents → Workflows`. Resume a crashed/edited run via prefix cache —
+     finished agents replay at zero token cost.
+   - After the run: parent does bookkeeping **from returned results only** —
+   tasks.md statuses, map.md rows, review records; then the end-of-issue
+     review gate runs exactly as below (ADR 0007/0010 unchanged).
+3. `dynamic` + no workflow runner on this host ⇒ soft-degrade to parent
+   dispatch, narrower fan, record the degrade reason in `map.md`.
+
 ## Investigation map
 
 `<issue>/map.md` — one fact per line, path + date, seeded at shape.

@@ -1,6 +1,12 @@
 # Context
 
 ## Language
+**Workflow execution mode** — the go phase's execution form, decided only by
+`~/.rope/config.toml` `[execution] default` plus a host capability probe
+(ADR 0014): `dynamic` means a script-driven deterministic workflow (JS
+orchestrator; the model lives only in leaves and review agents) with L1/L2/L3
+mechanical gates; absent or `agent` means parent Agent dispatch. Issue
+packages never declare it — a ticket describes work, not how it runs.
 
 **Parent Orchestrator**:
 The main issue session that owns grill, shape, the slice loop, leaf-worker dispatch, issue-level verify, and finish handoff. It is the only agent allowed to spawn workers for an issue. Judgment-primary and context-protective: it decides, talks to the human, writes durable artifacts, and re-briefs/steers leaves — it does not bulk-load exploratory noise or run long implement/fix loops in its own context, because compaction discards earlier discussion. Course correction is done by rewriting the brief and re-spawning a leaf, not by the parent absorbing the full failure trace and fixing in-place.

@@ -29,7 +29,11 @@ entrypoint** — starting the product the way a user would.
 Works with any host that supports skills and subagents (pi, Claude Code,
 codex, agy, …); `rope-harness-presets` discovers the active host's agent
 mechanism and model catalog at run time and writes leaf presets in that
-host's native format — no hardcoded adapters.
+host's native format — no hardcoded adapters. Go's execution form is
+config-decided (ADR 0014): `~/.rope/config.toml` `[execution] default =
+"dynamic"` runs slices through a script-driven deterministic workflow where
+the host supports it (pi SubagentWorkflow), with L1/L2/L3 mechanical gates;
+absent, or on hosts without a runner, go uses parent dispatch unchanged.
 
 ## How it works
 
@@ -119,7 +123,7 @@ Missing presets never block — go/verify soft-degrade and record it.
 | `rope-init` | Scaffold `.rope/` in a target repository |
 | `rope-grill` | Plain-language requirement interview; decisions land in durable docs |
 | `rope-shape` | Issue package: PRD + Contract Note, slices, matrix, E2E, graph read |
-| `rope-go` | Wave execution, investigation map, TDD at seams, per-slice commits |
+| `rope-go` | Wave execution, investigation map, TDD at seams, per-slice commits; config-decided workflow execution (ADR 0014) |
 | `rope-verify` | Thin paperwork gate between go and finish |
 | `rope-finish` | Close the issue; route architecture-doc updates |
 | `rope-summary` | Preserve reusable contracts/learnings into `.rope/` after the fact |
