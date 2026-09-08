@@ -77,6 +77,27 @@ Default handoff: same-session `rope-go`.
    structural-enabling slice that unblocks wide parallel work.
    Wide refactor → expand–contract (gates-and-vocab.md). Anti-pattern catalog:
    gates-and-vocab.md.
+   **Seam-migration sweep (ADR 0014):** a slice that moves/renames a shared
+   seam (owned files touch a contract other modules consume) carries a
+   mandatory **consumer-sweep** Required-evidence entry: old symbol
+   `grep`/import-graph assertion over the whole repo (zero hits, or every
+   hit accounted for). Blast radius crosses file boundaries — owning the
+   seam never owns the consumers, so nobody else will sweep (agent-workbench
+   dingtalk v1.6.2: two broken assembly files were in no slice's owned
+   files; `reply_queue` residue shipped for 6 days).
+   **Shared ledgers (ADR 0014):** appender-style files multiple slices would
+   write (`map.md`, registries, `CODING_STANDARDS.md`-style ledgers) are
+   excluded from concurrent leaf writes. Leaves **return evidence rows** in
+   their final report; the wave integrator appends once. Declaring such a
+   file in two same-wave `Owned files` is a shape defect.
+   **Composition roots (ADR 0014):** enumerate the repo's assembly points
+   the issue touches (channel/CLI/service wiring, DI/route tables, panel
+   mounts, local stack bring-up — usually 2–6 per repo). Touched ≥1 ⇒ add a
+   `## Composition roots` block to `tasks.md`: one L3 acceptance line per
+   root (real assembly, one event in, one observable behavior out; mock
+   only at the outer boundary). Harness missing ⇒ a harness slice is cut
+   first (Wave 1); harness exists ⇒ the line cites it. E4-style user walks
+   demote to final spot-check once L3 rows exist.
 9. **Read the graph, then quiz granularity, then ask one question.** From
    `Blocked by` edges derive **waves** (topological levels) and **rivers**
    (slice clusters with no edge, direct or transitive, between them). Show the
@@ -97,8 +118,10 @@ Default handoff: same-session `rope-go`.
     systems, real entrypoints, real data the mocks cannot prove (a behavior
     unit-tested against fakes that depends on a real API's semantics
     belongs here). Never list ticket-level test reruns; TDD evidence
-    already covers them. Classify executors; resolve non-agent gates at
-    shape time.
+    already covers them. L3 composition-root smokes are **not** e2e — they
+    are mechanical wave gates (fake transport at the outer boundary) and
+    live in the `tasks.md` composition-roots block. Classify executors;
+    resolve non-agent gates at shape time.
 11. **Contract Note gate:** output the `## Contract Note` from `prd.md` (3–5
     one-sentence bullets: “when this issue is done, what can you observe?” +
     failure visibility where relevant). The user confirms the note **instead of
@@ -126,3 +149,7 @@ Default handoff: same-session `rope-go`.
   that can drift from the PRD.
 - Do not ask the user to read the full PRD by default; step 11 confirms the
   Contract Note. Full-PRD review is opt-in.
+- A seam-migration slice without a consumer-sweep evidence entry is not
+  ready; a touched composition root without an L3 line is not ready.
+- Mocks at a migrated seam instead of the outer boundary are a shape defect
+  (fiction validation), not a test-style preference.

@@ -147,6 +147,17 @@ Execution mode: worktree | shared   # probed at shape (ADR 0012); go consumes, m
 - Stop conditions:
 ```
 
+### Composition roots block (when touched ≥1 — ADR 0014)
+
+```md
+## Composition roots
+
+- <root file/module, e.g. dingtalk_stream_assembly> — L3: real assembly +
+  fake outer-boundary transport, one event in (<event>) → observable out
+  (<assertion>); harness: <existing harness path | Slice N harness slice>
+- <root 2> — …
+```
+
 Size cap is universal (fresh-context fit); slices that cannot fit are re-cut
 at shape, never shipped oversized.
 
