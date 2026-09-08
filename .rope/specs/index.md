@@ -8,6 +8,7 @@ Stable implementation contracts and project coding rules.
 - `<area>/` - area-specific implementation contracts.
 - `review-cost-optimization.md` - end-of-issue review cost contract (ADR 0010): two parallel read-only leaves, scanner/reviewer brief budgets, diff hygiene, blocking-only fix protocol with delta re-review.
 - `plan-artifact-reader-layering.md` - reader layering contract (ADR 0005): Contract Note, Minimal Leaf Brief allowlist + line cap, unresolved-question policy.
+- `dynamic-workflow-mode.md` - workflow execution contract (ADR 0014): config-decided script-driven go execution (`~/.rope/config.toml` + host probe), L1/L2/L3 gate menu, fans, shared-ledger evidence-row rule; supersedes ADR 0003-era per-issue `mode:` convention.
 
 ## Usage
 
