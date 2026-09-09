@@ -2,11 +2,22 @@
 
 ## E2E Executor Rules
 
-- `agent`: local tests, fixture smoke, read-only checks, safe CLI. Go must run.
-- `agent-with-gate`: restart, deploy, shared/prod write, expensive/destructive.
-  Shape gets approval first.
-- `user`: visual/business judgment, 2FA, private session, unreachable env.
-- `not-run`: out of scope; reason + user-accepted waiver.
+Every e2e item carries a **mechanism label** — how the behavior is
+observable: `browser-walk` | `cli` | `api` | `file-inspect` |
+`judgment` | `credentialed` | `unreachable`. Executors are resolved
+against the **harness capability probe** at go/verify time (the tool
+surface this host actually exposes — browser automation, HTTP/CLI,
+file inspection), never frozen at shape:
+
+- mechanism covered by a probed tool ⇒ **agent** runs it; record
+  `agent_passed` + the tool + evidence. Browser automation on the host
+  makes every `browser-walk` item agent-runnable — a UI item is parked
+  on `user` only when driving it needs human judgment.
+- covered but touching restart / deploy / shared-write / expensive
+  operations ⇒ **agent-with-gate**; approval first.
+- `judgment` (taste, sign-off), `credentialed` (2FA, private session),
+  `unreachable` ⇒ **user** — the durable human classes.
+- out of scope ⇒ `not-run` with reason + user-accepted waiver.
 
 E2E items carry **real-environment behaviors only** (real APIs, real entrypoints, real data). Ticket-level unit validation lives in TDD evidence and never appears as an E2E item — no `covered_by_slice` bookkeeping: if it would be `covered_by_slice`, it does not belong in e2e.md at all.
 

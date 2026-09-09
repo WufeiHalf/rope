@@ -296,9 +296,16 @@ e2e.md carries **real-environment behaviors only** (real APIs, real
 entrypoints, real external systems). Ticket-level units live in TDD
 evidence, never in e2e.md.
 
+Executor resolution is capability-relative (gates-and-vocab): read each
+item's mechanism label, probe the harness tool surface, and run every
+covered mechanism as agent. A user handing an item over mid-go
+(“你自己跑吧”) is the probe firing late — run it and record it as agent
+execution with evidence, never as an exception.
+
 - `agent_passed`: agent ran it; record command + evidence.
 - `agent_failed`: ran and failed; fix or record blocker.
-- `blocked_on_gate` / `blocked_on_user`: missing approval / human-only.
+- `blocked_on_gate` / `blocked_on_user`: missing approval / human-only
+  (judgment, credentialed, unreachable).
 - `skipped_by_user_at_shape` / `not_run_with_reason`: intentional skips.
 
 ## Commit Rules

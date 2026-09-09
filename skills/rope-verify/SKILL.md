@@ -17,7 +17,10 @@ Verdict rules and `verify.md` format: [references/verify-rules.md](references/ve
    identity + fix rounds recorded; `review_degraded` carries its reason.
 2. Every E2E item (real-environment behaviors) has a terminal status.
    Hunt drift: `agent_failed` / `pending` items that silently became
-   completed — re-run or block, never absorb.
+   completed — re-run or block, never absorb. An item parked on `user`
+   whose mechanism label a probed harness tool covers is classification
+   drift — send it back to agent execution instead of accepting the
+   parking.
 3. Per-slice commits present; no unrelated dirty files.
 4. Architecture Impact: every entry has a terminal documentation outcome or
    a confirmed `pending-finish` routed to finish.

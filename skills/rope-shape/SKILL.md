@@ -120,8 +120,11 @@ Default handoff: same-session `rope-go`.
     belongs here). Never list ticket-level test reruns; TDD evidence
     already covers them. L3 composition-root smokes are **not** e2e — they
     are mechanical wave gates (fake transport at the outer boundary) and
-    live in the `tasks.md` composition-roots block. Classify executors;
-    resolve non-agent gates at shape time.
+    live in the `tasks.md` composition-roots block. Label each item's
+    **mechanism** (`browser-walk`/`cli`/`api`/`file-inspect`/
+    `judgment`/`credentialed`/`unreachable`); classify executors against
+    it (gates-and-vocab), resolving non-agent gates at shape time — go
+    re-resolves against the live harness capability probe.
 11. **Contract Note gate:** output the `## Contract Note` from `prd.md` (3–5
     one-sentence bullets: “when this issue is done, what can you observe?” +
     failure visibility where relevant). The user confirms the note **instead of
