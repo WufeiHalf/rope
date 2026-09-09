@@ -43,16 +43,28 @@ execution.default == "dynamic"?
 ## Workflow execution semantics
 
 - The dependency graph in `tasks.md` is the truth source. The script
-  compiles waves from it; it does not invent edges.
+  schedules **per-slice readiness**: a slice dispatches the moment its
+  `seam-required` blockers are merged; after every merge the ready set is
+  recomputed (frontier refill). Fixed waves are the shared-mode concept —
+  a workflow script adds scheduling edges or wave barriers on top of the
+  graph only in shared mode. It never invents dependency edges.
 - Leaves run in isolated worktrees via harness presets
   (`rope-implementer`, `rope-reviewer`, …) — same registry as Agent
   dispatch; the executor is just a different consumer.
 - Leaves receive self-contained briefs: read the slice entry themselves;
   no workflow context leaks into leaves; leaves never spawn leaves.
-- Merge/integration is a dedicated mechanical agent per wave, not the
-  parent: merge all input branches, run gates, commit. Briefs must say
-  "resolve mechanical conflicts (append sections) or report and continue",
-  never "stop on conflict".
+- Every leaf brief opens with **step 0 = the repo's `routes.md`
+  `Worktree setup:` command** (unconditional, check-first, idempotent —
+  the execution-rules contract). The compiler injects the step; a leaf
+  never discovers after a red test that it needed setup. The return
+  schema carries a `setup` line (`setup: ran <cmd>` | `setup: no-op` |
+  setup failure as the blocker). Undeclared line ⇒ execution-rules
+  fallback: environment failure is a blocker, never a fix-round target.
+- Merge/integration is a dedicated mechanical agent, not the
+  parent: merges landed branches serially in landing order (batched as
+  frontier refill produces them), runs the L2 gate, commits. Briefs must
+  say "resolve mechanical conflicts (append sections) or report and
+  continue", never "stop on conflict".
 - Fix rounds: gate red ⇒ fresh fix agent (same brief + failure output),
   budget 2 rounds, fail-fast. **Resume cannot carry a gate** — never combine
   them.
@@ -65,12 +77,18 @@ execution.default == "dynamic"?
 
 ## Gate menu
 
-All gates are mechanical, cheap, per wave. **Gate scripts live in repo
-files** (e.g. `gate_legal.py` pattern) — inline shell in the orchestrating
-JS gets silently corrupted by quoting layers.
+All gates are mechanical, cheap, per merge batch. **Gate scripts live in
+repo files** (e.g. `gate_legal.py` pattern) — inline shell in the
+orchestrating JS gets silently corrupted by quoting layers. Every gate
+command writes its output to a file and asserts on the file — a piped
+exit code is not evidence (`cmd | tail` swallowed a real nonzero exit in
+the field and reported a red tree green).
 
 - **L1 — slice-focused tests.** Run inside each leaf against its own
-  worktree; leaf reports red/green evidence per matrix row.
+  worktree; leaf reports red/green evidence per matrix row. L1 is the only
+  suite a leaf ever runs. **The full suite appears exactly twice in an
+  issue — the go baseline and the end-of-issue review** (ADR 0013); a leaf
+  or merge gate that runs it has mis-tiered.
 - **L2 — integration invariant (dual assertion).**
   1. every input branch of the wave is merged into the integration branch
      (`git branch --merged` covers them), AND

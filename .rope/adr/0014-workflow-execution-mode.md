@@ -101,3 +101,33 @@ assembly with events in and observable behavior out.
   concurrent writes.
 - Deferred: `graph2workflow` compiler (tasks.md graph → `.js` script) as a
   separate issue once more issues have run under manual script authorship.
+
+## Addendum (2026-09-10): graph scheduling, gate tiering, setup step 0
+
+First full production run under dynamic mode (agent-workbench
+`legal-agent-capabilities`, 17 slices; field report
+`.rope/research/session-01a0840a-dynamic-field-report.md`) validated the
+script-driven form and exposed four executor-side defects, all fixed in
+`.rope/specs/dynamic-workflow-mode.md`:
+
+1. **Wave compilation → per-slice readiness dispatch** (frontier refill
+   after each merge). Under worktree isolation, fixed wave barriers idled
+   ready slices behind whole-wave merges + full suites they never needed
+   (S14–S16 waited out a full W3 merge). Aligns the executor with ADR
+   0007's graph-is-the-scheduler; waves remain the shared-mode concept.
+2. **Gate tiering is a hard rule, restated where the script author reads**:
+   L1 focused inside leaves; the full suite appears exactly twice — go
+   baseline and end-of-issue review. The run put full suites in every
+   leaf closing gate and every wave merge (~11 full runs ≈ 38 of 73 min);
+   ADR 0013 already forbade this.
+3. **Step 0 setup injection**: the script compiler injects the repo's
+   `routes.md` `Worktree setup:` command into every leaf brief
+   (unconditional, check-first; `setup` line in the return schema). The
+   first run omitted it — three leaves went red on missing node_modules
+   in harness worktrees; the recompiled run passed first try.
+4. **Gates assert on output files, never piped exit codes** — a merge
+   regression reported green through `cmd | tail` exit swallowing.
+
+The end-of-issue review protocol for the dynamic path (freeze point,
+two parallel leaves, in-script fix loop) lands in the spec's end-of-issue
+section the same date.

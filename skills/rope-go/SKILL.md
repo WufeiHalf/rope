@@ -77,19 +77,25 @@ package influences it:
 2. `dynamic` + host provides a deterministic workflow runner (pi:
    SubagentWorkflow tool) ⇒ **script-driven execution** per
    the `dynamic-workflow-mode.md` spec in the rope repo's `.rope/specs/`:
-   - Compile waves from the dependency graph into a workflow script
+   - Compile the dependency graph into a workflow script
      (`.pi/workflows/<issue>.js`); the script owns dispatch, merges, gates,
-     fix rounds. The model lives only in leaves and review agents — never
-     as the orchestrator.
+     fix rounds. Dispatch is per-slice readiness — frontier refill after
+     each merge; fixed wave barriers are shared-mode only. The model
+     lives only in leaves and review agents — never as the orchestrator.
    - Leaves: same harness presets as Agent dispatch (`rope-implementer`…),
      worktree isolation, self-contained briefs (leaf reads its slice entry
-     itself). Briefs stay within the ≤60-line budget.
-   - **Gates per wave, scripts in repo files** (never inline shell in JS —
-     quoting layers corrupt it): **L1** leaf-focused tests (inside leaf);
-     **L2** integration dual assertion — *all input branches merged* AND
-     focused suite green (tests-green alone ships partial integrations);
-     **L3** composition-root smoke from the `tasks.md` composition-roots
-     block (real assembly, fake outer boundary, event in → observable out).
+     itself), each opening with **step 0 = the `routes.md` worktree-setup
+     command** (unconditional, check-first; setup line in the return).
+     Briefs stay within the ≤60-line budget.
+   - **Gates, scripts in repo files** (never inline shell in JS — quoting
+     layers corrupt it; every gate asserts on an output file, never a
+     piped exit code): **L1** leaf-focused tests — the only suite a leaf
+     runs; **L2** integration dual assertion — *all input branches
+     merged* AND focused suite green (tests-green alone ships partial
+     integrations); **L3** composition-root smoke from the `tasks.md`
+     composition-roots block (real assembly, fake outer boundary, event
+     in → observable out). The full suite appears exactly twice — go
+     baseline and end-of-issue review (ADR 0013).
    - Merge/integration is a dedicated mechanical agent per wave; its brief
      says "resolve mechanical conflicts (append sections) or report and
      continue" — never "stop on conflict". Shared ledgers: leaves return
