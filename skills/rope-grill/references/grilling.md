@@ -3,9 +3,11 @@
 ## Fact vs decision
 
 - **Facts** (code, tests, docs, primary sources, mature libraries): look up.
-  Prefer a background explore leaf when wide — a running exploration delays
-  only the questions downstream of it, never the current round. Never turn
-  answerable facts into user quizzes.
+  Prefer background explore leaves when wide — fan them out in parallel
+  under a dynamic execution config (research briefs per the explore
+  research mode); a running exploration delays only the questions
+  downstream of it, never the current round. Never turn answerable facts
+  into user quizzes.
 - **Decisions** (product tradeoffs, risk, gates, which option wins): put to
   the user in frontier rounds, each with a recommended answer. Never write
   contested choices into `.rope/` as settled.
