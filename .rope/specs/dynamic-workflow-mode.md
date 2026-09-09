@@ -103,6 +103,35 @@ the field and reported a red tree green).
   class): assemble the real stream wiring with a fake transport, feed one
   `/clear` event, assert a reply delivery marker is enqueued.
 
+## End-of-issue review (in-script)
+
+The review gate runs **inside the workflow script**, mirroring ADR
+0010/0011 — a review fail never returns to the parent for self-fixing
+(field 2026-09-09: it did, and the Parent Orchestrator discipline broke).
+
+- **Freeze point.** The review stage starts only at the script's serial
+  tail: every slice merged, L2 green, tree clean, no leaf running.
+  Scanner and reviewer read the same frozen HEAD; nothing writes until
+  both return.
+- **Two parallel read-only leaves** in one message: the **Standards
+  scanner** (`rope-explore` + Standards brief; never runs the product) and
+  the **Behavior reviewer** (`rope-reviewer`; walks the Matrix at the real
+  entrypoint and runs e2e items — the only leaf that may run the product).
+  Both return schema-structured findings: `{severity blocking|note,
+  path:line, issue, fix}`.
+- **Mechanical aggregation**: verdict = worst of axes, no rerank; `note`
+  findings are recorded, never fixed by a round. Zero blocking findings ⇒
+  pass, script returns.
+- **Fix loop (≤2 rounds), all in-script**: transcribe blocking findings
+  verbatim into one fix brief ⇒ fresh implementer agent (resume never
+  carries a gate) ⇒ serial **delta re-review** — scanner re-scans the fix
+  diff only, reviewer re-probes only the affected paths. Clear ⇒ pass;
+  else one more round on the new delta. Defense Budget unchanged: a fix
+  round adds zero acceptance requirements.
+- **Budget exhausted** ⇒ return a structured stop — remaining blocking
+  findings + fix-round history. The parent renders it as the Human
+  Escalation Stop; it never patches the findings itself.
+
 ## Fans (executor-side semantics; never in tickets)
 
 | Fan | Use | Default ceiling |

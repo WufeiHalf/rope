@@ -107,7 +107,9 @@ package influences it:
      finished agents replay at zero token cost.
    - After the run: parent does bookkeeping **from returned results only** —
    tasks.md statuses, map.md rows, review records; then the end-of-issue
-     review gate runs exactly as below (ADR 0007/0010 unchanged).
+     review gate runs **in-script at the freeze point** (two leaves +
+     fix loop ≤2 with delta re-review — spec's End-of-issue review
+     section); ADR 0007/0010 semantics unchanged.
 3. `dynamic` + no workflow runner on this host ⇒ soft-degrade to parent
    dispatch, narrower fan, record the degrade reason in `map.md`.
 

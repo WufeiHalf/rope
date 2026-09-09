@@ -206,7 +206,12 @@ other lanes sit idle without an explicit hold statement.
 
 After all slices and before verify, the parent spawns **two read-only
 leaves in one message** (ADR 0010) — both new eyes, never watched the
-build:
+build. Under workflow execution (ADR 0014) this gate runs **inside the
+script at its freeze point** — same two leaves, same mechanical
+aggregation, plus the in-script fix loop with delta re-review
+(`.rope/specs/dynamic-workflow-mode.md` → End-of-issue review); the
+parent does bookkeeping from the structured return and renders an
+exhausted fix budget as the Human Escalation Stop:
 
 1. **Scanner leaf** — the `rope-explore` preset with the Standards brief
    below (generic read-only worker otherwise; record the type used).
