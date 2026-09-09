@@ -177,7 +177,8 @@ slice.
 ## E1 <Validation Name>
 
 Architecture evidence: <constraint/decision IDs and the behavior or invariant this validates>
-Executor: agent | agent-with-gate | user | not-run
+Mechanism: browser-walk | cli | api | file-inspect | judgment | credentialed | unreachable
+Executor: agent | agent-with-gate | user | not-run   ← resolved against the harness capability probe at go/verify, never frozen at shape
 Risk: local-readonly | local-write | remote-readonly | remote-write | production | human-judgment
 Gate Decision: not-required | approved | skipped | user-run | blocked | not-run-waived
 Approved Action: <action, not exact command; required for approved agent-with-gate>
