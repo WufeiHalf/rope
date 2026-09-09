@@ -38,7 +38,12 @@ Default handoff: same-session `rope-go`.
    spawn an isolated (worktree) subagent, and record the result in the
    `tasks.md` header as `Execution mode: worktree` | `shared` (one line on
    how verified). Go consumes it; a capability mismatch at go degrades to
-   shared with a recorded reason.
+   shared with a recorded reason. Resolve the full execution form the
+   same mechanical way as grill's step 0 (config + host probe — workflow
+   execution spec; never a user question). Under `dynamic`, slice for
+   width: hunt the prefactor first, keep the fresh-context anchors, and
+   let step 9's numbers expose the achievable fan-out — boldness comes
+   from infrastructure, never from bigger slices.
 3. Run the conditional Architecture Impact trigger check. Record `required`, or
    `not-applicable` with the lightweight check. For `required`, list each source,
    status, disposition, invariant, forbidden shortcut, evidence, scope, and conflict.
@@ -120,8 +125,11 @@ Default handoff: same-session `rope-go`.
     belongs here). Never list ticket-level test reruns; TDD evidence
     already covers them. L3 composition-root smokes are **not** e2e — they
     are mechanical wave gates (fake transport at the outer boundary) and
-    live in the `tasks.md` composition-roots block. Classify executors;
-    resolve non-agent gates at shape time.
+    live in the `tasks.md` composition-roots block. Label each item's
+    **mechanism** (`browser-walk`/`cli`/`api`/`file-inspect`/
+    `judgment`/`credentialed`/`unreachable`); classify executors against
+    it (gates-and-vocab), resolving non-agent gates at shape time — go
+    re-resolves against the live harness capability probe.
 11. **Contract Note gate:** output the `## Contract Note` from `prd.md` (3–5
     one-sentence bullets: “when this issue is done, what can you observe?” +
     failure visibility where relevant). The user confirms the note **instead of

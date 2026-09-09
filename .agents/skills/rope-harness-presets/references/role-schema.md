@@ -8,7 +8,7 @@ Shared across harness writers. Parent/session role is **not** a preset row.
 | --- | --- | --- | --- | --- |
 | `implementer` | `rope-implementer` | Write, test, commit one unit of work from a self-contained brief | full write set: read, bash, edit, write, grep, find, ls (+ host equivalents) | `medium` |
 | `reviewer` | `rope-reviewer` | End-of-issue behavior acceptance: Matrix walk at the real entrypoint + probe; verdict owner. The Standards axis is a separate scanner leaf (below) | read-only: read, bash, grep, find, ls | `high` |
-| `explore` | `rope-explore` | Read-only fact gathering / codebase navigation; **research mode** (brief-selected): external sources + findings persisted to `.rope/research/` (ADR 0011) | read, bash, grep, find, ls + web/search/fetch; `write` only into `.rope/research/**` and only on a research brief | `low` |
+| `explore` | `rope-explore` | Read-only fact gathering / codebase navigation; **research mode** (brief-selected): external sources + findings persisted to `.rope/research/` (ADR 0011) | **unrestricted** host tool surface (web/search/fetch + write included) — mode discipline lives in the agent body, never in tool restriction | `low` |
 
 ## Shared leaf rules
 
@@ -36,8 +36,12 @@ Harness-native agent type names are exactly:
 No fourth agent name: external research is a **mode of `rope-explore`**
 (ADR 0011), selected by the brief. Default and scanner dispatches stay
 read-only; a research brief may use web/search and write only a findings
-artifact under `.rope/research/**`. If a host's explore preset lacks web/write
-tools, run the research brief on a generic worker and record the type used
+artifact under `.rope/research/**`. The explore preset is generated with
+an **unrestricted tool surface** — mode discipline lives in the agent
+body. Preset-level tool restriction made research mode unreachable in
+the field (2026-09-09: every grill research leaf degraded to a
+general-purpose twin). If a host truly cannot grant the tools, run the
+research brief on a generic worker and record the type used
 (declared deviation).
 
 The end-of-issue **scanner leaf** (ADR 0010) is the `rope-explore` agent

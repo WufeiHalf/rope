@@ -1,15 +1,19 @@
 # Explore Research Mode (ADR 0011)
 
 External research with disk output is a **brief-selected mode of
-`rope-explore`** — not a separate agent. Exists because plain explore is
-read-only and cannot persist findings; borrowing a general-purpose worker
-without declaration was an undeclared dispatch deviation (observed twice in
-the field).
+`rope-explore`** — not a separate agent. The preset carries an
+**unrestricted tool surface**; both modes are body discipline, not tool
+restriction. Historically, plain explore was tool-restricted read-only,
+could not persist findings, and borrowing a general-purpose worker went
+undeclared (observed twice in the field; again 2026-09-09 — every grill
+research leaf degraded to a twin because the pi preset had been
+generated without web/write).
 
 ## Mode contract
 
-- Default mode (codebase navigation, end-of-issue scanner): read-only —
-  unchanged; no web, no writes.
+- Default mode (codebase navigation, end-of-issue scanner): behaves
+  read-only — web and writes stay unused even though the tool surface
+  grants them.
 - Research mode (the brief asks for a findings file): may use web search /
   fetch; may write exactly one findings artifact under `.rope/research/**` —
   nowhere else. Never touches product code, tests, or branches; never spawns.
@@ -27,6 +31,7 @@ the field).
 
 ## Degradation
 
-If the host's explore preset lacks web/write tools, run the research brief on
-a generic worker and **record the type used** (declared deviation, ADR 0011).
-No schema, ranking, or manifest change — the three core roles are unchanged.
+Rare by construction — the preset ships unrestricted. Only when a host
+cannot grant web/write at all: run the research brief on a generic worker
+and **record the type used** (declared deviation, ADR 0011). No schema,
+ranking, or manifest change — the three core roles are unchanged.

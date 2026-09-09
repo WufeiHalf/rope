@@ -113,7 +113,9 @@ Rules:
   host accepts (e.g. pi `model`/`thinking`; codex `model`/
   `model_reasoning_effort`).
 - Body follows role-schema + agent-templates (host-neutral): role contract,
-  tool bounds, output format, **forbid nested spawn**.
+  tool surface per role-schema (explore: **unrestricted** — mode discipline
+  lives in the body; never re-restrict research mode away at preset
+  level), output format, **forbid nested spawn**.
 - Re-run is idempotent: same paths, clean overwrite.
 
 Completion:
@@ -159,8 +161,10 @@ the presets written above — through the host's own subagent mechanism.
 ## Explore research mode & declared dispatch deviation (ADR 0011)
 
 - **Research is a mode of `rope-explore`**, selected by the brief: a research
-  brief unlocks web/search + write scoped to `.rope/research/**` (findings
-  artifact only); default and scanner dispatches stay read-only. See
+  brief switches the leaf to research behavior — web/search + one findings
+  artifact under `.rope/research/**`; default and scanner dispatches behave
+  read-only. The generated preset carries an unrestricted tool surface, so
+  the mode needs no deviation. See
   [references/explore-research-mode.md](references/explore-research-mode.md).
   No fourth agent name; the three core roles and the ranking flow are
   unchanged.

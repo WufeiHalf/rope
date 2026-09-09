@@ -47,9 +47,17 @@ When present: `.rope/CONTEXT.md`, `routes.md`, relevant `adr/`, `research/`,
 
 ## Workflow
 
+0. Resolve the execution form once at startup — `~/.rope/config.toml`
+   + host probe (workflow execution spec) — mechanical: never asked of
+   the user, never written into an issue package, not re-resolved
+   mid-session. Under `dynamic`, fact-gathering runs as a parallel
+   research fan (explore research mode), and the resolution carries to
+   shape and go.
 1. Restate target and suspected ambiguity.
-2. Resolve **facts** (code/docs/libs) before asking the user — dispatch a
-   background explore leaf for wide lookups; a running exploration delays only
+2. Resolve **facts** (code/docs/libs) before asking the user — dispatch
+   background explore leaves for wide lookups (parallel fan under a
+   dynamic execution config; research briefs per the harness-presets
+   explore research mode); a running exploration delays only
    the questions downstream of it, never the round. See grilling.md.
 3. Apply **domain discipline** (glossary, fuzzy terms, code contradictions).
 4. Resolve **Behavior Contract** six fields (grilling.md).
