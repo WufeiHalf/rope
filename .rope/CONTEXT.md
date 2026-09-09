@@ -1,11 +1,15 @@
 # Context
 
 ## Language
-**Workflow execution mode** — the go phase's execution form, decided only by
+**Workflow execution mode** — the session's execution form, resolved
+mechanically at each phase startup — grill step 0, shape, go — from
 `~/.rope/config.toml` `[execution] default` plus a host capability probe
-(ADR 0014): `dynamic` means a script-driven deterministic workflow (JS
-orchestrator; the model lives only in leaves and review agents) with L1/L2/L3
-mechanical gates; absent or `agent` means parent Agent dispatch. Issue
+(ADR 0014): never a user question, never an issue-package field, not
+re-resolved mid-session. `dynamic` means a script-driven deterministic
+workflow for go (JS orchestrator; the model lives only in leaves and
+review agents) with tiered mechanical gates, and it reaches backward:
+grill runs fact-gathering as a parallel research fan, shape slices for
+width. Absent or `agent` means parent Agent dispatch. Issue
 packages never declare it — a ticket describes work, not how it runs.
 
 **Parent Orchestrator**:
@@ -23,7 +27,7 @@ When leaf fix loops fail twice on the same problem, or the parent judges the fai
 _Avoid_: infinite fix loop, silent retry, bury the design conflict in more patches
 
 **Harness Profile / Role Preset**:
-A binding of Rope leaf roles (implementer, reviewer, explore) onto **harness-native** subagent/agent preset templates. Generated **discovery-based**: the running model identifies the host, probes its agent registry and model catalog at run time, and writes the host's native format (pi Markdown+frontmatter, codex TOML, …) — no hardcoded per-host adapter branches in the skill. Default write target is the host's **user-level** agents directory (machine-local model churn). Plus a thin **user-global** Rope manifest (not project `.rope/`) that maps role → preset name/model and generation metadata. Refresh is **manual only** (no TTL/stale timer). The host preset is the source of spawn configuration; Rope does not keep a second full prompt/tool database as primary.
+A binding of Rope leaf roles (implementer, reviewer, explore) onto **harness-native** subagent/agent preset templates. Generated **discovery-based**: the running model identifies the host, probes its agent registry and model catalog at run time, and writes the host's native format (pi Markdown+frontmatter, codex TOML, …) — no hardcoded per-host adapter branches in the skill. Default write target is the host's **user-level** agents directory (machine-local model churn). Plus a thin **user-global** Rope manifest (not project `.rope/`) that maps role → preset name/model and generation metadata. Refresh is **manual only** (no TTL/stale timer). The host preset is the source of spawn configuration; Rope does not keep a second full prompt/tool database as primary. The explore preset carries an **unrestricted tool surface** — mode discipline (read-only default; research briefs write `.rope/research/**` only) lives in the preset body, never in tool restriction.
 _Avoid_: hard-coded model list in skills, provider lock-in, Rope-only shadow agent runtime, default project-committed model ids, project-committed private model catalogs, automatic preset refresh, per-host adapter branches in skill text
 
 **Issue-Level Verify**:
@@ -39,7 +43,9 @@ without identity
 **End-of-Issue Review**:
 The single review gate after all slices (ADR 0007, mechanics refined by
 0010): **two parallel read-only leaves with new eyes**, spawned in one
-message. The **Standards scanner** (explore-class preset, cheap model)
+message — under workflow execution, in-script at a **freeze point**
+(every slice merged, tree clean, no leaf running), fix loop ≤2 rounds
+with delta re-review inside the script (dynamic-workflow-mode spec). The **Standards scanner** (explore-class preset, cheap model)
 runs lint/typecheck first, then judgement-call-scans the assembled diff
 for repo conventions, TDD anti-patterns, the smell baseline, and inline
 global invariants — never runs the product. The **Behavior reviewer**
