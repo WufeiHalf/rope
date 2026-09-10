@@ -2,6 +2,10 @@
 
 Use this reference from shape, go, verify, and finish. The issue package is the transport; `.rope/adr/` and `.rope/specs/` remain the decision sources.
 
+Before treating a retrieved passage as a requirement or updating a decision,
+read [current documents](../../rope-clear/references/current-docs.md) and
+check its status, scope, and replacement. A grep hit alone is not a constraint.
+
 ## Trigger check
 
 Shape performs a targeted lookup through `.rope/CONTEXT.md`, routes, the confirmed seams, task references, and relevant ADR/spec paths. It does not scan every architecture document.

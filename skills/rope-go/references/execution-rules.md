@@ -27,7 +27,7 @@ Rules:
 
 - **Worktree mode** — host can isolate a spawn in a git worktree (pi
   subagents: `isolation: "worktree"`; Claude Code: agent `--worktree`; a
-  hand-made worktree works too). Slice-ready: ready = blockers **merged**;
+  hand-made worktree works too). Slice-ready: ready = seam-required blockers **merged**;
   dispatch into a fresh worktree from the latest merged HEAD. Overlapping
   slices may run concurrently — overlap surfaces in the merge queue.
 - **Shared mode** — waves; same-wave parallelism needs disjoint owned
@@ -48,9 +48,10 @@ Landed branches merge **serially, one at a time**, in landing order:
    landing order.
 2. After each merge: update `map.md` from leaf summaries, re-check the
    ready set, dispatch newly-ready slices.
-3. No per-merge test ritual — leaves ran TDD; downstream worktrees cut from
-   merged HEAD exercise upstream changes; assembled truth is the
-   end-of-issue review. **Flake discipline (ADR 0013):** a failure under
+3. Agent dispatch adds no per-merge test ritual — leaves ran TDD;
+   downstream worktrees exercise upstream changes. Dynamic execution uses
+   its declared L2/L3 integration checks, not extra full-suite reruns.
+   Assembled behavior is accepted at the end-of-issue review. **Flake discipline (ADR 0013):** a failure under
    parallel load → rerun only the failing tests to classify the flake; a
    full clean rerun needs a recorded reason.
 
@@ -98,15 +99,25 @@ Landed branches merge **serially, one at a time**, in landing order:
                full:  `<cmd>`
 ```
 
-- **Baseline ladder** (go startup), cheapest rung first: ① same-HEAD
-  green evidence (CI or a recorded run ≤24h) — reuse, don't run; ② the
-  declared `quick` tier; ③ the full suite, once, as fallback. Any
-  baseline run writes output to a file and parses the file — rerunning
-  to re-parse is forbidden.
-- `quick` answers "is the repo broken at the start?"; `full` stays the
-  issue-level gate (baseline fallback, end-of-issue assembly). Green-
-  quick ≠ green-full — the accepted failure mode is late discovery,
-  never wrong conclusions.
+- **Impact selection:** shape's Testing Decisions names affected modules,
+  shared consumers, focused commands, and reasons for included/excluded
+  suites. Slice tests stay focused; integration checks exercise affected
+  seams; final review walks the Matrix/E2E and checks assembled impact.
+  Expand to broader suites for shared infrastructure, uncertain impact,
+  evidence of cross-module coupling, or an explicit repository requirement.
+  A local failure is diagnosed before using it to justify a global rerun.
+- **Baseline ladder** (go startup): reuse same-HEAD green evidence (CI or
+  recorded run ≤24h) that covers the selected scope and relevant environment;
+  otherwise run the declared quick tier or affected tests. Broader suites
+  are an issue-level fallback only with one of the impact reasons above.
+  Record the selected scope, command, reason, and reused/run evidence in
+  existing Testing Decisions/work records. Save output and exit status once;
+  parse saved evidence instead of rerunning to recover it.
+- **Full is a scope, not a frequency.** Baseline and final review are
+  decision points, not two mandatory full-suite executions. Scope-green
+  proves only that scope. Backend-only local changes do not automatically
+  run frontend suites; changes to a shared API consumed by the UI include
+  affected UI tests, expanding further when coupling is broad or unknown.
 - **Undeclared is legal**: the ladder skips the rung. When shape finds
   the line missing, shape derives it (explore leaf or in-session scan —
   never a human step, never mid-flight invention at go): guards +
@@ -209,13 +220,13 @@ leaves in one message** (ADR 0010) — both new eyes, never watched the
 build. Under workflow execution (ADR 0014) this gate runs **inside the
 script at its freeze point** — same two leaves, same mechanical
 aggregation, plus the in-script fix loop with delta re-review
-(`.rope/specs/dynamic-workflow-mode.md` → End-of-issue review); the
+([dynamic workflow](dynamic-workflow.md#end-of-issue-review--inside-the-script)); the
 parent does bookkeeping from the structured return and renders an
 exhausted fix budget as the Human Escalation Stop:
 
 1. **Scanner leaf** — the `rope-explore` preset with the Standards brief
    below (generic read-only worker otherwise; record the type used).
-   Runs lint/typecheck/build first and skips what tooling enforces;
+   Runs impact-selected lint/typecheck/build first and skips what tooling enforces;
    never runs the product.
 2. **Reviewer leaf** — `rope-reviewer` from the harness manifest (generic
    worker with explicit review instructions otherwise). Read-only on

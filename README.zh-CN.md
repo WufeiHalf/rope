@@ -97,6 +97,10 @@ rope-harness-presets   # 为你的宿主写 rope-* 叶子预设
 
 预设缺失从不阻塞——go/verify 软降级并记录在案。
 
+全局和项目目标都安装完整技能集及共享运行说明；dynamic 的引用相对于
+实际加载的 skill 解析，不依赖业务仓库里的 `.rope/`。只更新 CLI 不会刷新
+已复制的 skill，需对目标目录显式执行 `add`；同名副本冲突时先确认宿主加载路径。
+
 ## 技能清单
 
 | 技能 | 职责 |
@@ -108,6 +112,7 @@ rope-harness-presets   # 为你的宿主写 rope-* 叶子预设
 | `rope-verify` | go 与 finish 之间的薄文书门 |
 | `rope-finish` | 关闭 issue；路由架构文档更新 |
 | `rope-summary` | 事后把可复用契约/经验沉进 `.rope/` |
+| `rope-clear` | 提出清理清单，经确认修订旧文档，保留正式决策历史 |
 | `rope-quick` | 单人快修道，四条停止线退回管线 |
 | `rope-harness-presets` | 把叶子角色绑到宿主原生预设 |
 

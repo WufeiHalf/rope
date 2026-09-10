@@ -5,149 +5,88 @@ description: Executes a .rope issue package with acceptance-driven TDD, Constrai
 
 # Rope Go
 
-Parent Orchestrator for one `.rope/issues/<slug>/` package. Maximum
-concurrency by default: every ready slice gets a background implementer
-leaf; serializing anything needs a recorded reason. Review is one gate at
-the end. Never nested spawn.
+Parent Orchestrator for one `.rope/issues/<slug>/` package. Dispatch every
+ready slice within host limits; record reasons for reduced concurrency.
+Review is one gate at the end. Leaves never spawn leaves.
 
-Details, degrade paths, brief budgets: [references/execution-rules.md](references/execution-rules.md).
-Architecture continuity: [../rope-shape/references/architecture-continuity.md](../rope-shape/references/architecture-continuity.md).
-Red→green playbook: [references/tdd.md](references/tdd.md).
+Details, setup, test scope, briefs, and failure handling:
+[execution rules](references/execution-rules.md).
+Architecture constraints:
+[architecture continuity](../rope-shape/references/architecture-continuity.md).
+Code TDD: [red→green playbook](references/tdd.md).
 
 ## Startup
 
-1. Load lean: Behavior Contract, Testing Decisions, Architecture Impact,
-   Constraint Bundle index, slice statuses, e2e. Deep-read on dispatch.
-2. Clean git; baseline ladder (ADR 0013): same-HEAD green evidence →
-   declared quick tier → full suite once; rungs, budget, and the
-   write-to-file parsing rule live in execution-rules (Test tiers).
-   Issue package committed first if worktree mode (a worktree is cut
-   from HEAD).
-3. Consume the `Execution mode:` recorded at shape in `tasks.md` (ADR
-   0012); re-verify host capability — a mismatch degrades to shared with a
-   recorded reason. No record (legacy package): decide per execution-rules.
-4. **Declare parallelism in the report**: max X (widest wave / antichain)
-   vs planned Y; reasons when Y < X.
+1. Before baseline or dispatch, read **Startup** in the installed
+   [dynamic workflow reference](references/dynamic-workflow.md). Reuse the
+   session's execution form or resolve config + host capability on direct
+   entry. Under `dynamic`, read **Go**, **Mechanical gates**, and
+   **End-of-issue review** there before authoring the workflow.
+2. Load Behavior Contract, Testing Decisions, Architecture Impact, Constraint
+   Bundle index, slice statuses, and E2E. Deep-read details on dispatch.
+3. Check git status; resolve unrelated dirty work before proceeding. Select
+   baseline evidence using execution-rules' impact-based ladder. Commit the
+   issue package before worktree dispatch: fresh worktrees start from HEAD.
+4. Consume shape's `Execution mode:` (worktree/shared); recheck isolation
+   capability. A mismatch degrades with a recorded reason. For legacy
+   packages, derive isolation mode per execution-rules.
+5. Report initial ready count, maximum graph width, planned parallelism,
+   and reasons for constrained concurrency.
 
-## Slice loop — dispatch on readiness
+## Execute by resolved form
 
-- **Edge-aware ready set (ADR 0011/0012):** `seam-required` blockers gate
-  dispatch in both modes. `file-overlap` gates only in shared mode; under
-  recorded worktree mode it is a merge-order preference — the two slices
-  dispatch concurrently and the merge queue orders landing. A
-  `methodology-order` edge never blocks dispatch — it is a merge-order
-  preference recorded in tasks.md; serialize merges by it when convenient,
-  never serialize dispatch.
-- **Worktree mode** (host can isolate a spawn): a slice is ready the moment
-  its **seam-required** blockers are **merged**; dispatch immediately into
-  its own worktree from the latest merged HEAD. No wave barrier — the graph
-  is the scheduler.
-- **Shared mode** (any host): waves; same-wave parallelism needs disjoint
-  owned files; the parent collects commits serially in landing order.
+**Dynamic:** the linked workflow contract owns compilation, frontier refill,
+merge gates, fixes, and in-script review. After its structured return, update
+records from evidence and proceed to verify only if its review passed.
 
-Dispatch → background implementer leaf per slice with a **minimal brief**
-(allowlist + ≤60 lines; execution-rules): TDD hard fields, map path,
-constraint IDs, worktree-setup condition step. Collect results as they
-land: acceptance, red evidence, green, seam legal, commit, constraint
-evidence. **Mechanical Return Gate (ADR 0011):** reconcile each return
-against the slice's Required evidence — every item maps to pasted command
-output or an artifact path; missing items bounce the leaf to exactly those
-items. The gate is evidence reconciliation: no implementation re-read, no
-test reruns, no verdict (ADR 0007 — the end-of-issue review stays the only
-review gate). Fix rounds (≤2) on one slice never pause dispatch of other
-ready slices; a fix round may not add acceptance requirements absent from
-the Behavior Matrix (**Defense Budget**): a genuine gap goes back to shape
-as a re-cut, or is demoted to a recorded non-blocking note. Design defect
-→ Human Escalation Stop.
+**Agent dispatch:** use the following slice loop and final review.
 
-Worktree mode: merge landed branches serially, one at a time
-("Merge queue"); after each merge, update `map.md` from leaf summaries and
-re-check the ready set. Conflict → one re-dispatch with both branch names,
-resolving **on the unmerged branch** (its brief + commits are the primary
-intent sources — ADR 0012).
-Shared mode: next wave.
+## Slice loop — Agent dispatch
 
-## Workflow execution (config-decided — ADR 0014)
-
-Before dispatching, resolve the execution form. Nothing in the issue
-package influences it:
-
-1. Read `~/.rope/config.toml` `[execution] default`. Absent or `agent` ⇒
-   parent dispatch as above (this file's default behavior, unchanged).
-2. `dynamic` + host provides a deterministic workflow runner (pi:
-   SubagentWorkflow tool) ⇒ **script-driven execution** per
-   the `dynamic-workflow-mode.md` spec in the rope repo's `.rope/specs/`:
-   - Compile the dependency graph into a workflow script
-     (`.pi/workflows/<issue>.js`); the script owns dispatch, merges, gates,
-     fix rounds. Dispatch is per-slice readiness — frontier refill after
-     each merge; fixed wave barriers are shared-mode only. The model
-     lives only in leaves and review agents — never as the orchestrator.
-   - Leaves: same harness presets as Agent dispatch (`rope-implementer`…),
-     worktree isolation, self-contained briefs (leaf reads its slice entry
-     itself), each opening with **step 0 = the `routes.md` worktree-setup
-     command** (unconditional, check-first; setup line in the return).
-     Briefs stay within the ≤60-line budget.
-   - **Gates, scripts in repo files** (never inline shell in JS — quoting
-     layers corrupt it; every gate asserts on an output file, never a
-     piped exit code): **L1** leaf-focused tests — the only suite a leaf
-     runs; **L2** integration dual assertion — *all input branches
-     merged* AND focused suite green (tests-green alone ships partial
-     integrations); **L3** composition-root smoke from the `tasks.md`
-     composition-roots block (real assembly, fake outer boundary, event
-     in → observable out). The full suite appears exactly twice — go
-     baseline and end-of-issue review (ADR 0013).
-   - Merge/integration is a dedicated mechanical agent per wave; its brief
-     says "resolve mechanical conflicts (append sections) or report and
-     continue" — never "stop on conflict". Shared ledgers: leaves return
-     evidence rows, the integrator appends once (never concurrent writes).
-   - Fix rounds: fresh agent with failure output (≤2, fail-fast).
-     **Never combine `resume` with `gate`.**
-   - Run under an **interactive host** (headless crashes today); monitor via
-     `/agents → Workflows`. Resume a crashed/edited run via prefix cache —
-     finished agents replay at zero token cost.
-   - After the run: parent does bookkeeping **from returned results only** —
-   tasks.md statuses, map.md rows, review records; then the end-of-issue
-     review gate runs **in-script at the freeze point** (two leaves +
-     fix loop ≤2 with delta re-review — spec's End-of-issue review
-     section); ADR 0007/0010 semantics unchanged.
-3. `dynamic` + no workflow runner on this host ⇒ soft-degrade to parent
-   dispatch, narrower fan, record the degrade reason in `map.md`.
+- Worktree readiness: `seam-required` blockers must be merged. Dispatch
+  immediately from the latest merged HEAD; file-overlap and methodology
+  preferences order merges, not dispatch. No wave barrier.
+- Shared readiness: waves with disjoint owned files; file-overlap also
+  blocks dispatch. Collect commits serially to avoid index contention.
+- Give each implementer a self-contained minimal brief (≤60 lines, per
+  execution-rules): contract, constraint IDs, map path, focused TDD commands,
+  required evidence, and unconditional worktree setup step 0.
+- Reconcile each Required-evidence item to returned output or an artifact
+  path. Missing evidence bounces to the leaf; this is not a review or a
+  parent test rerun. Missing tests require an explicit brief correction,
+  not silent substitution. A changed acceptance requirement returns to shape.
+- Fix rounds: re-brief a fresh leaf, at most two per problem; independent
+  ready slices continue. A design/contract defect goes to the human.
+- Merge landed branches serially. Conflicts get one re-dispatch on the
+  unmerged branch, using both branches' intent; unresolved merges remain
+  blocked. After each merge update map evidence and refill the ready set.
 
 ## Investigation map
 
-`<issue>/map.md` — one fact per line, path + date, seeded at shape.
-Shared mode: implementers update falsified lines before committing.
-Worktree mode: leaves report them in summaries; the parent writes after
-each merge.
+`<issue>/map.md`: one current fact per line, path + date, seeded at shape.
+Shared mode: leaves update falsified lines in their disjoint scope.
+Worktree mode: leaves return corrections; the parent writes after merging.
 
-## After all slices: one review, two parallel leaves (BDD acceptance)
+## Final review — Agent dispatch only
 
-1. Matrix rows are the **issue's behavior spec** (Given/When/Then); tickets
-   already proved their units by TDD — the reviewer does not replay them.
-2. Spawn **two read-only leaves in one message**, both new eyes — they
-   never watched the build (ADR 0010):
-   - **Scanner leaf** (explore preset) — run lint/typecheck first, skip
-     what tooling enforces; then scan the diff: repo conventions, TDD
-     anti-patterns, smell baseline, inline global invariants. Judgement
-     calls; never runs the product.
-   - **Reviewer leaf** (`rope-reviewer`) — start the product first, read
-     the diff while it boots; walk the Matrix behaviors against the
-     **real entrypoint** (real config, real artifacts; browser/CLI/API)
-     as a user would; run e2e items; high-risk boundaries get the deepest
-     look. Fixture-green is not product-true.
-3. Aggregate mechanically: verdict = worst of axis verdicts; no rerank,
-   no merge. Only the reviewer leaf may run the product.
-4. Findings → one fix brief (**blocking only**; each finding `path:line` +
-   one-sentence fix — a transcription, not an exploration) → implementer
-   leaf; ≤2 rounds then Human Escalation Stop; re-review the **delta
-   only** (fix diff + affected probe paths). Zero findings → record
-   verdict with evidence.
-5. Hand off same-session **rope-verify** (thin paperwork). Finish only
-   after verify PASS.
+1. After every slice is integrated, freeze a clean tree with no active leaf.
+   Spawn two fresh read-only leaves concurrently against that HEAD:
+   **Standards scanner** (explore preset, affected lint/typecheck/build and
+   diff conventions) and **Behavior reviewer** (`rope-reviewer`, starts the
+   product and walks Matrix/E2E at the real entrypoint). Only the reviewer
+   runs the product. Test scope follows execution-rules, not blanket suites.
+2. Aggregate the worst axis verdict mechanically, retaining both identities
+   and evidence. Transcribe blocking findings (`path:line`, issue, fix) into
+   one implementer brief; notes stay notes. No new acceptance requirements.
+3. At most two fix rounds, delta-only re-review; unresolved findings become
+   a Human Escalation Stop. Record verdict and fix history.
+4. Hand off to `rope-verify` for paperwork after a passing review; finish
+   follows verify PASS. Dynamic execution already performed this review
+   inside its script and does not run it again here.
 
 ## Stop / report
 
-Stop on missing gates, human gates, escalation, dirty unrelated tree,
-missing env. Report: mode + parallelism declaration (X vs Y + reasons),
-slices, commits, red/green evidence, review verdict + fix rounds, E2E
-statuses, stops.
+Missing evidence, failed gates, missing environment, unresolved contracts,
+and human gates remain explicit blockers. Report slices/commits, parallelism,
+red/green evidence or waiver, test-scope reasons, review/fix history, E2E
+statuses, and held versus continuing work. Never infer success from silence.

@@ -1,5 +1,10 @@
 # Rope Grill Document Formats
 
+Before writing durable docs, read
+[current documents](../../rope-clear/references/current-docs.md).
+Apply its replace-in-place and source-status checks; the formats below
+choose the home, not a reason to create another copy.
+
 ## `.rope/CONTEXT.md`
 
 Use for project-specific domain language only.

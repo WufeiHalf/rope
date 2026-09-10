@@ -44,6 +44,8 @@
 - Good test: observe external behavior at agreed seams — not implementation details
 - Seams under test: <list confirmed with user during shape; when placement is contested, argue it with [seam-design.md](seam-design.md)>
 - Prior art (optional): <paths or patterns of similar tests in-repo>
+- Test scope: <affected modules/consumers, selected commands, excluded suites and reasons>
+- Broader-suite trigger: <impact/uncertainty/repo requirement, or none; apply [test selection](../../rope-go/references/execution-rules.md#test-tiers--baseline-ladder-repo-contract-adr-0013)>
 
 ## Behavior Contract
 

@@ -79,6 +79,9 @@ full pipeline. Never absorb a new decision silently.
 
 ## Doc sync (four homes)
 
+Read [current documents](../rope-clear/references/current-docs.md) before
+updating durable text; revise the current owner instead of appending a conflict.
+
 Consider every changed file against `.rope/specs/`, `.rope/adr/`,
 `.rope/research/`, and `.rope/CONTEXT.md`: each is updated or explicitly
 skipped with a reason. Correct falsified research conclusions in this

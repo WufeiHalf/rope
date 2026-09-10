@@ -18,8 +18,11 @@ Default handoff: same-session `rope-go`.
 
 ## Workflow
 
-1. Read CONTEXT, routes, the architecture-continuity reference, and relevant
-   adr/research/**specs** (architecture, not PRD).
+1. Before shaping, read **Startup** in the installed
+   [dynamic workflow reference](../rope-go/references/dynamic-workflow.md);
+   reuse the session's resolution or resolve it on direct entry. Under
+   `dynamic`, read **Grill / shape** there before research and slicing.
+   Read CONTEXT, routes, architecture continuity, and relevant adr/research/specs.
 2. Inspect only enough for public interfaces and verification **seams** (explore leaf if wide).
    Seed `<issue>/map.md` from what exploration learned — one fact per line, each
    with a file path and a date. Later leaves read the map for orientation and
@@ -38,12 +41,9 @@ Default handoff: same-session `rope-go`.
    spawn an isolated (worktree) subagent, and record the result in the
    `tasks.md` header as `Execution mode: worktree` | `shared` (one line on
    how verified). Go consumes it; a capability mismatch at go degrades to
-   shared with a recorded reason. Resolve the full execution form the
-   same mechanical way as grill's step 0 (config + host probe — workflow
-   execution spec; never a user question). Under `dynamic`, slice for
-   width: hunt the prefactor first, keep the fresh-context anchors, and
-   let step 9's numbers expose the achievable fan-out — boldness comes
-   from infrastructure, never from bigger slices.
+   shared with a recorded reason. This isolation probe is separate from
+   step 1's execution-form resolution. Apply the dynamic reference's
+   coverage and width checks at step 9.
 3. Run the conditional Architecture Impact trigger check. Record `required`, or
    `not-applicable` with the lightweight check. For `required`, list each source,
    status, disposition, invariant, forbidden shortcut, evidence, scope, and conflict.
@@ -63,7 +63,8 @@ Default handoff: same-session `rope-go`.
 8. `tasks.md` **tracer-bullet slices** (to-ticket style): each cuts a complete
    path when it can, but the hard rules are only — declare `Blocked by` edges
    **with an Edge Classification label** (file-overlap | seam-required |
-   methodology-order; ADR 0011 — only the first two block dispatch), fit a
+   methodology-order; only seam-required blocks in worktree mode;
+   shared mode also blocks file-overlap — ADR 0012), fit a
    **fresh context window** (default ~400 diff lines / ~4 owned files;
    exceeded ⇒ re-cut on the spot), and no two same-wave slices sharing core
    files in shared mode. **Lower bound:** a change that fits one fresh context
@@ -107,7 +108,8 @@ Default handoff: same-session `rope-go`.
    `Blocked by` edges derive **waves** (topological levels) and **rivers**
    (slice clusters with no edge, direct or transitive, between them). Show the
    graph with numbers: serial total vs longest river, wave count, size
-   violations already re-cut, startup width (max antichain). **Granularity
+   violations already re-cut, initial ready count and maximum graph width
+   separately (using mode-effective blocking edges). **Granularity
    quiz** (same message, not a new round): any slice too coarse (won't fit a
    window) or too fine (trivial grouping lost)? Are the blocking edges real
    per their Edge Classification? Merge or split? **Then** exactly one

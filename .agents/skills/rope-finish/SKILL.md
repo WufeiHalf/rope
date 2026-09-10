@@ -41,7 +41,9 @@ Architecture continuity fields: [../rope-shape/references/architecture-continuit
 6. If final behavior reveals an architecture change that was not confirmed by
    shape or a later parent decision, pause for human/parent disposition before
    writing or closing. Do not invent an exception.
-7. If reusable lessons were learned:
+7. Before durable updates, read
+   [current documents](../rope-clear/references/current-docs.md) and revise
+   the current owner in place. If reusable lessons were learned:
    - update `.rope/specs/` for implementation contracts or gotchas
    - update `.rope/research/` for external facts
    - update `.rope/CONTEXT.md` for stable project terms

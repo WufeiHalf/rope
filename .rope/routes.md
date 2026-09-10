@@ -78,6 +78,10 @@ For issue workflow changes, also read:
 - `.rope/adr/0013-test-cost-tiering.md`
 - `.rope/specs/guides/architecture-continuity.md`
 - `skills/rope-shape/references/architecture-continuity.md`
+- `skills/rope-go/references/dynamic-workflow.md` — shipped execution contract;
+  `.rope/specs/dynamic-workflow-mode.md` is only the maintainer route
+- `skills/rope-clear/references/current-docs.md` — current truth and document maintenance
+- `skills/rope-clear/SKILL.md` — approved cleanup workflow
 
 Verify with:
 - Unknown — documentation-only; no automated doc tests discovered

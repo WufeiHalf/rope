@@ -63,16 +63,16 @@ assembly with events in and observable behavior out.
      to rope-quick and never reaches go; switching to manual mid-run is
      one-off steering, not a persistent field.
 
-2. **dynamic means script-driven.** A deterministic script (JS) owns waves,
-   dispatch, merges, gates, and fix rounds. The model exists only inside
+2. **dynamic means script-driven.** A deterministic script (JS) owns graph
+   readiness, dispatch, serial merges, gates, and fix rounds. The model exists only inside
    leaves and review agents. Non-negotiables learned from the experiment:
    gate scripts live in repo files (quoting layers silently corrupt inline
    commands); fix rounds are fresh agents (resume cannot carry a gate);
-   fix/merge agents' briefs must say "resolve or report and continue", not
-   "stop on conflict" (literal obedience aborted a 3/5 integration that a
-   single-assertion gate then passed).
+   unresolved merges remain blocked while independent lanes may continue.
+   Partial integration cannot pass (a production run incorrectly accepted
+   a 3/5 integration with a single-assertion gate).
 
-3. **Gate menu** (per wave, cheap and mechanical):
+3. **Gate menu** (per integration batch, cheap and mechanical):
    - **L1 slice-focused tests** — inside each leaf's own run.
    - **L2 integration invariant** — dual assertion: *all* input branches
      merged AND the focused suite green. Tests-green alone is insufficient.
@@ -85,16 +85,27 @@ assembly with events in and observable behavior out.
    waves / width / disjoint files; that is the parallelism *possibility*. How
    far an executor exploits it is decided by config budgets. No `fan:` blocks
    in packages. Fans (research / panel / fix-storm / array) are executor-side
-   semantics defined in the spec.
+   semantics defined in the shipped runtime reference. Research covers
+   independent questions with evidence reconciliation; shape challenges
+   coarse slices and false dependencies, not an arbitrary fan-out quota.
 
 5. **E4-style user-run walks demote** from discovery layer to final
-   spot-check once L3 exists per wave.
+   spot-check once L3 exists for each touched root.
+
+6. **Runtime documentation ships with the skills.** The canonical contract
+   lives at [dynamic workflow](../../skills/rope-go/references/dynamic-workflow.md).
+   Grill, shape, and go read its explicit startup pointer relative to their
+   installed directory. `.rope/specs/dynamic-workflow-mode.md` is a maintainer
+   route, not a second operational copy. Full-set user-global and project
+   installs must resolve it without a Rope checkout. No installer precedence
+   changes or model-plan display are introduced.
 
 ## Consequences
 
 - Gains: parent context near-idle during go; zero-token resume of finished
-  agents; wall-clock from wave parallelism; AFK potential once pi's headless
-  stale-ctx bug is fixed (today: run under an interactive host).
+  agents; wall-clock from graph parallelism. The replay's headless stale-ctx
+  failure limits that historical evidence; validate the current host before
+  unattended execution.
 - Costs: gate invariant design is now load-bearing — one wrong invariant
   ships partial integration; shared ledgers (map.md-style) must use
   evidence-row return (leaf returns rows, integrator appends) instead of
@@ -107,19 +118,19 @@ assembly with events in and observable behavior out.
 First full production run under dynamic mode (agent-workbench
 `legal-agent-capabilities`, 17 slices; field report
 `.rope/research/session-01a0840a-dynamic-field-report.md`) validated the
-script-driven form and exposed four executor-side defects, all fixed in
-`.rope/specs/dynamic-workflow-mode.md`:
+script-driven form and exposed four executor-side defects, addressed by the runtime contract now shipped in
+`skills/rope-go/references/dynamic-workflow.md`:
 
 1. **Wave compilation → per-slice readiness dispatch** (frontier refill
    after each merge). Under worktree isolation, fixed wave barriers idled
    ready slices behind whole-wave merges + full suites they never needed
    (S14–S16 waited out a full W3 merge). Aligns the executor with ADR
    0007's graph-is-the-scheduler; waves remain the shared-mode concept.
-2. **Gate tiering is a hard rule, restated where the script author reads**:
-   L1 focused inside leaves; the full suite appears exactly twice — go
-   baseline and end-of-issue review. The run put full suites in every
-   leaf closing gate and every wave merge (~11 full runs ≈ 38 of 73 min);
-   ADR 0013 already forbade this.
+2. **Gate tiering belongs where the script author reads**: L1 is focused
+   inside leaves; broad runs follow ADR 0013's impact selection at issue
+   level. This corrects the earlier “exactly twice” wording. The field run
+   put full suites in every leaf closing gate and wave merge (~11 full runs
+   ≈ 38 of 73 min); ADR 0013 already forbade per-slice full-suite requirements.
 3. **Step 0 setup injection**: the script compiler injects the repo's
    `routes.md` `Worktree setup:` command into every leaf brief
    (unconditional, check-first; `setup` line in the return schema). The
@@ -129,5 +140,5 @@ script-driven form and exposed four executor-side defects, all fixed in
    regression reported green through `cmd | tail` exit swallowing.
 
 The end-of-issue review protocol for the dynamic path (freeze point,
-two parallel leaves, in-script fix loop) lands in the spec's end-of-issue
-section the same date.
+two parallel leaves, in-script fix loop) is retained in the shipped
+reference's end-of-issue section.

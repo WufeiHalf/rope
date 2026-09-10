@@ -102,6 +102,12 @@ npx git+https://github.com/WufeiHalf/rope.git add
 npx git+https://github.com/WufeiHalf/rope.git add --target ./.agents/skills
 ```
 
+Both targets receive the full skill set, including shared runtime references.
+Dynamic startup instructions resolve relative to the loaded skill, not the
+managed repo's `.rope/` directory. Updating the CLI alone does not refresh
+already copied skills; explicitly run `add` for the intended target. If the
+host finds duplicate skill names, check which path it loaded before updating.
+
 Then, in the repo you want to manage:
 
 ```bash
@@ -127,6 +133,7 @@ Missing presets never block — go/verify soft-degrade and record it.
 | `rope-verify` | Thin paperwork gate between go and finish |
 | `rope-finish` | Close the issue; route architecture-doc updates |
 | `rope-summary` | Preserve reusable contracts/learnings into `.rope/` after the fact |
+| `rope-clear` | Propose and apply approved cleanup of stale docs; retain decision history |
 | `rope-quick` | Solo single-window path (fixes + small features): grill-lite, stop lines back to the pipeline |
 | `rope-harness-presets` | Bind leaf roles to harness-native presets for your host |
 

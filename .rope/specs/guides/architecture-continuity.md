@@ -8,7 +8,8 @@ This contract applies to newly shaped Rope issue packages and to the parent/leaf
 
 - Every new `prd.md` contains `Architecture Impact` with `Impact: required | not-applicable` and a trigger-check explanation.
 - A relevant source decision has a source path, source status, issue disposition, scope, invariants, public seams, forbidden shortcuts, required evidence, applicability mapping, documentation outcome, and conflict state.
-- Source status and issue disposition are separate fields.
+- Source status and issue disposition are separate fields. Retrieved history is not an active constraint until status, scope, and replacement are checked.
+- Document maintenance follows the shipped [current documents contract](../../../skills/rope-clear/references/current-docs.md). Cleanup approval is defined by [rope-clear](../../../skills/rope-clear/SKILL.md); this spec does not duplicate its procedure.
 - `prd.md` owns the complete Constraint Bundle. `tasks.md` references decision/constraint IDs and maps them to slice evidence.
 - Implementer and reviewer briefs carry the Constraint Bundle by reference:
   bundle path + the slice's Constraint IDs + the short global invariant list
