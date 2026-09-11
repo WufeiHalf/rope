@@ -163,11 +163,13 @@ command blocks excluded). The parent checks the budget before dispatch.
   (`setup: ran <cmd>` | `setup: no-op`) — **plus the Return Gate payload:**
   every slice Required-evidence item mapped to pasted command output or an
   artifact path, keyed by evidence id (ADR 0011)
-- Worktree mode also stated to the leaf: the kernel's delivery contract is
-  injected by the executor, not written by the parent — commit everything,
-  leave `git status --porcelain` empty, then `git branch -f <delivery branch>
-  HEAD` as the last write. A leaf that misses a step costs a flag
-  (`recovered` / `moved` in the delivery verdict), never the implementation.
+- Worktree mode, dynamic: the kernel injects the delivery contract, so the
+  parent does not write it — commit everything, leave `git status --porcelain`
+  empty, then `git branch -f <delivery branch> HEAD` as the last write. A leaf
+  that misses a step costs a flag (`recovered` / `moved` in the delivery
+  verdict), never the implementation. Worktree mode, agent dispatch: state the
+  same three steps in the brief, because the host's own `pi-agent-<id>` cleanup
+  branch is not a name the plan can route on.
 - Relevant artifact paths (prd/tasks/e2e, bundle, map, specs, files)
 - Map path — orient by it; update falsified lines before commit (shared
   mode) or report them in the summary (worktree mode)

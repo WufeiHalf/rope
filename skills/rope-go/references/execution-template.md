@@ -85,19 +85,39 @@ Measured against the installed `@tintinweb/pi-subagents` source, 2026-09-11.
   "setupCommand": "bash /abs/setup.sh .",  // optional; injected as step 0 into every leaf prompt
   "verifyScript": "/abs/.../verify-delivery.sh",   // required in worktree mode
   "checkScript": "/abs/.../run-check.sh",          // required if any check is declared
-  "evidenceDir": "/abs/path/.git/rope-evidence/<issue>",   // required if checks or a review are declared
+  "evidenceDir": "/abs/path/.rope/issues/<slug>/evidence",  // required if checks or a review are declared
   "tasks": [ /* Task, ≥1, ids unique */ ],
   "checks": [ /* Check, optional */ ],
   "e2e": [ /* E2eItem, optional */ ],
+  "e2eSerial": false,                        // optional; run e2e items one at a time
   "review": { /* Review, optional */ },
   "explain": false                          // optional; compile the schedule and return without spawning
 }
 ```
 
-**Keep `evidenceDir` outside the working tree** — under
-`<mainCheckout>/.git/rope-evidence/<issue>` is the intended path. Evidence is
-written by the gate scripts while the tree must stay clean, and an untracked
-evidence directory inside the tree would read as a dirty delivery.
+**`evidenceDir` lives in the repository, beside the issue package** —
+`<mainCheckout>/.rope/issues/<slug>/evidence` is the intended path, and the
+repository declares one ignore line for it:
+
+```
+.rope/issues/*/evidence/
+```
+
+Evidence is the executor's own bookkeeping, not work, and two mechanisms keep
+it from being mistaken for work:
+
+- every delivery gate is invoked with `--evidence <evidenceDir>`, so an
+  untracked evidence file can never make a finished delivery read as dirty, and
+  the leftover-recovery commit stages everything except that directory. This
+  holds even in a repository that never declared the ignore line.
+- the ignore line keeps the *human* view honest: `git status` in the main
+  checkout stays readable during a long run, and a leaf doing `git add -A` for
+  its own commit cannot sweep evidence into the history.
+
+Both are needed. Without the ignore line a delivery still passes, but the tree
+a reviewer looks at fills with machine files; without `--evidence` the
+ignore line becomes load-bearing, and one un-ignored stray file fails a
+delivery that was actually finished.
 
 Unknown fields are rejected by name at every level. A plan with a typo fails
 before a single leaf is spent.
@@ -139,13 +159,15 @@ before a single leaf is spent.
 }
 ```
 
-- **Checks never run concurrently with each other.** One batch per stage, serial
-  inside it, so nothing here needs an "exclusive lane": a batch holds the only
-  check slot there is and a CPU-heavy suite cannot be started beside another.
-- `stage: "merge"` checks are the post-merge early-warning signal, and the one
-  batch that overlaps running leaves. Declare them **cheap** (seconds); the
-  evidence file's `durationMs` makes a breach visible. A failed warning never
-  gates.
+- **No check ever runs beside anything else.** Every stage batch runs after the
+  dispatch loop has drained — the merge stage included — and one batch holds the
+  only check slot there is, serial inside it. So a CPU-heavy suite cannot be
+  started next to another, and nothing here needs an "exclusive lane": the
+  concurrency in a run is implementer leaves, each running its own focused L1
+  tests. That is what bounds engine load, and it is why L1 is briefed as cheap.
+- `stage: "merge"` checks are the post-merge early-warning signal: they run on
+  the integrated HEAD before L2 and never gate. Declare them **cheap**
+  (seconds); the evidence file's `durationMs` makes a breach visible.
 - A `required: false` check informs without gating: its non-zero exit is
   recorded and does not fail the batch.
 - **Reuse is mechanical.** The key is `<scope>@<integrated commit set>` and
@@ -169,6 +191,13 @@ before a single leaf is spent.
 
 Omitting `e2e` or `review` is recorded as **skipped**, never as passed. A run
 with no declared review is not a delivered run.
+
+E2e items run **concurrently by default** — one leaf per item, because an item is
+an end-to-end journey, not a unit. Declare `"e2eSerial": true` when they contend
+for one real resource: one bound port, one credentialed account, one
+single-slot service. Two walkthroughs fighting over a resource report failures
+that are not product findings, and a false failure costs a repair round, which
+costs more than the wait. Independent items should stay parallel.
 
 ## Delivery identity
 
@@ -234,9 +263,14 @@ nothing — is a parent-visible signal in the verdict file, not a kernel decisio
 
 - `state` is `integrated`, `blocked`, `not-started`, or `running` (only if the
   host ended the run early).
-- Each stage is `{ran, ok, skipped, reason}`. `skipped: true` means the stage was
-  declared empty and does not block; a stage held up by a prior failure is never
-  skipped and never ok.
+- Each stage is `{ran, ok, skipped, reason, atSha?, staleAfterFixes?}`.
+  `skipped: true` means the stage was declared empty and does not block; a stage
+  held up by a prior failure is never skipped and never ok.
+- **`atSha` is the HEAD the stage's checks actually ran on**, and
+  **`staleAfterFixes: true` means a review fix landed afterwards** — the fix leaf
+  re-ran only the tests covering the paths it touched, so that stage's green says
+  nothing about the delivered HEAD. Report both when you record the run; do not
+  write "freeze suite passed" without its SHA.
 - `verdict` is `delivered` only when **every planned task is `integrated`, no
   required stage failed, and the review returned `approve`**. Nothing else
   produces it — an absent review yields `partial`, not `delivered`.

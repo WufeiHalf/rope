@@ -131,7 +131,10 @@ before L3/E2E/review may start), `l3` (composition-root smokes), `freeze`
 (repo policy). Checks run serially, one batch per stage, through
 `scripts/run-check.sh` as the host's gate, so the verdict is an exit code and
 the detail is an evidence file keyed by `<scope>@<integrated commit set>` — an
-unchanged state reuses its evidence instead of spending the command again.
+unchanged state reuses its evidence instead of spending the command again. It
+lives in the tree at `.rope/issues/<slug>/evidence/`, ignored by the repository
+and excluded from the delivery gate by `--evidence`, because a bookkeeping file
+must never read as unfinished work.
 The repo declares `Test policy: fast-iteration | full-at-freeze` in `routes.md`.
 _Avoid_: per-slice full suites, periodic reruns without a changed key, gate
 detail relayed through agent prose

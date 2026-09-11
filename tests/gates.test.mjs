@@ -9,7 +9,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 
 import { loadTemplate } from "./harness/load-workflow.mjs";
@@ -22,7 +22,10 @@ const RUN_CHECK = scriptPath("run-check.sh");
 
 async function fixture(prefix) {
   const repo = await makeRepo(prefix);
-  repo.evidenceDir = join(repo.dir, ".git", "rope-evidence", prefix);
+  // The real location: inside the repository, beside the issue package. Every
+  // fixture run therefore exercises the evidence exclusion in the delivery gate,
+  // and a kernel that forgot to declare it would fail these tests.
+  repo.evidenceDir = join(repo.dir, ".rope", "issues", prefix.replace(/-+$/, ""), "evidence");
   repo.verifyScript = VERIFY;
   repo.checkScript = RUN_CHECK;
   return repo;
@@ -347,5 +350,170 @@ test("the kernel refuses to report a delivery when a slice is missing, and sugge
   assert.match(record.stages.l2.reason, /not every planned task is integrated \(0 of 2\)/);
   assert.ok(record.suggestDowngrade, "repeated failure must offer the parent a way out");
   assert.deepEqual(plain(record.suggestDowngrade.tasks), ["A", "B"]);
+  await cleanup(repo.dir);
+});
+
+/* ------------------------------------------------------------------ *
+ * Evidence is bookkeeping, not work
+ *
+ * Evidence lives in the repository (`.rope/issues/<slug>/evidence/`), so the
+ * delivery gate has to be told that path: an untracked evidence file must
+ * never make a finished delivery look dirty, and the leftover-recovery commit
+ * must never sweep it into history.
+ * ------------------------------------------------------------------ */
+
+test("an untracked evidence directory never fails a delivery", async () => {
+  const repo = await fixture("evidence-");
+  const evidence = join(repo.dir, ".rope", "issues", "x", "evidence");
+  // Even in a repository that never declared the ignore rule: the gate is told
+  // the path, so bookkeeping can never read as an unfinished delivery.
+  await rm(join(repo.dir, ".gitignore"));
+  try {
+    await writeFile(join(repo.dir, "work.txt"), "done\n");
+    git(repo.dir, "add", "-A");
+    git(repo.dir, "commit", "-q", "-m", "the slice");
+    git(repo.dir, "branch", "rope/A", "HEAD");
+    // The executor's own bookkeeping, written after the leaf committed.
+    await mkdir(join(evidence, "delivery"), { recursive: true });
+    await writeFile(join(evidence, "delivery", "A-r0.json"), "{\"ok\":true}\n");
+
+    const withoutFlag = runScript(VERIFY, [
+      "--branch", "rope/A", "--base", repo.baseSha,
+      "--verdict", join(repo.dir, ".git", "v1.json"),
+    ], repo.dir);
+    assert.equal(withoutFlag.status, 1, "an undeclared evidence path must read as dirty");
+    assert.equal((await readJson(join(repo.dir, ".git", "v1.json"))).reason, "dirty-tree");
+
+    const withFlag = runScript(VERIFY, [
+      "--branch", "rope/A", "--base", repo.baseSha, "--evidence", evidence,
+      "--verdict", join(repo.dir, ".git", "v2.json"),
+    ], repo.dir);
+    assert.equal(withFlag.status, 0, withFlag.stderr + withFlag.stdout);
+    const verdict = await readJson(join(repo.dir, ".git", "v2.json"));
+    assert.equal(verdict.ok, true);
+    assert.equal(verdict.evidenceExcluded, true);
+    assert.equal(verdict.recovered, false, "evidence alone must not trigger a leftover commit");
+    assert.equal(git(repo.dir, "status", "--porcelain"), "?? .rope/", "the evidence stays untracked");
+
+    const log = git(repo.dir, "log", "--oneline");
+    assert.equal(log.split("\n").length, 2, "no leftover commit was created: " + log);
+  } finally {
+    await cleanup(repo.dir);
+  }
+});
+
+test("leftover recovery commits the leaf's work but never the evidence", async () => {
+  const repo = await fixture("evidence-recover-");
+  const evidence = join(repo.dir, ".rope", "issues", "x", "evidence");
+  try {
+    await writeFile(join(repo.dir, "late.txt"), "forgotten\n");
+    await mkdir(join(repo.evidenceDir, "checks"), { recursive: true });
+    await writeFile(join(repo.evidenceDir, "checks", "l2.json"), "{\"exitCode\":0}\n");
+    assert.notEqual(repo.evidenceDir, evidence, "the fixture must exercise the declared path");
+
+    const result = runScript(VERIFY, [
+      "--branch", "rope/A", "--base", repo.baseSha, "--recover-dirty", "--evidence", evidence,
+      "--verdict", join(repo.dir, ".git", "v.json"),
+    ], repo.dir);
+    assert.equal(result.status, 0, result.stderr + result.stdout);
+    const verdict = await readJson(join(repo.dir, ".git", "v.json"));
+    assert.equal(verdict.recovered, true);
+    assert.equal(verdict.branch, "rope/A");
+
+    const committed = git(repo.dir, "show", "--name-only", "--pretty=format:", "HEAD");
+    assert.match(committed, /late\.txt/);
+    assert.doesNotMatch(committed, /evidence/, "evidence must not be committed by the recovery path");
+    assert.equal(git(repo.dir, "rev-parse", "rope/A"), git(repo.dir, "rev-parse", "HEAD"));
+  } finally {
+    await cleanup(repo.dir);
+  }
+});
+
+test("concurrent e2e items are the default; e2eSerial makes the plan wait", async () => {
+  const repo = await fixture("e2e-serial-");
+  try {
+    let active = 0;
+    let peak = 0;
+    const order = [];
+    const items = ["E1", "E2", "E3"].map((id) => ({ id: id, prompt: "Walk " + id + ".", required: true }));
+    const tasks = [task("A")];
+
+    const buildHost = (serial) => createStubHost({
+      repo: repo.dir,
+      replies: Object.assign(approvingReplies(["A"]), Object.fromEntries(items.map((item) => [
+        "e2e:" + item.id,
+        () => {
+          active += 1;
+          peak = Math.max(peak, active);
+          order.push(item.id);
+          active -= 1;
+          return { id: item.id, status: "passed", evidence: "stub", detail: "stub" };
+        },
+      ]))),
+    });
+
+    const parallelHost = buildHost(false);
+    await loadTemplate(templatePath(), {
+      globals: parallelHost.globals,
+      args: greenPlan({ repo: repo, baseSha: repo.baseSha, tasks: tasks, e2e: items }),
+    });
+
+    peak = 0;
+    order.length = 0;
+    const serialHost = buildHost(true);
+    await loadTemplate(templatePath(), {
+      globals: serialHost.globals,
+      args: Object.assign(greenPlan({ repo: repo, baseSha: repo.baseSha, tasks: tasks, e2e: items }), { e2eSerial: true }),
+    });
+
+    assert.equal(peak, 1, "e2eSerial must never let two items overlap");
+    assert.deepEqual(plain(order), ["E1", "E2", "E3"], "serial items keep declaration order");
+  } finally {
+    await cleanup(repo.dir);
+  }
+});
+
+test("a review fix marks the stages that passed before it as stale", async () => {
+  const repo = await fixture("stale-");
+  let reviewCall = 0;
+  const host = createStubHost({
+    repo: repo.dir,
+    replies: Object.assign(approvingReplies(["A"]), {
+      // First pass requests a change; the delta review after the fix approves.
+      "review:scanner": () => {
+        reviewCall += 1;
+        return reviewCall === 1
+          ? {
+            axis: "scanner", verdict: "changes_requested", identity: "stub-scanner",
+            findings: [{ severity: "blocking", path: "a.ts", line: 3, issue: "unhandled branch", fix: "handle it" }],
+          }
+          : { axis: "scanner", verdict: "approve", identity: "stub-scanner", findings: [] };
+      },
+      "fix:1": { status: "done", branch: "rope/review-fix-1", commit: "<sha:fix1>", summary: "handled the branch" },
+      "merge:fix1": {
+        commit: "<sha:fix1>", mergeCommit: "<sha:fix1>", headAfter: "<sha:fix1>", conflict: false, failed: null,
+      },
+    }),
+  });
+
+  const record = await loadTemplate(templatePath(), {
+    globals: host.globals,
+    args: greenPlan({
+      repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
+      checks: [passCheck("quick", "l2"), passCheck("suites", "freeze")],
+    }),
+  });
+
+  assert.equal(plain(record.verdict), "delivered");
+  assert.equal(plain(record.stages.freeze).ran, true, "the fixture must actually run a freeze batch");
+  assert.equal(plain(record.stages.freeze).ok, true);
+  assert.equal(plain(record.review).rounds, 1);
+  assert.equal(plain(record.review.fixes).length, 1, "the fix merge is recorded for the parent");
+  // Every stage ran before the fix, so none of them may read as evidence about
+  // the delivered HEAD without saying so.
+  for (const stage of ["merge", "l2", "freeze"]) {
+    assert.equal(plain(record.stages[stage]).staleAfterFixes, true, stage + " must be marked stale after a fix");
+    assert.equal(typeof plain(record.stages[stage]).atSha, "string", stage + " must record the HEAD it ran on");
+  }
   await cleanup(repo.dir);
 });

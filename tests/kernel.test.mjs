@@ -32,7 +32,10 @@ function plain(value) {
 
 async function fixture(prefix) {
   const repo = await makeRepo(prefix);
-  repo.evidenceDir = join(repo.dir, ".git", "rope-evidence", prefix);
+  // The real location: inside the repository, beside the issue package. Every
+  // fixture run therefore exercises the evidence exclusion in the delivery gate,
+  // and a kernel that forgot to declare it would fail these tests.
+  repo.evidenceDir = join(repo.dir, ".rope", "issues", prefix.replace(/-+$/, ""), "evidence");
   repo.verifyScript = VERIFY;
   repo.checkScript = RUN_CHECK;
   return repo;

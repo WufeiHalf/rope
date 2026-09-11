@@ -64,8 +64,10 @@ Both are now executor mechanism rather than advice.
    verdict is an exit code rather than an agent's report.
 2. **Reuse is keyed**, by `<scope>@<integrated commit set>`. An unchanged state
    finds its evidence file and does not spend the command again; changed scope
-   or a new commit invalidates it. `stage: "merge"` checks are the one batch
-   that overlaps running leaves and are therefore declared cheap by contract.
+   or a new commit invalidates it. Every stage batch runs after the dispatch
+   loop has drained, so no check ever runs beside a leaf: `stage: "merge"`
+   checks are declared cheap because they precede L2, not because they overlap
+   anything.
 3. **`routes.md` gains `Test policy:`** — the repository's own declaration of
    `fast-iteration` (impact-selected only) or `full-at-freeze` (this repo
    requires its full suite at the freeze point). It is the repo's statement, not
@@ -80,9 +82,13 @@ Both are now executor mechanism rather than advice.
 - "Full is a scope, not a frequency" is now enforced by an artifact rather than
   remembered by a session: a repeated expensive command requires deleting
   evidence or changing the key.
-- Evidence living outside the working tree (`.git/rope-evidence/`) keeps the
-  tree clean, which is what makes the delivery gate's clean-tree assertion
-  meaningful; an untracked in-tree evidence directory would read as a dirty
-  delivery.
+- Evidence lives in the tree beside the issue package
+  (`.rope/issues/<slug>/evidence/`). Two mechanisms keep it from being read as
+  work: the delivery gate is invoked with `--evidence` and excludes that path
+  from both its cleanliness check and its leftover-recovery commit, and the
+  repository declares one ignore line so a human's `git status` and a leaf's
+  `git add -A` stay honest. Discovery beats hiding: `.git/rope-evidence/` was
+  the first answer, and it read as a location chosen to dodge a check rather
+  than as a place for a record.
 - A check that only a human can run stays out of `checks` and stays visible in
   E2E as `blocked_on_user`.

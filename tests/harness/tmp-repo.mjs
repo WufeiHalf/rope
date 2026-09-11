@@ -36,6 +36,10 @@ export async function makeRepo(prefix = "go-execute-") {
   git(dir, "config", "commit.gpgsign", "false");
   await writeFile(join(dir, "README.md"), "# fixture\n");
   await writeFile(join(dir, "app.txt"), "base\n");
+  // A configured repository, as execution-template.md requires: the evidence
+  // directory lives in the tree, so the repo ignores it. Tests that exercise a
+  // repository that never declared this line delete the file themselves.
+  await writeFile(join(dir, ".gitignore"), ".rope/issues/*/evidence/\n");
   git(dir, "add", "-A");
   git(dir, "commit", "-q", "-m", "chore: base");
   return { dir, baseSha: git(dir, "rev-parse", "HEAD") };

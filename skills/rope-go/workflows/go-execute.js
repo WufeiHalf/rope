@@ -20,7 +20,7 @@ export const meta = {
 const PLAN_KEYS = [
   "issue", "baseSha", "mode", "targetBranch", "mainCheckout", "branchPrefix",
   "inFlight", "fixRounds", "setupCommand", "verifyScript", "checkScript",
-  "evidenceDir", "tasks", "checks", "e2e", "review", "explain",
+  "evidenceDir", "tasks", "checks", "e2e", "e2eSerial", "review", "explain",
 ];
 const TASK_KEYS = ["id", "title", "briefPath", "blockedBy", "ownedFiles", "evidence", "preset"];
 const EDGE_KEYS = ["id", "class"];
@@ -94,6 +94,7 @@ function validatePlan(raw) {
     fixRounds: optionalInteger(raw.fixRounds, "args.fixRounds", 2, 0, 5),
     inFlight: optionalInteger(raw.inFlight, "args.inFlight", 6, 1, 16),
     explain: optionalBoolean(raw.explain, "args.explain", false),
+    e2eSerial: optionalBoolean(raw.e2eSerial, "args.e2eSerial", false),
   };
 
   if (plan.mode !== "worktree" && plan.mode !== "shared") {
@@ -445,7 +446,7 @@ function buildMergePrompt(plan, branch, claim) {
     "Merge in: `" + branch + "`" + (claim ? " (the slice reported commit " + claim + ")" : ""),
     "",
     "Steps, in order:",
-    "1. `cd " + plan.mainCheckout + "`. Run `git status --porcelain`. If it is not empty, report `failed` as `main-checkout-dirty` with the offending paths. Do not stash, commit, or clean anything.",
+    "1. `cd " + plan.mainCheckout + "`. Run `git status --porcelain`. If it is not empty, report `failed` as `main-checkout-dirty` with the offending paths. Do not stash, commit, or clean anything. Untracked files under the executor's evidence directory (`" + (plan.evidenceDir === undefined ? "(none declared)" : plan.evidenceDir) + "`) are the executor's own bookkeeping, not work: ignore them and do not report them.",
     "2. `git rev-parse --verify refs/heads/" + branch + "` — if this fails, report `failed` as `missing-branch`.",
     "3. `git merge --no-ff --no-edit " + branch + "`.",
     "4. On conflict: resolve every conflicted path in favour of the slice being merged — its brief and commits are the primary intent source, and the already-landed behaviour is kept wherever the slice does not contradict it. `git add` each resolved path, then `git commit --no-edit`. Never use `--ours`/`--theirs` wholesale, never `git merge --abort`, never `git reset`.",
@@ -628,6 +629,7 @@ function deliveryVerdictPath(taskId, round) {
 function deliveryGate(task, round) {
   if (plan.verifyScript === undefined) return undefined;
   const parts = ["bash", shellQuote(plan.verifyScript), "--verdict", shellQuote(deliveryVerdictPath(task.id, round))];
+  if (plan.evidenceDir !== undefined) parts.push("--evidence", shellQuote(plan.evidenceDir));
   if (plan.mode === "worktree") {
     parts.push("--branch", shellQuote(task.branch), "--base", shellQuote(plan.baseSha), "--recover-dirty");
   } else {
@@ -829,7 +831,7 @@ function scopeKey(scope) {
 
 async function runStageChecks(stage) {
   const batch = plan.checks.filter((check) => check.stage === stage);
-  if (batch.length === 0) return { ran: false, ok: false, reason: "no " + stage + " checks declared" };
+  if (batch.length === 0) return { ran: false, ok: false, atSha: headSha, reason: "no " + stage + " checks declared" };
 
   const specs = batch.map((check) => ({
     id: check.id,
@@ -871,9 +873,9 @@ async function runStageChecks(stage) {
       class: "product",
       message: "stage " + stage + " failed: a required check exited non-zero (" + requiredIds.join(", ") + "); evidence under " + plan.evidenceDir + "/" + scopeKey("stage-" + stage),
     });
-    return { ran: true, ok: false, reason: "one or more required " + stage + " checks exited non-zero: " + requiredIds.join(", ") };
+    return { ran: true, ok: false, atSha: headSha, reason: "one or more required " + stage + " checks exited non-zero: " + requiredIds.join(", ") };
   }
-  return { ran: true, ok: true, reason: "every required " + stage + " check exited zero" };
+  return { ran: true, ok: true, atSha: headSha, reason: "every required " + stage + " check exited zero" };
 }
 
 /* ------------------------------------------------------------------ *
@@ -882,11 +884,24 @@ async function runStageChecks(stage) {
 
 async function runE2e() {
   if (plan.e2e.length === 0) return [];
-  const results = await parallel(plan.e2e.map((item) => () => {
+  const thunks = plan.e2e.map((item) => () => {
     const options = { label: "e2e:" + item.id, phase: "E2E", schema: E2E_SCHEMA };
     if (item.preset !== undefined) options.agentType = item.preset;
     return agent(buildE2ePrompt(plan, item), options);
-  }));
+  });
+  // Items run concurrently by default. A plan declares `e2eSerial` when they
+  // contend for one real resource (a bound port, one credentialed account, a
+  // single-slot service): two walkthroughs fighting over it would report
+  // failures that are not product findings, and a false failure costs a repair
+  // round, which costs more than the wait.
+  let results;
+  if (plan.e2eSerial) {
+    log("running " + plan.e2e.length + " e2e items serially (the plan declared e2eSerial)");
+    results = [];
+    for (const thunk of thunks) results.push(await thunk());
+  } else {
+    results = await parallel(thunks);
+  }
   return plan.e2e.map((item, index) => {
     const payload = parsePayload(results[index]);
     if (payload === null) {
@@ -1021,8 +1036,8 @@ const everyTaskIntegrated = integratedCount === plan.tasks.length;
  * ------------------------------------------------------------------ */
 
 let stages = everyTaskIntegrated
-  ? { merge: { ran: true, ok: true, skipped: false, reason: integratedCount + " integrations landed", conflicts: integrated.filter((entry) => entry.conflict === true).length } }
-  : { merge: { ran: true, ok: false, skipped: false, reason: integratedCount + " of " + plan.tasks.length + " planned tasks integrated" } };
+  ? { merge: { ran: true, ok: true, skipped: false, atSha: headSha, reason: integratedCount + " integrations landed", conflicts: integrated.filter((entry) => entry.conflict === true).length } }
+  : { merge: { ran: true, ok: false, skipped: false, atSha: headSha, reason: integratedCount + " of " + plan.tasks.length + " planned tasks integrated" } };
 
 /** A stage with no required items is skipped and does not block; a stage held up by a prior failure never reads as skipped. */
 function skippedStage(stage) {
@@ -1054,11 +1069,11 @@ if (!everyTaskIntegrated) {
   if (mergeStage.ran) log("post-merge warnings: " + mergeStage.reason);
 
   const l2 = await runStageChecks("l2");
-  stages.l2 = l2.ran ? { ran: true, ok: l2.ok, skipped: false, reason: l2.reason } : skippedStage("l2");
+  stages.l2 = l2.ran ? { ran: true, ok: l2.ok, skipped: false, atSha: l2.atSha, reason: l2.reason } : skippedStage("l2");
 
   if (stages.l2.ok) {
     const l3 = await runStageChecks("l3");
-    stages.l3 = l3.ran ? { ran: true, ok: l3.ok, skipped: false, reason: l3.reason } : skippedStage("l3");
+    stages.l3 = l3.ran ? { ran: true, ok: l3.ok, skipped: false, atSha: l3.atSha, reason: l3.reason } : skippedStage("l3");
   } else {
     stages.l3 = blockedByPriorStage("l3", "L2");
   }
@@ -1068,14 +1083,14 @@ if (!everyTaskIntegrated) {
     const requiredE2e = e2eResults.filter((item) => item.required);
     stages.e2e = e2eResults.length === 0
       ? { ran: false, ok: true, skipped: true, reason: "no e2e items declared" }
-      : { ran: true, ok: requiredE2e.every((item) => item.status === "passed"), skipped: false, reason: requiredE2e.map((item) => item.id + ":" + item.status).join(", ") };
+      : { ran: true, ok: requiredE2e.every((item) => item.status === "passed"), skipped: false, atSha: headSha, reason: requiredE2e.map((item) => item.id + ":" + item.status).join(", ") };
   } else {
     stages.e2e = blockedByPriorStage("e2e", "L3");
   }
 
   if (stages.e2e.ok) {
     const freeze = await runStageChecks("freeze");
-    stages.freeze = freeze.ran ? { ran: true, ok: freeze.ok, skipped: false, reason: freeze.reason } : skippedStage("freeze");
+    stages.freeze = freeze.ran ? { ran: true, ok: freeze.ok, skipped: false, atSha: freeze.atSha, reason: freeze.reason } : skippedStage("freeze");
   } else {
     stages.freeze = blockedByPriorStage("freeze", "the e2e stage");
   }
@@ -1087,6 +1102,17 @@ const stagesOk = everyTaskIntegrated
 const review = stagesOk
   ? await runReview()
   : { verdict: "skipped", axes: [], rounds: 0, findings: [], reason: "a required stage did not pass" };
+
+// A review fix changes the product after the staged checks ran, and the fix leaf
+// re-runs only the tests covering the paths it touched. Saying "freeze passed"
+// about a HEAD that no longer exists is the false green ADR 0013 exists to
+// prevent, so the stages that ran before the fixes say so out loud.
+if (review.fixes !== undefined && review.fixes.length > 0) {
+  for (const key of ["merge", "l2", "l3", "e2e", "freeze"]) {
+    const stage = stages[key];
+    if (stage !== undefined && stage.ran === true) stage.staleAfterFixes = true;
+  }
+}
 
 if (review.verdict === "changes_requested" || review.verdict === "blocked") {
   record({

@@ -11,6 +11,13 @@
 #   --branch <name> --base <sha> [--recover-dirty]   worktree delivery
 #   --commit <sha>                                   shared-checkout delivery
 #
+# --evidence <dir> names the executor's own bookkeeping directory. It is not
+# work: a clean tree means "no uncommitted product changes", so anything under
+# that directory is excluded from the cleanliness check and from the leftover
+# commit. Passing it is optional; omitting it makes a stray evidence file look
+# like a dirty delivery, which is the honest answer when the plan never
+# declared where evidence goes.
+#
 # Exit 0 = the delivery is verifiable. Exit 1 = it is not. Exit 2 = the script
 # itself could not run, which the kernel must not read as a delivery verdict.
 
@@ -22,12 +29,14 @@ commit=""
 base=""
 recover_dirty=0
 verdict=""
+evidence=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --branch) branch="${2:-}"; shift 2 ;;
     --commit) commit="${2:-}"; shift 2 ;;
     --base) base="${2:-}"; shift 2 ;;
+    --evidence) evidence="${2:-}"; shift 2 ;;
     --verdict) verdict="${2:-}"; shift 2 ;;
     --recover-dirty) recover_dirty=1; shift ;;
     *) echo "verify-delivery.sh: unknown argument: $1" >&2; exit 2 ;;
@@ -84,16 +93,43 @@ if [ -z "$head_sha" ]; then
   exit 2
 fi
 
-dirty="$(git status --porcelain 2>/dev/null)"
+# The exclusion is only meaningful when the evidence directory can actually
+# appear inside this tree; an absolute path in someone else's checkout (the
+# common case, since the gate runs inside a worktree) needs no pathspec.
+top_level="$(git rev-parse --show-toplevel 2>/dev/null)"
+evidence_spec=""
+evidence_excluded="false"
+if [ -n "$evidence" ] && [ -n "$top_level" ]; then
+  real_top="$(cd "$top_level" 2>/dev/null && pwd -P)"
+  real_evidence="$(cd "$evidence" 2>/dev/null && pwd -P)"
+  [ -n "$real_evidence" ] || real_evidence="$evidence"
+  case "$real_evidence" in
+    "$real_top"/*)
+      evidence_spec="${real_evidence#"$real_top"/}"
+      evidence_excluded="true"
+      ;;
+  esac
+fi
+
+specs=( . )
+[ -n "$evidence_spec" ] && specs+=( ":(exclude)${evidence_spec}" )
+
+dirty="$(git status --porcelain -- "${specs[@]}" 2>/dev/null)"
 recovered="false"
 if [ -n "$dirty" ]; then
   if [ "$mode" = "branch" ] && [ "$recover_dirty" -eq 1 ]; then
     # The leaf left work uncommitted. The host would commit it to
     # `pi-agent-<id>` — a branch the plan cannot name — so committing it here is
     # what keeps one forgotten step from costing a whole implementation.
-    if git add -A >/dev/null 2>&1 && git commit --no-verify -m "chore(rope): commit leaf leftovers before delivery" >/dev/null 2>&1; then
+    # `git add -A -- . ':(exclude)<evidence>'` is not usable here: naming an
+    # ignored path in a pathspec makes git refuse the whole add. Staging
+    # everything and unstaging the evidence afterwards works whether or not the
+    # repository ignores that directory.
+    git add -A -- . >/dev/null 2>&1
+    [ -n "$evidence_spec" ] && git reset -q -- "$evidence_spec" >/dev/null 2>&1
+    if git commit --no-verify -m "chore(rope): commit leaf leftovers before delivery" >/dev/null 2>&1; then
       head_sha="$(git rev-parse HEAD 2>/dev/null)"
-      dirty="$(git status --porcelain 2>/dev/null)"
+      dirty="$(git status --porcelain -- "${specs[@]}" 2>/dev/null)"
       recovered="true"
     fi
   fi
@@ -109,7 +145,7 @@ if [ "$mode" = "commit" ]; then
   # Shared checkout: the leaf committed on the current branch, so the delivery
   # is that commit being a real object reachable from HEAD.
   if [ "$dirty_count" -gt 0 ]; then
-    write_verdict false "dirty-tree" "\"dirtyFiles\":\"$(json_escape "$dirty_files")\",\"clean\":false"
+    write_verdict false "dirty-tree" "\"dirtyFiles\":\"$(json_escape "$dirty_files")\",\"clean\":false,\"evidenceExcluded\":${evidence_excluded}"
     exit 1
   fi
   if ! git cat-file -e "${commit}^{commit}" >/dev/null 2>&1; then
@@ -120,7 +156,7 @@ if [ "$mode" = "commit" ]; then
     write_verdict false "commit-not-ancestor-of-head" "\"commit\":\"$(json_escape "$commit")\",\"clean\":true"
     exit 1
   fi
-  write_verdict true "commit-verified" "\"commit\":\"$(json_escape "$commit")\",\"clean\":true"
+  write_verdict true "commit-verified" "\"commit\":\"$(json_escape "$commit")\",\"clean\":true,\"evidenceExcluded\":${evidence_excluded}"
   exit 0
 fi
 
@@ -149,7 +185,7 @@ if [ -n "$base" ] && [ "$head_sha" = "$base" ]; then
   head_moved="false"
 fi
 
-extra="\"branch\":\"$(json_escape "$branch")\",\"sha\":\"${head_sha}\",\"clean\":true,\"recovered\":${recovered},\"moved\":${moved},\"headMovedFromBase\":${head_moved}"
+extra="\"branch\":\"$(json_escape "$branch")\",\"sha\":\"${head_sha}\",\"clean\":true,\"recovered\":${recovered},\"moved\":${moved},\"headMovedFromBase\":${head_moved},\"evidenceExcluded\":${evidence_excluded}"
 [ -n "$base" ] && extra="${extra},\"baseSha\":\"$(json_escape "$base")\""
 write_verdict true "branch-verified" "$extra"
 exit 0

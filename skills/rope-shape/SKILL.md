@@ -112,10 +112,12 @@ Default handoff: same-session `rope-go`.
 **waves** (topological levels) and **rivers** (clusters with no edge, direct or
 transitive, between them) from the `Blocked by` edges
 ([vocabulary](references/gates-and-vocab.md#frontier-waves-rivers)) — then get the
-numbers from the executor instead of by hand: the go kernel
-compiles a plan without spawning anything (`explain`), so the same code that
-will schedule the run reports **initial ready count, level widths, the longest
-gating chain, and the cross-level preference edges**. Show those numbers with
+numbers from the executor instead of by hand: under dynamic
+execution the shipped go kernel compiles a plan without spawning anything
+(`explain`), so the same code that will schedule the run reports **initial
+ready count, level widths, the longest gating chain, and the cross-level
+preference edges**. Under agent dispatch, derive them from the edges and say
+which numbers are estimates. Show those numbers with
 the serial total: a chain of *n* levels is *n* sequential rounds whatever the
 window is, and a window wider than the chain buys nothing. Then the
 **granularity quiz** (same message, not a new round): any slice too coarse
