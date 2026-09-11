@@ -177,10 +177,10 @@ repair is to stop asking for a re-implementation.
    Branch-level routing replaces text parsing, which is what produced the
    `branch: HEAD` mis-match.
 3. **Preconditions are structural.** L2 is "every planned task integrated **and**
-   the affected suite green" asserted before L3/E2E/review may start; a stage
+   the affected suite green" asserted before L3/review/e2e may start; a stage
    that cannot run is reported `{ran:false, ok:false}` or explicitly
    `skipped:true`, never as passed. `verdict: "delivered"` additionally requires
-   a review that returned `approve`.
+   a review that returned `approve` **and** an e2e stage that is ok.
 4. **Check reuse is part of the contract.** `scripts/run-check.sh` keys evidence
    by `<scope>@<integrated commit set>` and reuses it, so an unchanged state
    cannot spend an expensive command again by accident. Checks run serially per

@@ -91,7 +91,7 @@ its evidence and does not spend the command again.
 - **L2:** every intended input branch is integrated **and** the affected
   integration suite is green. Account for every input with commit/branch
   evidence; a partial merge with green tests fails this dual assertion, and the
-  kernel does not start L3/E2E/review until it holds.
+  kernel does not start L3/review/e2e until it holds.
 - **L3:** each touched composition root in `tasks.md` exercises real assembly,
   one event in, one observable result out. Fake only outer boundaries;
   migrated seams remain real. Shape adds a harness slice if needed.
@@ -109,8 +109,8 @@ Use the host's documented retry contract; on pi, `resume` cannot carry `gate`.
 The kernel freezes only when every slice is integrated, required gates are green
 and no leaf is running. It spawns the two read-only review axes concurrently
 against that HEAD: Standards scanner and Behavior reviewer. Only the Behavior
-reviewer runs the product. It walks the Matrix and E2E; issue-level test
-selection follows execution-rules, not automatic full suites.
+reviewer runs the product. It walks the Matrix; issue-level test selection
+follows execution-rules, not automatic full suites.
 
 It aggregates the worst verdict mechanically and preserves structured findings
 (`severity: blocking|note`, `path:line`, `issue`, `fix`) with both identities.
@@ -118,6 +118,26 @@ Blocking findings become one fresh implementer brief, land through the same
 merge queue, and get a delta-only re-review — at most `fixRounds`. Notes are
 recorded, not repaired by a round. Budget exhausted yields a structured stop
 carrying the remaining findings and the round history.
+
+## The real environment — after the review, and it is repairable
+
+**The kernel walks e2e after the review, not before it.** The read-only review is
+cheap and the real-environment walk is not, so reviewing first means the walk runs
+once, on the commit that will actually be delivered. Running it before the review
+meant a review fix moved the HEAD and the walk's green described a commit that was
+gone.
+
+Only items whose `executor` says the agent runs them are walked. A failed item
+enters the same bounded loop as a review failure: one fix leaf briefed with the
+failing items verbatim, landed through the merge queue, then every declared item
+re-walked (an e2e fix moves the HEAD, so the previous round's green is gone), plus
+a delta re-review of the fix commit — at most `fixRounds`. Budget exhausted stops
+the run with the failure named.
+
+An item Shape kept out of the run (`user`, `not-run`, a declined gate) is recorded
+with its terminal status and does not gate. `blocked_on_user` is an honest outcome
+a run may still deliver with; it is never reported as passed, and a leaf that ran
+and reported `blocked` has not passed either.
 
 After the record returns, the parent updates tasks/map/review records from it;
 missing results remain missing. Do not repeat the review outside the kernel.

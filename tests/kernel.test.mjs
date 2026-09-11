@@ -363,7 +363,12 @@ test("an empty stage is reported as skipped, never as passed, and go without a r
   assert.equal(record.stages.l2.ran, false);
   assert.equal(record.stages.l2.skipped, true);
   assert.equal(record.stages.l2.ok, true, "an empty stage must not block");
-  assert.equal(record.stages.e2e.skipped, true);
+  // The e2e stage sits after the review, so a run whose review was never
+  // declared cannot reach it: it is held up, not skipped. "Held up by a prior
+  // failure" and "declared empty" must not read the same in the record.
+  assert.equal(record.stages.e2e.ran, false);
+  assert.equal(record.stages.e2e.skipped, false);
+  assert.equal(record.stages.e2e.ok, false);
   assert.equal(record.review.verdict, "skipped");
   assert.notEqual(record.verdict, "delivered",
     "a run with no review gate is not a delivered run");

@@ -26,8 +26,8 @@ SubagentWorkflow({
 | Readiness, dispatch order, in-flight window, refill | Which tasks exist and what each one builds |
 | The delivery contract inside every leaf prompt | Each task's brief file contents |
 | Branch identity, merge order, conflict re-dispatch | The declared checks and their commands |
-| Advancing only through a satisfied precondition | Which items the E2E stage covers |
-| Bounded repair rounds, delta re-review | Reading the record and updating issue docs |
+| Advancing only through a satisfied precondition | Which items the E2E stage covers, and each item's `executor`/`decision` |
+| Bounded repair rounds, delta re-review — for review **and** e2e findings | Reading the record and updating issue docs |
 | Never inferring completion from silence | — |
 
 The parent writes no orchestration code and never restates the delivery
@@ -295,11 +295,13 @@ nothing — is a parent-visible signal in the verdict file, not a kernel decisio
   "checks": [ { "id", "stage", "scope", "key", "required", "ok",
                 "verdictFile", "outputFile" } ],
   "stages": { "merge": {…}, "l2": {…}, "l3": {…}, "e2e": {…}, "freeze": {…} },
-  "e2e": [ { "id", "status", "evidence", "detail", "required" } ],
+  "e2e": [ { "id", "status", "evidence", "detail", "required", "executor", "ran" } ],
   "review": { "verdict", "axes": [ { "axis", "verdict", "identity" } ],
               "rounds", "fixes": [ { "round", "branch", "commit", "mergeCommit" } ],
-              "findings", "blockingRemaining" },
-  "concurrency": { "inFlight", "peak" },
+              "findings", "blockingRemaining",
+              "e2eFixes": [ { "round", "branch", "commit", "mergeCommit" } ],
+              "e2eDeltaAxes": [ { "axis", "verdict", "identity" } ] },
+  "concurrency": { "inFlight", "peak", "spawns" },
   "tokens": { "output": 0 },
   "suggestDowngrade": { "reason": "…", "tasks": ["S2"] } | null
 }
@@ -311,13 +313,21 @@ nothing — is a parent-visible signal in the verdict file, not a kernel decisio
   `skipped: true` means the stage was declared empty and does not block; a stage
   held up by a prior failure is never skipped and never ok.
 - **`atSha` is the HEAD the stage's checks actually ran on**, and
-  **`staleAfterFixes: true` means a review fix landed afterwards** — the fix leaf
+  **`staleAfterFixes: true` means a fix landed afterwards** — the fix leaf
   re-ran only the tests covering the paths it touched, so that stage's green says
   nothing about the delivered HEAD. Report both when you record the run; do not
-  write "freeze suite passed" without its SHA.
+  write "freeze suite passed" without its SHA. The `e2e` stage is excluded from
+  the review-fix staleness sweep because it runs *after* the review loop, so it
+  reports the post-fix HEAD; when an e2e fix lands, `review.e2eFixes` names it and
+  the pre-review stages are marked stale.
+- `concurrency.peak` is the run's **real** maximum concurrent spawns — slice
+  leaves, merge agents, gate carriers, e2e items, review axes and fix leaves all
+  count. `spawns` is the run's total. A counter over the dispatch loop alone would
+  report a number far below what the run actually did, and that number is how a
+  reader judges whether the plan was executed in parallel.
 - `verdict` is `delivered` only when **every planned task is `integrated`, no
-  required stage failed, and the review returned `approve`**. Nothing else
-  produces it — an absent review yields `partial`, not `delivered`.
+  required stage failed, the review returned `approve` and the e2e stage is ok**.
+  Nothing else produces it — an absent review yields `partial`, not `delivered`.
 - `checks` carries verdicts and evidence paths, not durations: read the per-check
   JSON beside the output file for `exitCode`, `durationMs` and `reused`.
 - `review.identity` is self-reported by each axis leaf; the host exposes no model
@@ -354,15 +364,35 @@ In order, each advancing only if the previous one is satisfied:
 | `merge` | the cheap post-merge batch ran (never gating) |
 | `l2` | every required `l2` check exited zero |
 | `l3` | every required `l3` check exited zero |
-| `e2e` | every required E2E item reported `passed` |
+| `e2e` | every required E2E item **that the agent ran** reported `passed` |
 | `freeze` | every required `freeze` check exited zero |
 | review | both axes returned; the verdict is the mechanical worst of the two |
-| fix rounds | ≤ `fixRounds` blocking-finding rounds, delta re-review only, then the record stops with the remaining findings |
+| e2e fixes | ≤ `fixRounds` rounds: fix → merge → re-walk every declared item → delta re-review |
+| review fixes | ≤ `fixRounds` blocking-finding rounds, delta re-review only, then the record stops with the remaining findings |
 
 The `l2` row is the audited failure's fence. "Every planned task integrated
 **and** the affected suite green" is asserted by the kernel before anything
 downstream starts, where the failed run returned `l2` as a field and then ran E2E
 anyway with nothing merged.
+
+**The real order is `l2 → l3 → freeze → review (+fix loop) → e2e (+fix loop)`.**
+The table lists the gates in the order they must be satisfied, but `freeze`
+belongs to the review's preconditions and `e2e` belongs after it:
+
+- The read-only review is cheap; the real-environment walk is not. Reviewing
+  first means the expensive walk runs **once**, on the commit that will actually
+  be delivered. An earlier version ran e2e before the review, so a review fix
+  moved the HEAD and the e2e green described a commit that no longer existed —
+  real money spent on evidence that had to be marked `staleAfterFixes`.
+- A failed e2e item therefore enters the **same bounded repair loop as a review
+  failure**: one fix leaf with the failing items verbatim, landed through the
+  merge queue, then every declared item re-walked (an e2e fix moves the HEAD, so
+  a green from the previous round is gone), plus a delta re-review of the fix
+  commit. Exhausting the budget stops the run with the failure named.
+- The e2e stage is reached only on a HEAD the review approved. A review that did
+  not approve holds it up (`ran: false, ok: false, skipped: false`), because the
+  run is undeliverable anyway and walking the real environment first would spend
+  real money on evidence the run cannot use.
 
 ## Stub fidelity (what the offline tests may claim)
 

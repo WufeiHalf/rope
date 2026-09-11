@@ -127,7 +127,7 @@ routing on the host's `pi-agent-*` cleanup branch
 **Check Timetable**:
 The declared schedule that decides when each repository check runs: `merge`
 (cheap post-merge warning, never gating), `l2` (integration gate, asserted
-before L3/E2E/review may start), `l3` (composition-root smokes), `freeze`
+before L3/review/e2e may start), `l3` (composition-root smokes), `freeze`
 (repo policy). Checks run serially, one batch per stage, through
 `scripts/run-check.sh` as the host's gate, so the verdict is an exit code and
 the detail is an evidence file keyed by `<scope>@<integrated commit set>` — an
@@ -138,6 +138,21 @@ must never read as unfinished work.
 The repo declares `Test policy: fast-iteration | full-at-freeze` in `routes.md`.
 _Avoid_: per-slice full suites, periodic reruns without a changed key, gate
 detail relayed through agent prose
+
+**Real-Environment Walk**:
+The e2e stage of dynamic go, and it runs **after** the End-of-Issue Review, not
+before it: the read-only review is cheap and the real-environment walk is not, so
+reviewing first means the walk runs once, on the commit that will actually be
+delivered. Each item carries the `executor` Shape resolved (`agent`,
+`agent-with-gate`, `user`, `not-run`) and is recorded with the terminal status
+verify/finish read. A failed item enters the same bounded repair loop as a review
+failure — fix, land through the merge queue, re-walk every declared item, delta
+re-review — because a fix moves the HEAD and the previous green is gone. Only an
+item the agent actually ran gates; a kept-out item is an honest terminal outcome a
+delivered run may carry.
+_Avoid_: walking the real environment before the code review, reusing a green
+from a superseded HEAD, a leaf declaring its own failed item human-only, a kept-out
+item that vanishes instead of appearing in the record
 
 **Self-Fix Loop**:
 A check/verify pattern (from Trellis) where the verifying model finds a problem and fixes it directly, then reruns checks, looping until green. Not used at issue-level verify in Rope, because verify must not edit code (cross-role separation of implement vs accept).

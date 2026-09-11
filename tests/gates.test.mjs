@@ -192,13 +192,23 @@ test("a failing post-merge warning does not gate: it is an early signal, not a s
   await cleanup(repo.dir);
 });
 
-test("a failing E2E item fences the review and is reported by id", async () => {
+test("e2e runs after the review, on the HEAD the review approved, and a failure gets a fix round", async () => {
   const repo = await fixture("e2e-");
+  let e2eAttempts = 0;
   const host = createStubHost({
     repo: repo.dir,
     replies: Object.assign(approvingReplies(["A"]), {
       "e2e:E1": { id: "E1", status: "passed", evidence: "curl /health → 200", detail: "ok" },
-      "e2e:E2": { id: "E2", status: "failed", evidence: "curl /next?cursor=bogus", detail: "tampered cursor returned page 1" },
+      "e2e:E2": () => {
+        e2eAttempts += 1;
+        return e2eAttempts === 1
+          ? { id: "E2", status: "failed", evidence: "curl /next?cursor=bogus", detail: "tampered cursor returned page 1" }
+          : { id: "E2", status: "passed", evidence: "curl /next?cursor=bogus → 400", detail: "rejected after the fix" };
+      },
+      "e2e-fix:1": { status: "done", branch: "rope/e2e-fix-1", commit: "<sha:e2efix>", summary: "validated the cursor" },
+      "merge:e2e-fix1": {
+        commit: "<sha:e2efix>", mergeCommit: "<sha:e2efix>", headAfter: "<sha:e2efix>", conflict: false, failed: null,
+      },
     }),
   });
 
@@ -213,12 +223,82 @@ test("a failing E2E item fences the review and is reported by id", async () => {
     }),
   });
 
-  assert.equal(record.stages.e2e.ran, true);
+  const labels = host.calls.map((call) => call.label);
+
+  // Order: the read-only review sees the frozen HEAD first, and the expensive
+  // real-environment walk comes after it, so its evidence describes the HEAD
+  // that is actually delivered.
+  assert.ok(labels.indexOf("review:behavior") < labels.indexOf("e2e:E1"),
+    "the review must run before the e2e walk: " + labels.join(" "));
+  assert.equal(record.stages.freeze.skipped, true,
+    "freeze is the last precondition of the review, so it must have been reached (empty here, not blocked)");
+  assert.notEqual(record.review.verdict, "skipped");
+
+  // The failure was repaired rather than fencing the run, and the re-walk
+  // happened on the post-fix HEAD.
+  assert.equal(e2eAttempts, 2, "a failed e2e item must be re-walked after its fix");
+  assert.equal(record.e2e.find((item) => item.id === "E2").status, "agent_passed");
+  assert.equal(record.stages.e2e.ok, true);
+  assert.equal(record.stages.e2e.atSha, record.headSha, "the e2e green must describe the delivered HEAD");
+  assert.equal(record.review.e2eFixes.length, 1);
+  assert.equal(record.verdict, "delivered");
+  await cleanup(repo.dir);
+});
+
+test("an e2e failure that survives its fix rounds stops the run with the failure named", async () => {
+  const repo = await fixture("e2e-stuck-");
+  const host = createStubHost({
+    repo: repo.dir,
+    replies: Object.assign(approvingReplies(["A"]), {
+      "e2e:E1": { id: "E1", status: "failed", evidence: "curl /health → 502", detail: "the service never comes up" },
+      "e2e-fix:1": { status: "done", branch: "rope/e2e-fix-1", commit: "<sha:e2efix1>", summary: "attempt one" },
+      "e2e-fix:2": { status: "done", branch: "rope/e2e-fix-2", commit: "<sha:e2efix2>", summary: "attempt two" },
+      "merge:e2e-fix1": { commit: "<sha:e2efix1>", mergeCommit: "<sha:e2efix1>", headAfter: "<sha:e2efix1>", conflict: false, failed: null },
+      "merge:e2e-fix2": { commit: "<sha:e2efix2>", mergeCommit: "<sha:e2efix2>", headAfter: "<sha:e2efix2>", conflict: false, failed: null },
+    }),
+  });
+
+  const record = await loadTemplate(templatePath(), {
+    globals: host.globals,
+    args: greenPlan({
+      repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
+      e2e: [e2eItem("E1", { prompt: "hit the live health endpoint" })],
+    }),
+  });
+
+  const fixLabels = host.calls.map((call) => call.label).filter((label) => label.startsWith("e2e-fix:"));
+  assert.deepEqual(plain(fixLabels), ["e2e-fix:1", "e2e-fix:2"], "the fix budget is bounded by fixRounds");
   assert.equal(record.stages.e2e.ok, false);
-  assert.match(record.stages.e2e.reason, /E2:agent_failed/);
-  assert.equal(record.e2e.find((item) => item.id === "E1").status, "agent_passed");
-  assert.equal(host.calls.some((call) => call.label === "review:scanner"), false);
+  assert.match(record.stages.e2e.reason, /E1:agent_failed/);
+  assert.ok(record.blockers.some((blocker) => /real-environment walk still fails/.test(blocker.message)));
   assert.notEqual(record.verdict, "delivered");
+  await cleanup(repo.dir);
+});
+
+test("the run record's peak concurrency counts every spawn, not just the slice leaves", async () => {
+  const repo = await fixture("peak-");
+  const host = createStubHost({
+    repo: repo.dir,
+    replies: Object.assign(approvingReplies(["A"]), {
+      "e2e:E1": { id: "E1", status: "passed", evidence: "stub", detail: "stub" },
+      "e2e:E2": { id: "E2", status: "passed", evidence: "stub", detail: "stub" },
+    }),
+  });
+
+  const record = await loadTemplate(templatePath(), {
+    globals: host.globals,
+    args: greenPlan({
+      repo: repo, baseSha: repo.baseSha, tasks: [task("A")], inFlight: 1,
+      e2e: [e2eItem("E1"), e2eItem("E2")],
+    }),
+  });
+
+  // One slice leaf, then two e2e items plus two review axes. A counter that only
+  // watched the dispatch loop would report peak 1 for a run that had four
+  // because the reader uses this number to judge parallelism.
+  assert.ok(record.concurrency.peak >= 2,
+    "peak must include e2e and review spawns, not only the dispatch loop: " + JSON.stringify(record.concurrency));
+  assert.equal(record.concurrency.spawns > record.concurrency.peak, true);
   await cleanup(repo.dir);
 });
 

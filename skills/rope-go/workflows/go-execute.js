@@ -595,7 +595,26 @@ const neverReady = [];
 const checkRecords = [];
 const running = new Map();
 const settled = [];
+
+/**
+ * Every spawn goes through here, so the peak in the record is the run's real
+ * concurrency rather than the dispatch loop's alone. Counting only the slice
+ * leaves would understate a run whose E2E items and review axes are also
+ * running, which is exactly the number a reader uses to judge whether the plan
+ * was executed in parallel.
+ */
+let activeSpawns = 0;
 let peakInFlight = 0;
+let totalSpawns = 0;
+function spawn(prompt, options) {
+  activeSpawns += 1;
+  totalSpawns += 1;
+  if (activeSpawns > peakInFlight) peakInFlight = activeSpawns;
+  return agent(prompt, options).then(
+    (result) => { activeSpawns -= 1; return result; },
+    (error) => { activeSpawns -= 1; throw error; },
+  );
+}
 let headSha = plan.baseSha;
 let e2eResults = [];
 let suggestDowngrade = null;
@@ -715,7 +734,7 @@ function launchTask(task) {
 
   entry.state = "running";
   entry.reason = undefined;
-  const promise = agent(prompt, options)
+  const promise = spawn(prompt, options)
     .then((result) => { settled.push({ task: task, round: round, result: result, threw: null }); })
     .catch((error) => {
       settled.push({
@@ -727,7 +746,6 @@ function launchTask(task) {
     })
     .then(() => { running.delete(task.id); });
   running.set(task.id, { promise: promise });
-  if (running.size > peakInFlight) peakInFlight = running.size;
 }
 
 function parsePayload(result) {
@@ -835,7 +853,7 @@ async function mergeOne(task) {
     return;
   }
 
-  const result = await agent(buildMergePrompt(plan, task.branch, entry.claim), {
+  const result = await spawn(buildMergePrompt(plan, task.branch, entry.claim), {
     label: "merge:" + task.id,
     phase: "Merge",
     schema: MERGE_SCHEMA,
@@ -901,7 +919,7 @@ async function runStageChecks(stage) {
     outPath: plan.evidenceDir + "/" + scopeKey(check.scope) + "/" + check.id + ".out",
     detailPath: plan.evidenceDir + "/" + scopeKey(check.scope) + "/" + check.id + ".json",
   }));
-  const result = await agent(gateCarrierPrompt(stage + " check batch"), {
+  const result = await spawn(gateCarrierPrompt(stage + " check batch"), {
     label: "checks:" + stage,
     phase: "Checks",
     schema: CARRIER_SCHEMA,
@@ -974,7 +992,7 @@ async function runE2e() {
     const thunks = willRun.map((item) => () => {
       const options = { label: "e2e:" + item.id, phase: "E2E", schema: E2E_SCHEMA };
       if (item.preset !== undefined) options.agentType = item.preset;
-      return agent(buildE2ePrompt(plan, item), options);
+      return spawn(buildE2ePrompt(plan, item), options);
     });
     // Items run concurrently by default. A plan declares `e2eSerial` when they
     // contend for one real resource (a bound port, one credentialed account, a
@@ -1030,11 +1048,60 @@ async function runAxis(axis, delta) {
   const config = plan.review[axis];
   const options = { label: "review:" + axis + (delta === undefined ? "" : ":delta"), phase: "Review", schema: AXIS_SCHEMA };
   if (config.preset !== undefined) options.agentType = config.preset;
-  const payload = parsePayload(await agent(buildReviewPrompt(plan, axis, config, delta), options));
+  const payload = parsePayload(await spawn(buildReviewPrompt(plan, axis, config, delta), options));
   if (payload === null) return { axis: axis, verdict: "blocked", identity: "(no usable return)", findings: [] };
   return { axis: axis, verdict: payload.verdict, identity: payload.identity, findings: payload.findings === undefined ? [] : payload.findings };
 }
 
+/**
+ * One bounded repair: spawn the fix leaf in its own worktree, land its branch,
+ * and report the HEAD the run now sits on. Shared by the review fix loop and
+ * the e2e fix loop — the two differ only in what they do afterwards
+ * (delta re-review vs re-walking the real environment).
+ */
+async function deliverFix(args) {
+  const branch = plan.branchPrefix + args.slug + "-" + args.round;
+  const fixOptions = {
+    label: args.label,
+    phase: args.phase,
+    schema: FIX_SCHEMA,
+  };
+  if (plan.mode === "worktree") {
+    fixOptions.isolation = "worktree";
+    fixOptions.gate = shellCommand([
+      "bash", shellQuote(plan.verifyScript),
+      "--verdict", shellQuote(plan.evidenceDir + "/delivery/" + args.slug + "-" + args.round + ".json"),
+      "--branch", shellQuote(branch), "--base", shellQuote(headSha), "--recover-dirty",
+    ]);
+  }
+
+  const fix = parsePayload(await spawn(buildFixPrompt(plan, args.findings, args.round, branch), fixOptions));
+  if (fix === null || fix.status !== "done") {
+    record({ id: null, class: "product", message: args.slug + " fix round " + args.round + " produced no usable fix" });
+    return null;
+  }
+
+  if (plan.mode !== "worktree") {
+    // Shared mode has no branch to land: the leaf committed into the one
+    // checkout, and its claimed SHA is the only routing input available (the
+    // host exposes no commit or branch on a spawn result). The gate verified
+    // the tree at settle time, so the claim is as trustworthy here as it is for
+    // a slice integration.
+    return { branch: plan.targetBranch, commit: fix.commit, mergeCommit: fix.commit, headAfter: fix.commit };
+  }
+
+  const merged = parsePayload(await spawn(buildMergePrompt(plan, branch, fix.commit), {
+    label: args.mergeLabel,
+    phase: "Merge",
+    schema: MERGE_SCHEMA,
+  }));
+  if (merged === null || (merged.failed !== null && merged.failed !== undefined) || typeof merged.headAfter !== "string") {
+    record({ id: null, class: "product", message: args.slug + " fix round " + args.round + " did not merge" });
+    return null;
+  }
+  headSha = merged.headAfter;
+  return { branch: branch, commit: fix.commit, mergeCommit: merged.mergeCommit, headAfter: merged.headAfter };
+}
 async function runReview() {
   if (plan.review === undefined) {
     return { verdict: "skipped", axes: [], rounds: 0, findings: [], reason: "the plan declares no review" };
@@ -1052,42 +1119,20 @@ async function runReview() {
     const blocking = findings.filter((finding) => finding.severity === "blocking");
     if (blocking.length === 0) break;
     rounds += 1;
-    const branch = plan.branchPrefix + "review-fix-" + rounds;
-    const fixOptions = {
+    const fromSha = headSha;
+    const delivered = await deliverFix({
+      findings: blocking,
+      round: rounds,
+      slug: "review-fix",
       label: "fix:" + rounds,
+      mergeLabel: "merge:fix" + rounds,
       phase: "Review",
-      schema: FIX_SCHEMA,
-    };
-    if (plan.mode === "worktree") {
-      fixOptions.isolation = "worktree";
-      fixOptions.gate = shellCommand([
-        "bash", shellQuote(plan.verifyScript),
-        "--verdict", shellQuote(plan.evidenceDir + "/delivery/review-fix-" + rounds + ".json"),
-        "--branch", shellQuote(branch), "--base", shellQuote(headSha), "--recover-dirty",
-      ]);
-    }
-    const fix = parsePayload(await agent(buildFixPrompt(plan, blocking, rounds, branch), fixOptions));
-    if (fix === null || fix.status !== "done") {
-      record({ id: null, class: "product", message: "review fix round " + rounds + " produced no usable fix" });
-      break;
-    }
+    });
+    if (delivered === null) break;
 
-    if (plan.mode === "worktree") {
-      const merged = parsePayload(await agent(buildMergePrompt(plan, branch, fix.commit), {
-        label: "merge:fix" + rounds,
-        phase: "Merge",
-        schema: MERGE_SCHEMA,
-      }));
-      if (merged === null || (merged.failed !== null && merged.failed !== undefined) || typeof merged.headAfter !== "string") {
-        record({ id: null, class: "product", message: "review fix round " + rounds + " did not merge" });
-        break;
-      }
-      delta = { fromSha: headSha, headSha: merged.headAfter };
-      fixes.push({ round: rounds, branch: branch, commit: fix.commit, mergeCommit: merged.mergeCommit });
-      headSha = merged.headAfter;
-    } else {
-      delta = { fromSha: headSha, headSha: headSha };
-    }
+    // Delta-only: the fix commit, not the whole issue diff.
+    delta = { fromSha: fromSha, headSha: delivered.headAfter };
+    fixes.push({ round: rounds, branch: delivered.branch, commit: delivered.commit, mergeCommit: delivered.mergeCommit });
 
     const reAxes = (await parallel([() => runAxis("scanner", delta), () => runAxis("behavior", delta)]))
       .filter((axis) => axis !== null && axis !== undefined);
@@ -1103,6 +1148,49 @@ async function runReview() {
     fixes: fixes,
     findings: findings,
     blockingRemaining: findings.filter((finding) => finding.severity === "blocking").length,
+  };
+}
+
+/**
+ * The e2e stage: every declared item that runs, against the HEAD the review just
+ * approved. It sits after the review on purpose.
+ *
+ * The read-only pass is cheap and clears product problems first, so the expensive
+ * real-environment walk runs once, on the commit that will actually be delivered.
+ * Running it before the review meant a review fix moved the HEAD and the e2e
+ * green described a commit that no longer existed — money spent on evidence that
+ * had to be marked stale, which is the false green ADR 0013 exists to prevent.
+ *
+ * It also makes e2e failure repairable. The first version fenced the review on an
+ * e2e failure and stopped, so a real-environment assertion that failed got zero
+ * fix attempts; research is explicit that e2e failures enter the same bounded
+ * fix/delta-review loop as review failures.
+ */
+async function runE2eStage() {
+  e2eResults = await runE2e();
+  stages.e2e = e2eStageRecord();
+  return stages.e2e;
+}
+
+function e2eStageRecord() {
+  const runnable = e2eResults.filter((item) => item.ran);
+  const requiredE2e = runnable.filter((item) => item.required);
+  const statusLine = e2eResults.map((item) => item.id + ":" + item.status).join(", ");
+  // Only a required item the agent actually ran can gate. An item Shape kept
+  // out of the run is a recorded terminal outcome, not a failure the kernel
+  // can repair — and it is named here so it cannot pass as green.
+  if (e2eResults.length === 0) {
+    return { ran: false, ok: true, skipped: true, reason: "no e2e items declared" };
+  }
+  if (runnable.length === 0) {
+    return { ran: false, ok: true, skipped: true, reason: "no declared e2e item is agent-runnable (" + statusLine + ")" };
+  }
+  return {
+    ran: true,
+    ok: requiredE2e.every((item) => item.status === "agent_passed"),
+    skipped: false,
+    atSha: headSha,
+    reason: statusLine,
   };
 }
 
@@ -1167,7 +1255,6 @@ function blockedByIntegration(stage, integratedCount, plannedCount) {
 if (!everyTaskIntegrated) {
   stages.l2 = blockedByIntegration("l2", integratedCount, plan.tasks.length);
   stages.l3 = blockedByIntegration("l3", integratedCount, plan.tasks.length);
-  stages.e2e = blockedByIntegration("e2e", integratedCount, plan.tasks.length);
   stages.freeze = blockedByIntegration("freeze", integratedCount, plan.tasks.length);
   log("stopping before L2: " + integratedCount + "/" + plan.tasks.length + " tasks integrated");
 } else {
@@ -1185,32 +1272,20 @@ if (!everyTaskIntegrated) {
   }
 
   if (stages.l3.ok) {
-    e2eResults = await runE2e();
-    const runnable = e2eResults.filter((item) => item.ran);
-    const requiredE2e = runnable.filter((item) => item.required);
-    const statusLine = e2eResults.map((item) => item.id + ":" + item.status).join(", ");
-    // Only a required item the agent actually ran can gate. An item Shape kept
-    // out of the run is a recorded terminal outcome, not a failure the kernel
-    // can repair — and it is named here so it cannot pass as green.
-    stages.e2e = e2eResults.length === 0
-      ? { ran: false, ok: true, skipped: true, reason: "no e2e items declared" }
-      : runnable.length === 0
-        ? { ran: false, ok: true, skipped: true, reason: "no declared e2e item is agent-runnable (" + statusLine + ")" }
-        : { ran: true, ok: requiredE2e.every((item) => item.status === "agent_passed"), skipped: false, atSha: headSha, reason: statusLine };
-  } else {
-    stages.e2e = blockedByPriorStage("e2e", "L3");
-  }
-
-  if (stages.e2e.ok) {
     const freeze = await runStageChecks("freeze");
     stages.freeze = freeze.ran ? { ran: true, ok: freeze.ok, skipped: false, atSha: freeze.atSha, reason: freeze.reason } : skippedStage("freeze");
   } else {
-    stages.freeze = blockedByPriorStage("freeze", "the e2e stage");
+    stages.freeze = blockedByPriorStage("freeze", "L3");
   }
 }
 
 const stagesOk = everyTaskIntegrated
-  && [stages.l2, stages.l3, stages.e2e, stages.freeze].every((stage) => stage.ok);
+  && [stages.l2, stages.l3, stages.freeze].every((stage) => stage.ok);
+
+/* ------------------------------------------------------------------ *
+ * Review, then the real environment. Freeze is the last thing the review
+ * sees, so the review's HEAD is the HEAD the e2e stage walks.
+ * ------------------------------------------------------------------ */
 
 const review = stagesOk
   ? await runReview()
@@ -1219,9 +1294,11 @@ const review = stagesOk
 // A review fix changes the product after the staged checks ran, and the fix leaf
 // re-runs only the tests covering the paths it touched. Saying "freeze passed"
 // about a HEAD that no longer exists is the false green ADR 0013 exists to
-// prevent, so the stages that ran before the fixes say so out loud.
+// prevent, so the stages that ran before the fixes say so out loud. The e2e
+// stage is not in this list: it runs *after* the review loop, so it reports the
+// post-fix HEAD rather than a stale one.
 if (review.fixes !== undefined && review.fixes.length > 0) {
-  for (const key of ["merge", "l2", "l3", "e2e", "freeze"]) {
+  for (const key of ["merge", "l2", "l3", "freeze"]) {
     const stage = stages[key];
     if (stage !== undefined && stage.ran === true) stage.staleAfterFixes = true;
   }
@@ -1235,7 +1312,75 @@ if (review.verdict === "changes_requested" || review.verdict === "blocked") {
   });
 }
 
-const delivered = everyTaskIntegrated && stagesOk && review.verdict === "approve";
+// The e2e stage runs only on a HEAD the review approved. A review that never
+// passed leaves the run undeliverable anyway, so walking the real environment
+// first would spend real money on evidence the run cannot use.
+const e2eFixes = [];
+if (!everyTaskIntegrated) {
+  stages.e2e = blockedByIntegration("e2e", integratedCount, plan.tasks.length);
+} else if (!stagesOk) {
+  stages.e2e = blockedByPriorStage("e2e", "a required gate");
+} else if (review.verdict !== "approve") {
+  stages.e2e = blockedByPriorStage("e2e", "the review");
+} else {
+  await runE2eStage();
+
+  // A failed real-environment walk is repairable, exactly like a failed review
+  // axis: brief one fix leaf with the failing items verbatim, land it, then
+  // re-walk every declared item — an e2e fix moves the HEAD, so a green from
+  // the previous round describes a commit that is gone.
+  while (stages.e2e.ran === true && stages.e2e.ok === false && e2eFixes.length < plan.fixRounds) {
+    const round = e2eFixes.length + 1;
+    const failed = e2eResults.filter((item) => item.ran && item.required && item.status === "agent_failed");
+    if (failed.length === 0) break;
+    const fromSha = headSha;
+    const delivered = await deliverFix({
+      findings: failed.map((item) => ({
+        severity: "blocking",
+        path: (item.evidence || "(no evidence reported)"),
+        issue: "e2e " + item.id + " failed against the real environment: " + (item.detail || "(no detail reported)"),
+        fix: "make e2e " + item.id + " pass as specified; do not weaken the walkthrough",
+      })),
+      round: round,
+      slug: "e2e-fix",
+      label: "e2e-fix:" + round,
+      mergeLabel: "merge:e2e-fix" + round,
+      phase: "E2E",
+    });
+    if (delivered === null) break;
+    e2eFixes.push({ round: round, branch: delivered.branch, commit: delivered.commit, mergeCommit: delivered.mergeCommit });
+    await runE2eStage();
+    if (stages.e2e.ran === true) stages.e2e.deltaFrom = fromSha;
+    // The fix changed product code after the review approved, so the review's
+    // approval describes the pre-fix HEAD. A narrow delta review of the fix
+    // commit is what keeps the approval honest.
+    const reAxes = (await parallel([
+      () => runAxis("scanner", { fromSha: fromSha, headSha: headSha }),
+      () => runAxis("behavior", { fromSha: fromSha, headSha: headSha }),
+    ])).filter((axis) => axis !== null && axis !== undefined);
+    review.e2eDeltaAxes = reAxes.map((axis) => ({ axis: axis.axis, verdict: axis.verdict, identity: axis.identity }));
+    review.verdict = worstVerdict([review.verdict].concat(reAxes.map((axis) => axis.verdict)));
+    review.findings = review.findings.concat(reAxes.flatMap((axis) => axis.findings));
+    if (review.verdict !== "approve") break;
+  }
+
+  if (e2eFixes.length > 0) {
+    review.e2eFixes = e2eFixes;
+    for (const key of ["merge", "l2", "l3", "freeze"]) {
+      const stage = stages[key];
+      if (stage !== undefined && stage.ran === true) stage.staleAfterFixes = true;
+    }
+    if (stages.e2e.ok !== true) {
+      record({
+        id: null,
+        class: "product",
+        message: "the real-environment walk still fails after " + e2eFixes.length + " fix round(s): " + stages.e2e.reason,
+      });
+    }
+  }
+}
+
+const delivered = everyTaskIntegrated && stagesOk && review.verdict === "approve" && stages.e2e.ok === true;
 const blockedTaskCount = plan.tasks.filter((task) => state.get(task.id).state === "blocked").length;
 const templateTrouble = blockers.some((blocker) => blocker.class === "environment" || blocker.class === "host-template");
 
@@ -1277,7 +1422,7 @@ return {
   stages: stages,
   e2e: e2eResults,
   review: review,
-  concurrency: { inFlight: plan.inFlight, peak: peakInFlight },
+  concurrency: { inFlight: plan.inFlight, peak: peakInFlight, spawns: totalSpawns },
   tokens: { output: budget.spent() },
   suggestDowngrade: suggestDowngrade,
 };
