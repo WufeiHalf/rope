@@ -142,3 +142,72 @@ script-driven form and exposed four executor-side defects, addressed by the runt
 The end-of-issue review protocol for the dynamic path (freeze point,
 two parallel leaves, in-script fix loop) is retained in the shipped
 reference's end-of-issue section.
+
+## Addendum (2026-09-11): the fixed execution kernel, and why doc-only rules failed
+
+The audited session (`agent-workbench` `legal-retrieval-pagination`;
+diagnosis in `.rope/issues/dynamic-go-session-audit/diagnosis.md`, research in
+`.rope/research/dynamic-go-template-and-parallelism.md`) split go across two
+workflows: a first one carrying S1 alone, a hand-merge by the parent between
+them, then a second for the rest. The stated reason was that the script has no
+shell, so "the script owns serial merges" read as impossible. The consequence
+was measurable: the second script's own branch parser matched the string
+`branch: HEAD` quoted inside a brief instead of the host's delivery footer,
+both concurrent implementers were marked blocked with nothing integrated, and
+L2 and E2E still ran and were returned as **fields** rather than used as
+preconditions. S3b/S4/P1–P3 appear nowhere in the result.
+
+The rule-side conclusion is narrow and worth recording: the documents were not
+wrong about *what* to do, and the executor that ignored them was not evidence
+that the model cannot follow them. **A prose contract that a fresh session must
+re-implement as code will be re-implemented wrong, differently each time.** The
+repair is to stop asking for a re-implementation.
+
+### Decision
+
+1. **The orchestration kernel is a shipped asset**, not per-issue source:
+   `skills/rope-go/workflows/go-execute.js`, invoked by absolute `scriptPath`
+   from the skill's installed directory. The parent compiles **task data** and
+   reads a **run record**; it writes no orchestration code. Schema authority:
+   [`skills/rope-go/references/execution-template.md`](../../skills/rope-go/references/execution-template.md).
+2. **Delivery identity is git-verified, never taken from agent prose.** The
+   leaf commits, leaves a clean tree, and points its predeclared branch at the
+   final commit; the host runs `scripts/verify-delivery.sh` as the spawn's gate
+   inside the worktree *before* cleanup, and the exit code is the verdict.
+   Branch-level routing replaces text parsing, which is what produced the
+   `branch: HEAD` mis-match.
+3. **Preconditions are structural.** L2 is "every planned task integrated **and**
+   the affected suite green" asserted before L3/E2E/review may start; a stage
+   that cannot run is reported `{ran:false, ok:false}` or explicitly
+   `skipped:true`, never as passed. `verdict: "delivered"` additionally requires
+   a review that returned `approve`.
+4. **Check reuse is part of the contract.** `scripts/run-check.sh` keys evidence
+   by `<scope>@<integrated commit set>` and reuses it, so an unchanged state
+   cannot spend an expensive command again by accident. Checks run serially per
+   stage, which is why no exclusive-lane scheduler exists.
+5. **The kernel is offline-tested against its own failure history.** `tests/`
+   reproduces the four audited defect classes (branch identity, missing
+   downstream read as completion, false L2, per-slice full suites) with a stub
+   host whose behaviours cite the installed extension source, so a host
+   contract change surfaces as a test failure instead of a silent divergence.
+6. **A single-file kernel is an accepted cost.** The workflow sandbox forbids
+   `import`, so the kernel cannot be modularized and two slices that both edit
+   it must serialize. This is not a re-introduced wave barrier; it is disclosed
+   in the issue graph and in `execution-template.md`.
+7. **No schema-version gate** (user decision). A plan compiled against a
+   different kernel shape fails silently rather than loudly; the accepted
+   mitigation is that `explain` validates the plan and the run record names what
+   it did at every stage. This is recorded as an accepted risk, not an oversight.
+
+### Consequences
+
+- The parent session's per-issue token cost drops by the size of the script it
+  no longer writes, and the class of defect it can introduce drops with it.
+- Capability fixes now land in one artifact. A kernel bug affects every issue
+  until fixed — which is why the offline suite is a prerequisite for shipping
+  it, not a nicety.
+- Kernel changes are serialized edits: two concurrent slices cannot both own
+  `go-execute.js`.
+- `rope add` already copies skill subdirectories recursively, so
+  `workflows/` and `scripts/` install with no installer change and stay
+  version-locked to the skill.

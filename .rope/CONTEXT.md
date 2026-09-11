@@ -45,9 +45,9 @@ without identity
 **End-of-Issue Review**:
 The single review gate after all slices (ADR 0007, mechanics refined by
 0010): **two parallel read-only leaves with new eyes**, spawned in one
-message — under workflow execution, in-script at a **freeze point**
+message — under workflow execution, inside the kernel at a **freeze point**
 (every slice merged, tree clean, no leaf running), fix loop ≤2 rounds
-with delta re-review inside the script (dynamic-workflow-mode spec). The **Standards scanner** (explore-class preset, cheap model)
+with delta re-review. The **Standards scanner** (explore-class preset, cheap model)
 runs lint/typecheck first, then judgement-call-scans the assembled diff
 for repo conventions, TDD anti-patterns, the smell baseline, and inline
 global invariants — never runs the product. The **Behavior reviewer**
@@ -80,8 +80,9 @@ architecture-continuity judgment out of the Behavior reviewer
 The post-0007/0008/0009 execution model. Shape slices tracer-bullet style
 (blocking edges + fresh-context fit are the hard rules; component and
 prefactor slices legal; vertical path-per-slice is a habit, not a rule). Shape reads the slice graph after
-slicing — rivers, fresh-context size fit — and asks one execution question
-with numbers. Go's default intent is maximum concurrency in either mode (every ready
+slicing — the executor's own compile pass reports initial ready count, level
+widths and the longest gating chain — and asks one execution question
+with those numbers. Go's default intent is maximum concurrency in either mode (every ready
 slice gets a background leaf; serialization needs a recorded reason;
 startup declares planned vs max parallelism). It picks a mode from host
 capability: **worktree mode**
@@ -89,12 +90,51 @@ capability: **worktree mode**
 merged (file-overlap edges are merge-order preferences under this mode), one worktree
 per leaf, serial merge queue, repo-declared `worktree-setup:` contract in
 `routes.md`, parent owns `map.md` updates) or **shared mode** (waves,
-disjoint owned files per wave, leaves maintain the map). No `mode:` or
+disjoint owned files per wave, leaves maintain the map; the kernel serializes
+to one leaf at a time because there is one index and one checkout). No `mode:` or
 `review:` frontmatter; legacy packages that carry them are ignored.
 Re-cutting that bends the requirement goes back to grill.
 _Avoid_: wave barriers in worktree mode, asking serial-or-parallel before
 the graph exists, merging in parallel, per-merge test rituals, leaves
 writing the shared map concurrently
+
+**Execution Kernel**:
+The shipped orchestration asset for dynamic go
+(`skills/rope-go/workflows/go-execute.js`, ADR 0014 addendum 2026-09-11):
+one fixed, offline-tested JavaScript file that owns readiness dispatch,
+frontier refill, the in-flight window, serial merges, staged preconditions,
+bounded repair rounds and the in-run review. The parent session compiles
+**task data** into it and reads a **run record** back; it writes no
+orchestration code and never restates the delivery contract. Invoked by
+absolute `scriptPath` resolved from the skill's installed directory, because
+a non-absolute path resolves against the repository. Schema authority:
+[`execution-template.md`](../skills/rope-go/references/execution-template.md).
+_Avoid_: per-issue script authorship, orchestrating from the parent between
+runs, mistaking a shipped kernel for example code to edit
+
+**Delivery Branch**:
+The predeclared, plan-derived branch (`branchPrefix + task id`) a worktree leaf
+points at its own final commit as the last write before returning. It is the
+only routing input the executor reads: `scripts/verify-delivery.sh` runs as the
+spawn's gate inside the worktree before cleanup and asserts the branch exists,
+resolves to the tree's HEAD, and that the tree is clean — creating or moving the
+branch and committing leftovers when needed, and reporting `moved`/`recovered`.
+The merge agent establishes the SHA from git, so a leaf's claimed SHA is never
+trusted. This replaces parsing branch names out of agent text.
+_Avoid_: reading a branch name from a leaf's prose, trusting a claimed SHA,
+routing on the host's `pi-agent-*` cleanup branch
+
+**Check Timetable**:
+The declared schedule that decides when each repository check runs: `merge`
+(cheap post-merge warning, never gating), `l2` (integration gate, asserted
+before L3/E2E/review may start), `l3` (composition-root smokes), `freeze`
+(repo policy). Checks run serially, one batch per stage, through
+`scripts/run-check.sh` as the host's gate, so the verdict is an exit code and
+the detail is an evidence file keyed by `<scope>@<integrated commit set>` — an
+unchanged state reuses its evidence instead of spending the command again.
+The repo declares `Test policy: fast-iteration | full-at-freeze` in `routes.md`.
+_Avoid_: per-slice full suites, periodic reruns without a changed key, gate
+detail relayed through agent prose
 
 **Self-Fix Loop**:
 A check/verify pattern (from Trellis) where the verifying model finds a problem and fixes it directly, then reruns checks, looping until green. Not used at issue-level verify in Rope, because verify must not edit code (cross-role separation of implement vs accept).

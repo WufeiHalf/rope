@@ -46,3 +46,43 @@ suites by phase rather than impact. A phase is not evidence of a dependency.
   override repository policy to save time.
 - No cache service or test-selection runtime is introduced. Repo commands and
   the accepted behavior remain the inputs to agent judgment.
+
+## Addendum (2026-09-11): the check timetable, evidence reuse, and the repo policy field
+
+ADR 0013's selection rules were correct and were still violated in practice for
+a mechanical reason: nothing carried them into execution. The first production
+dynamic run spent ~11 full-suite executions (~38 of 73 minutes), and the
+audited follow-up ran its integration gate on a checkout with **nothing merged**.
+Both are now executor mechanism rather than advice.
+
+### Decision
+
+1. **Checks are declared data with a stage**, not prose in a script:
+   `merge` (cheap post-merge warning), `l2`, `l3`, `freeze`. The parent compiles
+   them from `routes.md`'s `Test tiers` and the repo's policy; the kernel runs
+   each stage's batch through `scripts/run-check.sh` as the host's gate, so the
+   verdict is an exit code rather than an agent's report.
+2. **Reuse is keyed**, by `<scope>@<integrated commit set>`. An unchanged state
+   finds its evidence file and does not spend the command again; changed scope
+   or a new commit invalidates it. `stage: "merge"` checks are the one batch
+   that overlaps running leaves and are therefore declared cheap by contract.
+3. **`routes.md` gains `Test policy:`** — the repository's own declaration of
+   `fast-iteration` (impact-selected only) or `full-at-freeze` (this repo
+   requires its full suite at the freeze point). It is the repo's statement, not
+   a judgement call at go; an absent line is legal and the impact ladder decides.
+   Shape records the value in Testing Decisions.
+4. **Missing evidence is never backfilled by the parent.** A gate's detail lives
+   in the evidence file beside its output; the parent reads it, and a missing
+   slice evidence item bounces the leaf (ADR 0011 Return Gate), unchanged.
+
+### Consequences
+
+- "Full is a scope, not a frequency" is now enforced by an artifact rather than
+  remembered by a session: a repeated expensive command requires deleting
+  evidence or changing the key.
+- Evidence living outside the working tree (`.git/rope-evidence/`) keeps the
+  tree clean, which is what makes the delivery gate's clean-tree assertion
+  meaningful; an untracked in-tree evidence directory would read as a dirty
+  delivery.
+- A check that only a human can run stays out of `checks` and stays visible in
+  E2E as `blocked_on_user`.

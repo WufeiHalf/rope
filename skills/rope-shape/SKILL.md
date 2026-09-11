@@ -36,7 +36,11 @@ Default handoff: same-session `rope-go`.
    **Test-tiers check (ADR 0013):** if `routes.md` has no `Test tiers:`
    line, derive one now per the go execution-rules contract (fixed
    criteria, timed budget) and write it back with the derivation
-   note — zero-human; existing repos join here like worktree-setup.
+   note — zero-human; existing repos join here like worktree-setup. Beside
+   it, record the repo's **broader-suite policy** (`Test policy: fast-iteration`
+   = impact-selected only, or `full-at-freeze` = the repo requires its full
+   suite at the freeze point). It is the repository's declaration, not a
+   judgement call at go; missing is legal and means the ladder decides.
    **Execution-mode probe (ADR 0012):** verify whether this harness can
    spawn an isolated (worktree) subagent, and record the result in the
    `tasks.md` header as `Execution mode: worktree` | `shared` (one line on
@@ -104,16 +108,22 @@ Default handoff: same-session `rope-go`.
    only at the outer boundary). Harness missing ⇒ a harness slice is cut
    first (Wave 1); harness exists ⇒ the line cites it. E4-style user walks
    demote to final spot-check once L3 rows exist.
-9. **Read the graph, then quiz granularity, then ask one question.** From
-   `Blocked by` edges derive **waves** (topological levels) and **rivers**
-   (slice clusters with no edge, direct or transitive, between them). Show the
-   graph with numbers: serial total vs longest river, wave count, size
-   violations already re-cut, initial ready count and maximum graph width
-   separately (using mode-effective blocking edges). **Granularity
-   quiz** (same message, not a new round): any slice too coarse (won't fit a
-   window) or too fine (trivial grouping lost)? Are the blocking edges real
-   per their Edge Classification? Merge or split? **Then** exactly one
-   execution question:
+9. **Read the graph, then quiz granularity, then ask one question.** Derive
+**waves** (topological levels) and **rivers** (clusters with no edge, direct or
+transitive, between them) from the `Blocked by` edges
+([vocabulary](references/gates-and-vocab.md#frontier-waves-rivers)) — then get the
+numbers from the executor instead of by hand: the go kernel
+compiles a plan without spawning anything (`explain`), so the same code that
+will schedule the run reports **initial ready count, level widths, the longest
+gating chain, and the cross-level preference edges**. Show those numbers with
+the serial total: a chain of *n* levels is *n* sequential rounds whatever the
+window is, and a window wider than the chain buys nothing. Then the
+**granularity quiz** (same message, not a new round): any slice too coarse
+(won't fit a window) or too fine (trivial grouping lost)? Are the blocking
+edges real per their Edge Classification? A `seam-required` edge that does not
+carry a consumed contract is a shape defect, not caution — cutting a thin
+interface slice or narrowing the consumer's dependency is the fix. Merge or
+split? **Then** exactly one execution question:
     - two or more rivers ⇒ offer the **split** — each river its own issue, its
       own pipeline, deliverable alone — or one issue with the rivers running in
       parallel;

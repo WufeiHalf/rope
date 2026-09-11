@@ -46,6 +46,7 @@
 - Prior art (optional): <paths or patterns of similar tests in-repo>
 - Test scope: <affected modules/consumers, selected commands, excluded suites and reasons>
 - Broader-suite trigger: <impact/uncertainty/repo requirement, or none; apply [test selection](../../rope-go/references/execution-rules.md#test-tiers--baseline-ladder-repo-contract-adr-0013)>
+- Repo suite policy: <`fast-iteration` | `full-at-freeze` — copied from `routes.md`'s `Test policy:` line; say `undeclared` when the repo has none, and the impact ladder decides>
 
 ## Behavior Contract
 
@@ -114,6 +115,12 @@
 # <Issue Title> Tasks
 
 Execution mode: worktree | shared   # probed at shape (ADR 0012); go consumes, may degrade with recorded reason
+
+## Graph summary
+
+<Report what the executor compiled, not hand arithmetic: initial ready count,
+level widths, longest gating chain, and the cross-level preference edges. A
+chain of n levels is n sequential rounds whatever the window is.>
 
 ## Behavior Matrix (issue behavior spec — BDD)
 

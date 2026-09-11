@@ -37,7 +37,11 @@ Rules:
 
 ## Merge queue (worktree mode)
 
-Landed branches merge **serially, one at a time**, in landing order:
+Under dynamic execution the **kernel** owns this queue; the parent reads the
+`merged` rows out of the run record. Under agent dispatch the parent runs it.
+Either way the rules are the same: landed branches merge **serially, one at a
+time**, in landing order, and the parent never merges while a leaf is running
+that could touch the same paths.
 
 1. Merge one branch; conflict → re-dispatch **one** implementer leaf with
    both branch names and conflicting paths, resolving **on the unmerged
@@ -151,14 +155,19 @@ command blocks excluded). The parent checks the budget before dispatch.
   after minimal implementation — focused seam commands by default; a
   full-suite run is issue-level evidence (ADR 0013), never a brief
   requirement
-- Expected return shape: summary, paths changed, commit hash (or branch
-  name in worktree mode), acceptance text exercised, red evidence
+- Expected return shape: summary, paths changed, delivery branch + the commit
+  hash printed by `git rev-parse HEAD`, acceptance text exercised, red evidence
   (command + failure) unless waived, green evidence, constraint IDs
   checked + disposition conflicts, falsified/needed map lines (worktree
-  mode), blockers, one setup line in worktree mode (`setup: ran <cmd>` |
-  `setup: no-op`) — **plus the Return Gate payload:** every slice
-  Required-evidence item mapped to pasted command output or an artifact
-  path, keyed by evidence id (ADR 0011)
+  mode), blockers with a class, one setup line in worktree mode
+  (`setup: ran <cmd>` | `setup: no-op`) — **plus the Return Gate payload:**
+  every slice Required-evidence item mapped to pasted command output or an
+  artifact path, keyed by evidence id (ADR 0011)
+- Worktree mode also stated to the leaf: the kernel's delivery contract is
+  injected by the executor, not written by the parent — commit everything,
+  leave `git status --porcelain` empty, then `git branch -f <delivery branch>
+  HEAD` as the last write. A leaf that misses a step costs a flag
+  (`recovered` / `moved` in the delivery verdict), never the implementation.
 - Relevant artifact paths (prd/tasks/e2e, bundle, map, specs, files)
 - Map path — orient by it; update falsified lines before commit (shared
   mode) or report them in the summary (worktree mode)
@@ -213,16 +222,15 @@ Each entry: affected slices / exact authorization requested / blast radius /
 other lanes' continue-or-hold status. Never present gates one-at-a-time while
 other lanes sit idle without an explicit hold statement.
 
-## End-of-Issue Review Execution (parent-owned)
+## End-of-Issue Review Execution
 
-After all slices and before verify, the parent spawns **two read-only
-leaves in one message** (ADR 0010) — both new eyes, never watched the
-build. Under workflow execution (ADR 0014) this gate runs **inside the
-script at its freeze point** — same two leaves, same mechanical
-aggregation, plus the in-script fix loop with delta re-review
-([dynamic workflow](dynamic-workflow.md#end-of-issue-review--inside-the-script)); the
-parent does bookkeeping from the structured return and renders an
-exhausted fix budget as the Human Escalation Stop:
+After all slices and before verify. Under dynamic execution the **kernel** owns
+this gate (ADR 0014) — freeze point, both axes, mechanical aggregation and the
+bounded fix loop — and the parent only reads the record. Under agent dispatch
+the parent runs it: spawns **two read-only leaves in one message** (ADR 0010),
+both new eyes, never watched the build, then does bookkeeping from the
+structured return and renders an exhausted fix budget as the Human Escalation
+Stop:
 
 1. **Scanner leaf** — the `rope-explore` preset with the Standards brief
    below (generic read-only worker otherwise; record the type used).

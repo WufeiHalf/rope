@@ -20,8 +20,9 @@ Code TDD: [red→green playbook](references/tdd.md).
 1. Before baseline or dispatch, read **Startup** in the installed
    [dynamic workflow reference](references/dynamic-workflow.md). Reuse the
    session's execution form or resolve config + host capability on direct
-   entry. Under `dynamic`, read **Go**, **Mechanical gates**, and
-   **End-of-issue review** there before authoring the workflow.
+   entry. Under `dynamic`, also read the
+   [execution template contract](references/execution-template.md) — the plan
+   schema, the run record, and the host limits the plan must live inside.
 2. Load Behavior Contract, Testing Decisions, Architecture Impact, Constraint
    Bundle index, slice statuses, and E2E. Deep-read details on dispatch.
 3. Check git status; resolve unrelated dirty work before proceeding. Select
@@ -35,9 +36,13 @@ Code TDD: [red→green playbook](references/tdd.md).
 
 ## Execute by resolved form
 
-**Dynamic:** the linked workflow contract owns compilation, frontier refill,
-merge gates, fixes, and in-script review. After its structured return, update
-records from evidence and proceed to verify only if its review passed.
+**Dynamic:** compile task data from the approved `tasks.md` and invoke the
+shipped kernel — `skills/rope-go/workflows/go-execute.js`, by **absolute
+`scriptPath` resolved from this skill's installed directory**. You write
+briefs, checks and the evidence table; the kernel writes the delivery
+contract, dispatches, merges, gates, reviews and fixes. Ask for
+`explain: true` first when the graph is new. After the structured return,
+update the issue records from it and hand off to verify only on `delivered`.
 
 **Agent dispatch:** use the following slice loop and final review.
 
@@ -82,7 +87,7 @@ Worktree mode: leaves return corrections; the parent writes after merging.
    a Human Escalation Stop. Record verdict and fix history.
 4. Hand off to `rope-verify` for paperwork after a passing review; finish
    follows verify PASS. Dynamic execution already performed this review
-   inside its script and does not run it again here.
+   inside its kernel and does not run it again here.
 
 ## Stop / report
 

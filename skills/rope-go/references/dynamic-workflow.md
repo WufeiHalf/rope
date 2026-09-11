@@ -51,26 +51,29 @@ and why; slicing more finely must buy a real independent delivery.
 ## Go — compile and execute
 
 Read [execution-rules.md](execution-rules.md) for test scope, setup, briefs,
-return reconciliation, and the two-axis review contract before compiling.
+return reconciliation, and the two-axis review contract. The plan schema, the
+run record and the host limits live in
+[execution-template.md](execution-template.md) — read that contract before
+compiling, not after a failure.
 
-- Compile `tasks.md` into a host workflow script. The script owns dispatch,
-  serial merges, mechanical gates, and bounded fix rounds; leaves own code
-  and judgment. Leaves receive self-contained briefs and never spawn leaves.
-- Refill the ready frontier after each merge, without worktree wave barriers.
-  Shared execution uses disjoint-file waves. Preset-based implementers use
-  isolated worktrees when supported; retain the ≤60-line brief budget.
-- Inject step 0: the repo's `routes.md` worktree setup, check-first and
-  idempotent. Require a returned setup result; environment failure is a
-  blocker, not a code fix round.
+- Compile task data from `tasks.md` and invoke the shipped kernel at
+  `workflows/go-execute.js` by absolute `scriptPath`. The kernel owns dispatch,
+  serial merges, mechanical gates, bounded repair rounds and the in-run review;
+  leaves own code and judgment. Leaves receive self-contained briefs and never
+  spawn leaves.
+- The kernel refills the ready frontier after each merge, without worktree wave
+  barriers. Shared execution serializes to one leaf at a time (one index, one
+  checkout); preset-based implementers run in isolated worktrees.
+- Inject step 0 into the plan as `setupCommand`: the repo's `routes.md` worktree
+  setup, check-first and idempotent. The kernel puts it in every leaf prompt
+  unconditionally; environment failure is a blocker, not a code fix round.
 - Validate briefed test commands/paths against the repo before dispatch.
   Missing commands or evidence return as blocked/missing. A replacement
   requires an explicit parent correction preserving the same acceptance;
   changed acceptance returns to shape. A leaf's substitute is not proof.
-- The integrator merges serially and owns shared ledger updates from leaf
-  evidence rows. Concurrent leaves never edit the shared map. Mechanical
-  conflicts resolve on the unmerged branch or return a blocker; unresolved
-  inputs remain unmerged. Other independent lanes may continue, but the
-  batch cannot pass and consumers of the blocked seam wait.
+- The merge queue is the kernel's: serial, one branch at a time, in landing
+  order, with conflict resolution on the unmerged slice's intent. The parent
+  updates the shared ledger from the record afterwards, never concurrently.
 
 ## Mechanical gates
 
@@ -78,10 +81,17 @@ Gate commands live in repo files, not inline shell embedded in workflow JS.
 Save command output and exit status, then assert both. A pipeline's final
 command succeeding does not establish the test command's success.
 
-- **L1:** leaf-focused seam tests and required evidence only.
+The kernel runs each stage's declared checks through `scripts/run-check.sh` as
+the host's gate, so the verdict is an exit code rather than an agent's report.
+Reuse is keyed by `<scope>@<integrated commit set>`: an unchanged state finds
+its evidence and does not spend the command again.
+
+- **L1:** leaf-focused seam tests and required evidence only, described in the
+  brief.
 - **L2:** every intended input branch is integrated **and** the affected
   integration suite is green. Account for every input with commit/branch
-  evidence; a partial merge with green tests fails this dual assertion.
+  evidence; a partial merge with green tests fails this dual assertion, and the
+  kernel does not start L3/E2E/review until it holds.
 - **L3:** each touched composition root in `tasks.md` exercises real assembly,
   one event in, one observable result out. Fake only outer boundaries;
   migrated seams remain real. Shape adds a harness slice if needed.
@@ -94,21 +104,22 @@ held/continuing lanes. Code repairs get fresh implementers, at most two
 rounds per problem; exhausted or contract-changing failures stop for a human.
 Use the host's documented retry contract; on pi, `resume` cannot carry `gate`.
 
-## End-of-issue review — inside the script
+## End-of-issue review — inside the kernel
 
-Freeze only when every slice is integrated, required gates are green, the
-tree is clean, and no leaf is running. Spawn the two read-only review axes
-concurrently against that HEAD: Standards scanner and Behavior reviewer.
-Only the Behavior reviewer runs the product. It walks the Matrix and E2E;
-issue-level test selection follows execution-rules, not automatic full suites.
+The kernel freezes only when every slice is integrated, required gates are green
+and no leaf is running. It spawns the two read-only review axes concurrently
+against that HEAD: Standards scanner and Behavior reviewer. Only the Behavior
+reviewer runs the product. It walks the Matrix and E2E; issue-level test
+selection follows execution-rules, not automatic full suites.
 
-Aggregate the worst verdict mechanically. Preserve structured findings
-(`severity: blocking|note`, `path:line`, `issue`, `fix`) and both identities.
-Blocking findings → one fresh implementer brief → delta-only re-review,
-at most two fix rounds. Notes are recorded, not repaired by a round.
-Budget exhausted → structured stop with remaining findings and round history.
+It aggregates the worst verdict mechanically and preserves structured findings
+(`severity: blocking|note`, `path:line`, `issue`, `fix`) with both identities.
+Blocking findings become one fresh implementer brief, land through the same
+merge queue, and get a delta-only re-review — at most `fixRounds`. Notes are
+recorded, not repaired by a round. Budget exhausted yields a structured stop
+carrying the remaining findings and the round history.
 
-After the script returns, the parent updates tasks/map/review records from
-its evidence; missing results remain missing. Do not repeat the review outside
-the script. Use host-supported monitoring/resume; verify capability before
-headless execution rather than assuming interactive success proves it.
+After the record returns, the parent updates tasks/map/review records from it;
+missing results remain missing. Do not repeat the review outside the kernel.
+Use host-supported monitoring/resume; verify capability before headless
+execution rather than assuming interactive success proves it.
