@@ -28,7 +28,7 @@ evidence-based.
 - Worktree setup: host-managed — 纯 Markdown 规则仓 + 零依赖 Node 测试，`node --test`
   在 fresh worktree 里直接可跑，无需安装。叶子在 fresh worktree 的验证 = 该切片
   的聚焦测试（通常是 `node --test tests/<file>.test.mjs`）加结构检查。
-- Test tiers: quick: `node --test tests/*.test.mjs`（~2s，30 用例，2026-09-11 实测）；
+- Test tiers: quick: `node --test tests/*.test.mjs`（~2.3s，38 用例，2026-09-11 实测）；
   full 未单独定义 —— 本仓无更大型套件，quick 即全部。派生于 shape 2026-09-11
   （routes Test roots 改为 `tests/`）。
 - Evidence: `.rope/issues/<slug>/evidence/` — 内核与 gate 的证据目录，位于工作树内，

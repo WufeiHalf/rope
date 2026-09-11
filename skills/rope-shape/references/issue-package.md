@@ -45,6 +45,7 @@
 - Seams under test: <list confirmed with user during shape; when placement is contested, argue it with [seam-design.md](seam-design.md)>
 - Prior art (optional): <paths or patterns of similar tests in-repo>
 - Test scope: <affected modules/consumers, selected commands, excluded suites and reasons>
+- Contract sweep (only when the issue retires or re-keys a contract): <the vocabulary grepped across the test tree, the files it hit, and which hits are migrated in-issue versus named out of scope with a reason>
 - Broader-suite trigger: <impact/uncertainty/repo requirement, or none; apply [test selection](../../rope-go/references/execution-rules.md#test-tiers--baseline-ladder-repo-contract-adr-0013)>
 - Repo suite policy: <`fast-iteration` | `full-at-freeze` — copied from `routes.md`'s `Test policy:` line; say `undeclared` when the repo has none, and the impact ladder decides>
 

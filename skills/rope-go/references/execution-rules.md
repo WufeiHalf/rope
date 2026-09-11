@@ -100,7 +100,10 @@ that could touch the same paths.
 
 ```md
 - Test tiers: quick: `<cmd>` (~Ns, measured)   # guards + entrypoint smoke + pure units
-               full:  `<cmd>`
+               full:  `<cmd>` (~Ns, measured)   # regression net, not an iteration tool
+               report: `<full cmd> 2>&1 | tee <log> | grep -E '<failure|tally>'`
+                       # one run prints the failure names plus the tally and
+                       # saves everything; see One run, below
 ```
 
 - **Impact selection:** shape's Testing Decisions names affected modules,
@@ -110,13 +113,31 @@ that could touch the same paths.
   Expand to broader suites for shared infrastructure, uncertain impact,
   evidence of cross-module coupling, or an explicit repository requirement.
   A local failure is diagnosed before using it to justify a global rerun.
+  - **Contract sweep.** The affected set follows what the change *breaks*,
+    not what it *touches*. When a slice retires, reverses, renames, or
+    re-keys a contract — prompt text, enum or status value, field or
+    parameter name, error string, menu entry, response shape — the
+    assertions that pin it usually live in files the slice never opens:
+    tests exercise public interfaces and rarely import the symbol being
+    deleted, so grepping for that symbol returns near zero. Grep the test
+    tree for the contract's own vocabulary instead (the literal string, the
+    old value, the removed field). Every hit is migrated in this slice or
+    named out of scope with a reason. A hand-picked file list is not a
+    sweep.
 - **Baseline ladder** (go startup): reuse same-HEAD green evidence (CI or
   recorded run ≤24h) that covers the selected scope and relevant environment;
   otherwise run the declared quick tier or affected tests. Broader suites
   are an issue-level fallback only with one of the impact reasons above.
   Record the selected scope, command, reason, and reused/run evidence in
-  existing Testing Decisions/work records. Save output and exit status once;
-  parse saved evidence instead of rerunning to recover it.
+  existing Testing Decisions/work records.
+- **One run shows the failures.** Every command used as evidence writes its
+  full output to a file and prints the failing item names plus the tally in
+  that same invocation. Three projections of one command means running it
+  once and reading the file three ways — never three runs. Keep the exit
+  status intact through the capture: a bare `cmd | tee log | grep …`
+  pipeline reports the grep's status and silently turns a red suite green,
+  so `set -o pipefail` first. Recover a stack trace by grepping the saved
+  file, never by rerunning the command.
 - **Full is a scope, not a frequency.** Baseline and final review are
   decision points, not two mandatory full-suite executions. Scope-green
   proves only that scope. Backend-only local changes do not automatically
