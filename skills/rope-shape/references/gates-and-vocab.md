@@ -19,6 +19,12 @@ file inspection), never frozen at shape:
   `unreachable` ⇒ **user** — the durable human classes.
 - out of scope ⇒ `not-run` with reason + user-accepted waiver.
 
+The four executor values and the gate decision are what go compiles into the
+plan as `executor` + `decision` (execution-template.md, `E2eItem`). Write both,
+and a `reason` for anything that will not run — the kernel rejects an
+`agent-with-gate` item with no recorded approval rather than running it, and
+records a kept-out item by its decision instead of dropping it.
+
 E2E items carry **real-environment behaviors only** (real APIs, real entrypoints, real data). Ticket-level unit validation lives in TDD evidence and never appears as an E2E item — no `covered_by_slice` bookkeeping: if it would be `covered_by_slice`, it does not belong in e2e.md at all.
 
 ## Gate Approval Rules

@@ -323,6 +323,19 @@ covered mechanism as agent. A user handing an item over mid-go
 (“你自己跑吧”) is the probe firing late — run it and record it as agent
 execution with evidence, never as an exception.
 
+**The resolution is written into the plan before dispatch.** The kernel runs
+no probe and asks no human, so each e2e item carries `executor`
+(`agent` | `agent-with-gate` | `user` | `not-run`) plus its `decision`, and the
+plan is rejected when the two disagree — a gated action cannot start without a
+recorded `approved`. An item that runs must name its `preset`. An item that
+does not run must carry the `reason` it does not, and is recorded with its
+terminal status rather than dropped: a skipped item and a missing item must not
+look the same in the record.
+
+Only an item the agent actually ran gates. A required item kept out of the run
+(`user`, `not-run`, a declined gate) is an honest terminal outcome the run may
+still deliver with; a leaf that *ran* and reported `blocked` has not passed.
+
 - `agent_passed`: agent ran it; record command + evidence.
 - `agent_failed`: ran and failed; fix or record blocker.
 - `blocked_on_gate` / `blocked_on_user`: missing approval / human-only

@@ -29,6 +29,18 @@ export function task(id, overrides = {}) {
 }
 
 /**
+ * An e2e item the agent will run. `preset` is not optional for a running item:
+ * the kernel refuses a plan that would silently drift onto the host default.
+ */
+export function e2eItem(id, overrides = {}) {
+  return Object.assign({
+    id: id,
+    prompt: "Walk " + id + " against the real environment.",
+    preset: "rope-reviewer",
+  }, overrides);
+}
+
+/**
  * A plan whose every stage is declared and passes, and whose review approves.
  * Pass `review: null` to declare no review at all — the kernel must then record
  * a skip rather than a pass.

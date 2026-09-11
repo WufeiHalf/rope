@@ -27,7 +27,15 @@ const EDGE_KEYS = ["id", "class"];
 const EDGE_CLASSES = ["seam-required", "file-overlap", "methodology-order"];
 const CHECK_KEYS = ["id", "stage", "command", "scope", "required", "cwd"];
 const CHECK_STAGES = ["merge", "l2", "l3", "freeze"];
-const E2E_KEYS = ["id", "prompt", "preset", "required"];
+const E2E_KEYS = ["id", "prompt", "preset", "required", "executor", "decision", "reason"];
+// The Shape vocabulary (gates-and-vocab.md) reaches the plan through these two
+// fields. `executor` says who can run the item; `decision` says what was decided
+// about it at shape. The kernel cannot probe the harness tool surface or ask a
+// human mid-run, so the resolution happens once, in the parent, and the plan is
+// the record of it. An item whose executor is `agent` runs; every other terminal
+// outcome is recorded, never spawned.
+const E2E_EXECUTORS = ["agent", "agent-with-gate", "user", "not-run"];
+const E2E_DECISIONS = ["not-required", "approved", "skipped", "user-run", "blocked", "not-run-waived"];
 const REVIEW_KEYS = ["base", "scanner", "behavior"];
 const AXIS_KEYS = ["prompt", "preset"];
 const BLOCKER_CLASSES = ["product", "stale-contract", "environment", "host-template", "plan"];
@@ -192,15 +200,65 @@ function validatePlan(raw) {
     const id = requireString(item.id, where + ".id");
     if (e2eIds.has(id)) planError(where + ".id \"" + id + "\" is a duplicate e2e id");
     e2eIds.add(id);
-    requireString(item.prompt, where + ".prompt");
-    optionalString(item.preset, where + ".preset");
     optionalBoolean(item.required, where + ".required", true);
-  }).map((item) => ({
-    id: item.id,
-    prompt: item.prompt,
-    preset: item.preset,
-    required: item.required === undefined ? true : item.required,
-  }));
+
+    const executor = item.executor === undefined ? "agent" : item.executor;
+    if (!E2E_EXECUTORS.includes(executor)) {
+      planError(where + ".executor must be one of " + E2E_EXECUTORS.join(" | "));
+    }
+    const decision = item.decision === undefined
+      ? (executor === "agent" ? "not-required" : undefined)
+      : item.decision;
+    if (decision === undefined) planError(where + ".decision is required when executor is \"" + executor + "\"");
+    if (!E2E_DECISIONS.includes(decision)) {
+      planError(where + ".decision must be one of " + E2E_DECISIONS.join(" | "));
+    }
+
+    // The two fields agree or the plan is wrong. A gated action may only run
+    // under a recorded approval, and the three non-running outcomes each have
+    // exactly one decision that means them.
+    if (executor === "agent" && decision !== "not-required") {
+      planError(where + ".decision must be \"not-required\" for an agent-executed item");
+    }
+    if (executor === "agent-with-gate" && !["approved", "skipped", "blocked"].includes(decision)) {
+      planError(where + ".decision must be approved | skipped | blocked for an agent-with-gate item");
+    }
+    if (executor === "user" && decision !== "user-run") {
+      planError(where + ".decision must be \"user-run\" for a user-executed item");
+    }
+    if (executor === "not-run" && decision !== "not-run-waived") {
+      planError(where + ".decision must be \"not-run-waived\" for a not-run item");
+    }
+
+    const runs = executor === "agent" || (executor === "agent-with-gate" && decision === "approved");
+    if (runs) {
+      requireString(item.prompt, where + ".prompt");
+      // No silent model drift: an item that drives the real product names the
+      // preset it runs as. The normative choice for a product-driving item is
+      // rope-reviewer, the only leaf allowed to start processes and drive a
+      // browser, but the plan states it rather than the kernel guessing.
+      requireString(item.preset, where + ".preset");
+    } else {
+      requireString(item.reason, where + ".reason");
+      if (item.prompt !== undefined) planError(where + ".prompt is only allowed on an item that runs");
+      if (item.preset !== undefined) planError(where + ".preset is only allowed on an item that runs");
+    }
+  }).map((item) => {
+    const executor = item.executor === undefined ? "agent" : item.executor;
+    const decision = item.decision === undefined
+      ? (executor === "agent" ? "not-required" : undefined)
+      : item.decision;
+    return {
+      id: item.id,
+      prompt: item.prompt,
+      preset: item.preset,
+      required: item.required === undefined ? true : item.required,
+      executor: executor,
+      decision: decision,
+      reason: item.reason,
+      runs: executor === "agent" || (executor === "agent-with-gate" && decision === "approved"),
+    };
+  });
 
   if (raw.review !== undefined) {
     if (!isPlainObject(raw.review)) planError("args.review must be an object");
@@ -882,33 +940,81 @@ async function runStageChecks(stage) {
  * E2E and review
  * ------------------------------------------------------------------ */
 
+/**
+ * The terminal status vocabulary rope-verify and rope-finish read
+ * (execution-rules.md). A leaf that ran and reported `blocked` has NOT passed:
+ * the honest form of "this needs a human" is a shape-time `executor: user`
+ * decision, not a leaf's self-declared escape from a failing walkthrough.
+ */
+function e2eTerminalStatus(payload) {
+  if (payload === null) return "agent_failed";
+  if (payload.status === "passed") return "agent_passed";
+  if (payload.status === "failed") return "agent_failed";
+  return "blocked_on_user";
+}
+
+/** An item the shape decision kept out of the run carries that decision as its terminal status. */
+function e2eDeclaredStatus(item) {
+  if (item.executor === "user") return "blocked_on_user";
+  if (item.executor === "not-run") return "not_run_with_reason";
+  if (item.decision === "skipped") return "skipped_by_user_at_shape";
+  return "blocked_on_gate";
+}
+
 async function runE2e() {
   if (plan.e2e.length === 0) return [];
-  const thunks = plan.e2e.map((item) => () => {
-    const options = { label: "e2e:" + item.id, phase: "E2E", schema: E2E_SCHEMA };
-    if (item.preset !== undefined) options.agentType = item.preset;
-    return agent(buildE2ePrompt(plan, item), options);
-  });
-  // Items run concurrently by default. A plan declares `e2eSerial` when they
-  // contend for one real resource (a bound port, one credentialed account, a
-  // single-slot service): two walkthroughs fighting over it would report
-  // failures that are not product findings, and a false failure costs a repair
-  // round, which costs more than the wait.
-  let results;
-  if (plan.e2eSerial) {
-    log("running " + plan.e2e.length + " e2e items serially (the plan declared e2eSerial)");
-    results = [];
-    for (const thunk of thunks) results.push(await thunk());
-  } else {
-    results = await parallel(thunks);
+  const declared = plan.e2e.filter((item) => !item.runs);
+  for (const item of declared) {
+    log("e2e " + item.id + " is not run by the agent (" + item.executor + "/" + item.decision + "): " + item.reason);
   }
-  return plan.e2e.map((item, index) => {
-    const payload = parsePayload(results[index]);
-    if (payload === null) {
-      return { id: item.id, status: "blocked", evidence: "(no usable return)", required: item.required };
+
+  const willRun = plan.e2e.filter((item) => item.runs);
+  let results = [];
+  if (willRun.length > 0) {
+    const thunks = willRun.map((item) => () => {
+      const options = { label: "e2e:" + item.id, phase: "E2E", schema: E2E_SCHEMA };
+      if (item.preset !== undefined) options.agentType = item.preset;
+      return agent(buildE2ePrompt(plan, item), options);
+    });
+    // Items run concurrently by default. A plan declares `e2eSerial` when they
+    // contend for one real resource (a bound port, one credentialed account, a
+    // single-slot service): two walkthroughs fighting over it would report
+    // failures that are not product findings, and a false failure costs a repair
+    // round, which costs more than the wait.
+    if (plan.e2eSerial && willRun.length > 1) {
+      log("running " + willRun.length + " e2e items serially (the plan declared e2eSerial)");
+      for (const thunk of thunks) results.push(await thunk());
+    } else {
+      results = await parallel(thunks);
     }
-    return { id: item.id, status: payload.status, evidence: payload.evidence, detail: payload.detail, required: item.required };
+  }
+
+  // One entry per declared item, in declaration order: a skipped item must be
+  // as visible in the record as a failed one, or silence reads as success.
+  const byId = new Map();
+  willRun.forEach((item, index) => {
+    const payload = parsePayload(results[index]);
+    byId.set(item.id, {
+      id: item.id,
+      status: e2eTerminalStatus(payload),
+      evidence: payload === null ? "(no usable return)" : payload.evidence,
+      detail: payload === null ? undefined : payload.detail,
+      required: item.required,
+      executor: item.executor,
+      ran: true,
+    });
   });
+  for (const item of declared) {
+    byId.set(item.id, {
+      id: item.id,
+      status: e2eDeclaredStatus(item),
+      evidence: item.reason,
+      required: item.required,
+      executor: item.executor,
+      ran: false,
+    });
+  }
+  return plan.e2e.map((item) => byId.get(item.id));
 }
 
 function worstVerdict(verdicts) {
@@ -1080,10 +1186,17 @@ if (!everyTaskIntegrated) {
 
   if (stages.l3.ok) {
     e2eResults = await runE2e();
-    const requiredE2e = e2eResults.filter((item) => item.required);
+    const runnable = e2eResults.filter((item) => item.ran);
+    const requiredE2e = runnable.filter((item) => item.required);
+    const statusLine = e2eResults.map((item) => item.id + ":" + item.status).join(", ");
+    // Only a required item the agent actually ran can gate. An item Shape kept
+    // out of the run is a recorded terminal outcome, not a failure the kernel
+    // can repair — and it is named here so it cannot pass as green.
     stages.e2e = e2eResults.length === 0
       ? { ran: false, ok: true, skipped: true, reason: "no e2e items declared" }
-      : { ran: true, ok: requiredE2e.every((item) => item.status === "passed"), skipped: false, atSha: headSha, reason: requiredE2e.map((item) => item.id + ":" + item.status).join(", ") };
+      : runnable.length === 0
+        ? { ran: false, ok: true, skipped: true, reason: "no declared e2e item is agent-runnable (" + statusLine + ")" }
+        : { ran: true, ok: requiredE2e.every((item) => item.status === "agent_passed"), skipped: false, atSha: headSha, reason: statusLine };
   } else {
     stages.e2e = blockedByPriorStage("e2e", "L3");
   }

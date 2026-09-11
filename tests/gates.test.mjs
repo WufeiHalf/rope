@@ -15,7 +15,7 @@ import { spawnSync } from "node:child_process";
 import { loadTemplate } from "./harness/load-workflow.mjs";
 import { createStubHost } from "./harness/stub-host.mjs";
 import { makeRepo, git, readJson, cleanup, scriptPath } from "./harness/tmp-repo.mjs";
-import { greenPlan, approvingReplies, task, passCheck, failCheck, templatePath } from "./harness/fixture-plan.mjs";
+import { greenPlan, approvingReplies, task, passCheck, failCheck, e2eItem, templatePath } from "./harness/fixture-plan.mjs";
 
 const VERIFY = scriptPath("verify-delivery.sh");
 const RUN_CHECK = scriptPath("run-check.sh");
@@ -154,7 +154,7 @@ test("a failing L2 stops the run before E2E and before the review ever starts", 
     args: greenPlan({
       repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
       checks: [failCheck("integration", "l2"), passCheck("smoke", "l3"), passCheck("frozen", "freeze")],
-      e2e: [{ id: "E1", prompt: "walk the real entrypoint" }],
+      e2e: [e2eItem("E1")],
     }),
   });
 
@@ -207,16 +207,16 @@ test("a failing E2E item fences the review and is reported by id", async () => {
     args: greenPlan({
       repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
       e2e: [
-        { id: "E1", prompt: "hit the live health endpoint" },
-        { id: "E2", prompt: "replay a tampered cursor against the live service" },
+        e2eItem("E1", { prompt: "hit the live health endpoint" }),
+        e2eItem("E2", { prompt: "replay a tampered cursor against the live service" }),
       ],
     }),
   });
 
   assert.equal(record.stages.e2e.ran, true);
   assert.equal(record.stages.e2e.ok, false);
-  assert.match(record.stages.e2e.reason, /E2:failed/);
-  assert.equal(record.e2e.find((item) => item.id === "E1").status, "passed");
+  assert.match(record.stages.e2e.reason, /E2:agent_failed/);
+  assert.equal(record.e2e.find((item) => item.id === "E1").status, "agent_passed");
   assert.equal(host.calls.some((call) => call.label === "review:scanner"), false);
   assert.notEqual(record.verdict, "delivered");
   await cleanup(repo.dir);
@@ -435,7 +435,7 @@ test("concurrent e2e items are the default; e2eSerial makes the plan wait", asyn
     let active = 0;
     let peak = 0;
     const order = [];
-    const items = ["E1", "E2", "E3"].map((id) => ({ id: id, prompt: "Walk " + id + ".", required: true }));
+    const items = ["E1", "E2", "E3"].map((id) => e2eItem(id, { required: true }));
     const tasks = [task("A")];
 
     const buildHost = (serial) => createStubHost({
@@ -515,5 +515,119 @@ test("a review fix marks the stages that passed before it as stale", async () =>
     assert.equal(plain(record.stages[stage]).staleAfterFixes, true, stage + " must be marked stale after a fix");
     assert.equal(typeof plain(record.stages[stage]).atSha, "string", stage + " must record the HEAD it ran on");
   }
+  await cleanup(repo.dir);
+});
+
+/* ------------------------------------------------------------------ *
+ * Shape's executor decision reaches the plan, and a decision the kernel
+ * cannot carry out is a recorded terminal outcome, never a silent skip.
+ * ------------------------------------------------------------------ */
+
+test("a user-executed e2e item is recorded as blocked_on_user, never spawned, and does not kill the delivery", async () => {
+  const repo = await fixture("e2e-user-");
+  const host = createStubHost({ repo: repo.dir, replies: approvingReplies(["A"]) });
+
+  const record = await loadTemplate(templatePath(), {
+    globals: host.globals,
+    args: greenPlan({
+      repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
+      e2e: [{ id: "E1", executor: "user", decision: "user-run", reason: "2FA login is human-only", required: true }],
+    }),
+  });
+
+  assert.equal(host.calls.some((call) => call.label === "e2e:E1"), false, "a user-only item must not be spawned");
+  const item = record.e2e.find((entry) => entry.id === "E1");
+  assert.equal(item.status, "blocked_on_user");
+  assert.equal(item.ran, false);
+  assert.equal(item.evidence, "2FA login is human-only");
+  assert.equal(record.stages.e2e.ok, true, "a recorded human-only item is not an agent failure");
+  assert.equal(record.stages.e2e.skipped, true, "nothing ran, so the stage is skipped rather than green");
+  assert.equal(record.verdict, "delivered");
+  await cleanup(repo.dir);
+});
+
+test("a not-run item and a shape-skipped gate are recorded by their decision, not dropped", async () => {
+  const repo = await fixture("e2e-declared-");
+  const host = createStubHost({ repo: repo.dir, replies: approvingReplies(["A"]) });
+
+  const record = await loadTemplate(templatePath(), {
+    globals: host.globals,
+    args: greenPlan({
+      repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
+      e2e: [
+        { id: "E1", executor: "not-run", decision: "not-run-waived", reason: "service decommissioned", required: false },
+        { id: "E2", executor: "agent-with-gate", decision: "skipped", reason: "user declined the restart", required: true },
+        { id: "E3", executor: "agent-with-gate", decision: "blocked", reason: "approval never arrived", required: true },
+      ],
+    }),
+  });
+
+  assert.equal(host.calls.some((call) => call.label.startsWith("e2e:")), false);
+  assert.equal(record.e2e.find((entry) => entry.id === "E1").status, "not_run_with_reason");
+  assert.equal(record.e2e.find((entry) => entry.id === "E2").status, "skipped_by_user_at_shape");
+  assert.equal(record.e2e.find((entry) => entry.id === "E3").status, "blocked_on_gate");
+  assert.equal(record.stages.e2e.skipped, true);
+  await cleanup(repo.dir);
+});
+
+test("a gated action may not run without a recorded approval", async () => {
+  const repo = await fixture("e2e-gate-");
+  let thrown = null;
+  try {
+    await loadTemplate(templatePath(), {
+      globals: { agent: async () => null },
+      args: greenPlan({
+        repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
+        e2e: [e2eItem("E1", { executor: "agent-with-gate" })],
+      }),
+    });
+  } catch (error) {
+    thrown = error;
+  }
+  assert.ok(thrown !== null, "a gated item with no decision must be rejected at compile time");
+  assert.match(String(thrown.message), /e2e\[0\]\.decision/);
+  await cleanup(repo.dir);
+});
+
+test("a running e2e item must name its preset, so the model cannot drift silently", async () => {
+  const repo = await fixture("e2e-preset-");
+  let thrown = null;
+  try {
+    await loadTemplate(templatePath(), {
+      globals: { agent: async () => null },
+      args: greenPlan({
+        repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
+        e2e: [{ id: "E1", prompt: "walk it" }],
+      }),
+    });
+  } catch (error) {
+    thrown = error;
+  }
+  assert.ok(thrown !== null, "a running item without a preset must be rejected at compile time");
+  assert.match(String(thrown.message), /e2e\[0\]\.preset/);
+  await cleanup(repo.dir);
+});
+
+test("a leaf that reports blocked has not passed: the escape is a shape decision, not the leaf's word", async () => {
+  const repo = await fixture("e2e-blocked-");
+  const host = createStubHost({
+    repo: repo.dir,
+    replies: Object.assign(approvingReplies(["A"]), {
+      "e2e:E1": { id: "E1", status: "blocked", evidence: "no credentials available", detail: "could not sign in" },
+    }),
+  });
+
+  const record = await loadTemplate(templatePath(), {
+    globals: host.globals,
+    args: greenPlan({
+      repo: repo, baseSha: repo.baseSha, tasks: [task("A")],
+      e2e: [e2eItem("E1", { prompt: "sign in and walk the console" })],
+    }),
+  });
+
+  assert.equal(record.e2e.find((entry) => entry.id === "E1").status, "blocked_on_user");
+  assert.equal(record.stages.e2e.ok, false, "a required item that did not pass must fence the rest");
+  assert.equal(record.stages.freeze.ran, false);
+  assert.notEqual(record.verdict, "delivered");
   await cleanup(repo.dir);
 });

@@ -180,7 +180,11 @@ before a single leaf is spent.
 ### E2eItem and Review
 
 ```jsonc
-"e2e": [ { "id": "E1", "prompt": "…", "preset": "rope-reviewer", "required": true } ],
+"e2e": [
+  { "id": "E1", "prompt": "…", "preset": "rope-reviewer", "required": true },
+  { "id": "E2", "executor": "user", "decision": "user-run",
+    "reason": "2FA login is human-only", "required": true }
+],
 
 "review": {
   "base": "<40-hex>",                       // optional; defaults to plan.baseSha
@@ -191,6 +195,46 @@ before a single leaf is spent.
 
 Omitting `e2e` or `review` is recorded as **skipped**, never as passed. A run
 with no declared review is not a delivered run.
+
+#### `executor` and `decision`
+
+The kernel cannot probe the harness tool surface and cannot ask a human
+mid-run, so Shape's executor resolution happens **once, in the parent**, and the
+plan is the record of it. `executor` says who can run the item; `decision` says
+what was decided. The two fields agree or the plan is rejected — a gated action
+may only run under a recorded approval.
+
+| `executor` | `decision` | Runs? | Terminal status recorded | Gates? |
+| --- | --- | --- | --- | --- |
+| `agent` (default) | `not-required` | yes | `agent_passed` / `agent_failed` | yes, when `required` |
+| `agent-with-gate` | `approved` | yes | `agent_passed` / `agent_failed` | yes, when `required` |
+| `agent-with-gate` | `skipped` | no | `skipped_by_user_at_shape` | no |
+| `agent-with-gate` | `blocked` | no | `blocked_on_gate` | no |
+| `user` | `user-run` | no | `blocked_on_user` | no |
+| `not-run` | `not-run-waived` | no | `not_run_with_reason` | no |
+
+- An item that runs requires `prompt` **and** `preset`. An item that does not
+  run requires `reason` and may carry neither `prompt` nor `preset`. Leaving
+  `preset` off a running item is a compile error, not a silent fall back to the
+  host's default subagent: an item that drives the real product must name the
+  leaf it runs as, and the normative choice is `rope-reviewer` — the only leaf
+  allowed to start processes and drive a browser.
+- **Only an item the agent actually ran can gate.** A required item Shape kept
+  out of the run is recorded with its terminal status and does **not** fail the
+  stage: `blocked_on_user` is an honest terminal outcome the run may still
+  deliver with, and `rope-verify` / `rope-finish` read it as such. It is never
+  reported as passed.
+- A leaf that **ran** and reported `blocked` has not passed — it is recorded
+  `blocked_on_user` and it does gate. A leaf does not get to escape a failing
+  walkthrough by declaring its own item human-only; that decision belongs to
+  Shape, and this table is where it is stated.
+- The stage reads `skipped: true` when no declared item was agent-runnable
+  (every item resolved to `user` / `not-run` / a declined gate). Nothing ran, so
+  nothing claims green; `record.e2e` still carries every item's terminal status.
+
+The status values are the vocabulary `rope-verify` and `rope-finish` accept
+(execution-rules.md, "E2E Execution Statuses"). The parent transcribes them; the
+kernel does not invent a second one.
 
 E2e items run **concurrently by default** — one leaf per item, because an item is
 an end-to-end journey, not a unit. Declare `"e2eSerial": true` when they contend
